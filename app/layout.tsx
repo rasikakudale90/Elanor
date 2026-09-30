@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Cormorant_Garamond, Manrope } from 'next/font/google';
 import './globals.css';
 import { StoreProvider } from '@/context/StoreContext';
@@ -24,16 +24,21 @@ const manrope = Manrope({
   display: 'swap',
 });
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+};
+
 export const metadata: Metadata = {
   title: 'Élanor — Haute Botanique & Clinical Skincare',
-  description: 'Pixel-perfect luxury skincare prototype blending rare botanical extracts with clinical bio-ferments for luminous, resilient skin.',
+  description: 'Pixel-perfect luxury skincare blending rare botanical extracts with clinical bio-ferments for luminous, resilient skin.',
   keywords: ['Élanor', 'luxury skincare', 'botanical elixir', 'ceramides', 'retinal', 'serum', 'Paris haute botanique'],
   openGraph: {
     title: 'Élanor — Haute Botanique & Clinical Skincare',
     description: 'Bespoke botanical rituals and clinical cellular longevity.',
     type: 'website',
   },
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=5',
 };
 
 export default function RootLayout({
