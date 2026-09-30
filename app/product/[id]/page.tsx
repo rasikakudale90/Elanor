@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, use } from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, useParams } from 'next/navigation';
 import { PRODUCTS } from '@/data/products';
 import { useStore } from '@/context/StoreContext';
 import ProductCard from '@/components/ProductCard';
@@ -19,9 +19,10 @@ import {
   ShoppingBag
 } from 'lucide-react';
 
-export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = use(params);
-  const product = PRODUCTS.find((p) => p.id === resolvedParams.id);
+export default function ProductDetailPage() {
+  const params = useParams();
+  const id = typeof params?.id === 'string' ? params.id : Array.isArray(params?.id) ? params.id[0] : '';
+  const product = PRODUCTS.find((p) => p.id === id);
 
   if (!product) {
     notFound();

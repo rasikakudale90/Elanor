@@ -1,16 +1,17 @@
 'use client';
 
-import React, { use } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { notFound } from 'next/navigation';
+import { notFound, useParams } from 'next/navigation';
 import { CONCERNS, PRODUCTS } from '@/data/products';
 import ProductCard from '@/components/ProductCard';
 import { Sparkles, ShieldCheck, ArrowRight, ArrowLeft } from 'lucide-react';
 
-export default function ConcernDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  const resolvedParams = use(params);
-  const concern = CONCERNS.find((c) => c.slug.toLowerCase() === resolvedParams.slug.toLowerCase());
+export default function ConcernDetailPage() {
+  const params = useParams();
+  const slug = typeof params?.slug === 'string' ? params.slug : Array.isArray(params?.slug) ? params.slug[0] : '';
+  const concern = CONCERNS.find((c) => c.slug.toLowerCase() === slug.toLowerCase());
 
   if (!concern) {
     notFound();
