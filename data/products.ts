@@ -26,6 +26,39 @@ export interface Product {
 
 export const PRODUCTS: Product[] = [
   {
+    id: 'elanor-soothing-balm',
+    name: 'Soothing Balm',
+    frenchSubtitle: 'Baume Apaisant Réparateur aux Plantes Rares',
+    category: 'Creams',
+    concern: 'Calming',
+    price: 175,
+    rating: 4.96,
+    reviewsCount: 88,
+    tagline: 'Infused with blue tansy, colloidal oat lipids, and rare alpine arnica to instantly pacify stressed and irritated complexions.',
+    description: 'A comforting, melt-in botanical salve crafted to cocoon sensitized, reactive, and stressed skin in restorative phytomolecular comfort and moisture.',
+    volume: '50 ml / 1.7 fl. oz.',
+    texture: 'Silken whipped melting balm with a delicate herbal hue',
+    skinTypes: ['Sensitive', 'Reactive', 'Dry', 'Redness-Prone', 'All Skin Types'],
+    keyActives: ['Blue Tansy Essential Oil', 'Colloidal Oat Lipids', 'Alpine Arnica Extract', 'Centella Asiatica'],
+    benefits: [
+      'Instantly calms flushing, redness, and irritation',
+      'Strengthens compromised dermal lipid barrier',
+      'Locks in continuous 48-hour moisture veil',
+      'Non-greasy velvety melting finish'
+    ],
+    usageRitual: 'Melt a pea-sized amount between clean fingertips and press gently into areas of sensitivity or apply all over face as an intensive soothing ritual.',
+    clinicalResults: [
+      { metric: '98%', description: 'felt immediate soothing relief from tightness and heat' },
+      { metric: '94%', description: 'saw marked reduction in visible skin redness within 7 days' },
+      { metric: '100%', description: 'reported zero sensitivity or irritation' }
+    ],
+    image: '/images/skin8.png',
+    hoverImage: '/images/skin7.png',
+    isBestSeller: true,
+    isNew: true,
+    stock: 28
+  },
+  {
     id: 'elanor-celestial-nectar',
     name: 'Sérum Éclat Botanique',
     frenchSubtitle: 'Concentré Illuminateur aux Cellules Végétales',
