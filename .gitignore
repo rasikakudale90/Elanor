@@ -25,10 +25,15 @@
 *.tsbuildinfo
 next-env.d.ts
 
+# Backend Build
+backend/target/
+*.class
+
 # Archives & Temporary files
 *.zip
 .DS_Store
 Thumbs.db
+*.lnk
 
 # IDEs
 .idea/
