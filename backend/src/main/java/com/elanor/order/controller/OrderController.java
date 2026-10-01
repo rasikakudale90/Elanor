@@ -56,4 +56,16 @@ public class OrderController {
         OrderDto order = orderService.getOrderByOrderNumber(orderNumber, principal.getId(), isAdmin);
         return ResponseEntity.ok(ApiResponse.ok(order));
     }
+
+    @PostMapping("/{id}/cancel")
+    @Operation(summary = "Cancel an order before it has been shipped")
+    public ResponseEntity<ApiResponse<OrderDto>> cancelOrder(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable UUID id,
+            @RequestBody(required = false) com.elanor.order.dto.CancelOrderRequest request) {
+        boolean isAdmin = principal.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_SUPER_ADMIN"));
+        OrderDto cancelled = orderService.cancelOrder(id, request, principal.getId(), isAdmin);
+        return ResponseEntity.ok(ApiResponse.ok(cancelled, "Order cancelled successfully"));
+    }
 }

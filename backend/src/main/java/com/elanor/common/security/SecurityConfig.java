@@ -56,6 +56,7 @@ public class SecurityConfig {
                                 "/api/v1/wishlist/**",
                                 "/api/v1/cart/**",
                                 "/api/v1/checkout/**",
+                                "/api/v1/payments/**",
                                 "/api/v1/cms/**",
                                 "/api/v1/blog/**",
                                 "/api-docs/**",
