@@ -3,87 +3,173 @@
 > **Product Name:** Élanor  
 > **Brand Slogan:** Pure Beauty. Naturally.  
 > **Brand Essence:** Haute Botanique & Clinical Cellular Longevity  
-> **Status:** Frontend Production Complete (100% Verified) & AI Prompts Automated — Ready for Phase 2: Backend  
+> **Architecture:** Modular Monolith with Replaceable Provider Ports (Spring Boot 3.3.5 + Java 21 + PostgreSQL + Flyway)  
+> **Current Status:** Backend Phases 1 through 8 Complete & Verified (37/37 Tests Passing, 100% Clean Git Tree)  
 > **Repository:** [https://github.com/rasikakudale90/Elanor](https://github.com/rasikakudale90/Elanor)  
-> **Last Updated:** October 1, 2026  
+> **Authoritative Specification:** [`docs/ELANOR_BACKEND_TECHNICAL_SRS.md`](file:///e:/Elanor/docs/ELANOR_BACKEND_TECHNICAL_SRS.md)  
+> **Last Updated:** October 2, 2026  
 
 ---
 
-## 1. Milestone Overview
-
-The frontend application and AI Prompt Automation system for **Élanor** are complete, mobile-first responsive, and verified across all 19 dynamic and static routes. Built strictly in accordance with [**`AGENTS_Elanor.md`**](file:///e:/Elanor/AGENTS_Elanor.md), [**`docs/Élanor_Frontend_PRD_v1.0.md`**](file:///e:/Elanor/docs/%C3%89lanor_Frontend_PRD_v1.0.md), and [**`technical-depth.md`**](file:///e:/Elanor/technical-depth.md).
+## 1. Backend Milestone Matrix (Phases 1 — 15)
 
 ```mermaid
 graph TD
-    A[Élanor Platform] --> B[Phase 1: Frontend & AI Prompts (100% COMPLETE)]
-    A --> C[Phase 2: Backend API & Database (NEXT SESSION)]
-    
-    B --> B1[12+ Full Screens & Interactive Modals]
-    B --> B2[Mobile-First Bottom Nav & Responsive Grid]
-    B --> B3[Lenis Smooth Scroll + GSAP 3 Physics]
-    B --> B4[Automated Prompts Engine & Structured Schemas: prompts/]
-    B --> B5[Clean Code Export Package: Elanor_Codebase.zip]
-    
-    C --> C1[Gemini AI Diagnostic Edge Route: app/api/ai/diagnose]
-    C --> C2[Database & Auth Persistence: PostgreSQL / Supabase]
-    C --> C3[Commerce & Stripe Payment Integration]
+    A[Élanor Backend Architecture] --> B[Core Platform: Phases 1-8 (100% COMPLETE)]
+    A --> C[Logistics & Operations: Phases 9-12 (NEXT SESSIONS)]
+    A --> D[Hardening & AI: Phases 13-15 (FINAL GATES)]
+
+    subgraph Completed [Phases 1 - 8 Complete]
+        B1[Phase 1: Database & Core Baseline]
+        B2[Phase 2: Auth, OTP, Google & Profile]
+        B3[Phase 3: Catalog, Categories & Variants]
+        B4[Phase 4: Search & Multi-Facet Filters]
+        B5[Phase 5: Wishlist & Cart with Merge]
+        B6[Phase 6: Coupon Engine & Discounts]
+        B7[Phase 7: Checkout, Quotes & Order Snapshots]
+        B8[Phase 8: Payments, State Machine & Cancellation]
+    end
+
+    subgraph Upcoming [Next Phases]
+        C1[Phase 9: Shipping, Tracking & Timeline (NEXT)]
+        C2[Phase 10: Returns, Replacements & Refunds]
+        C3[Phase 11: Reviews Moderation, CMS & Blog]
+        C4[Phase 12: Notifications, Analytics & Audit Logs]
+        D1[Phase 13: Core Hardening & Concurrency Gate]
+        D2[Phase 14: AI Shopping Assistant & Regimens]
+        D3[Phase 15: Razorpay & Shiprocket Live Adapters]
+    end
 ```
 
 ---
 
-## 2. Completed Milestones
+## 2. Completed Backend Phases Details
 
-### 🧠 AI Prompt Engine & Modular Prompts (`prompts/`)
-- [x] **Master System Prompt ([`prompts/system_elanor_core.md`](file:///e:/Elanor/prompts/system_elanor_core.md))**: Haute Botanique brand voice, dermatological boundaries, and injection defense.
-- [x] **Clinical Diagnostic Prompt ([`prompts/ai_routine_diagnostic.md`](file:///e:/Elanor/prompts/ai_routine_diagnostic.md))**: Heuristic-to-biotech mapping with Morning/Evening regimen output schema.
-- [x] **INCI Synergy Analyzer ([`prompts/inci_synergy_analyzer.md`](file:///e:/Elanor/prompts/inci_synergy_analyzer.md))**: Active compatibility, pH stability, and bio-synergy evaluator.
-- [x] **Luxury Concierge Consultation ([`prompts/concierge_consultation.md`](file:///e:/Elanor/prompts/concierge_consultation.md))**: Virtual Atelier master aesthetician conversation prompt.
-- [x] **Automated Prompt Manager ([`prompts/index.ts`](file:///e:/Elanor/prompts/index.ts))**: Type-safe payload builders and Gemini `response_schema` objects for deterministic JSON generation.
-
----
-
-### 🎨 Design Tokens & Brand Assets
-- [x] **Design Tokens Locked**: Implemented complete palette (`#F8F3EB` primary canvas, `#F2EBE2` sand, `#FFFDF9` luminescent card, `#C8A46A` brand gold, `#7D9075` botanical sage, `#1B1A17` text).
-- [x] **Typography Hierarchy**: `Cormorant Garamond` serif headings with refined letter-spacing and `Manrope` for UI/body.
-- [x] **Official Brand Visual**: Integrated [`skin7.png`](file:///e:/Elanor/skin7.png) on the front page hero (`aspect-[3/2]`) ensuring complete visibility of the **ÉLANOR** typographic logo and emblem.
-- [x] **Unoptimized Image Preservation**: Configured `images: { unoptimized: true }` in `next.config.mjs` ensuring 100% full-resolution, uncompressed image fidelity on Vercel.
+### ✅ Phase 1 — Database & Core Baseline
+- [x] **Flyway Migration (`V1__init_schema.sql`)**: 25 normalized tables covering users, roles, profiles, addresses, catalog, inventory, wishlist, cart, coupons, orders, payments, shipments, returns, refunds, reviews, CMS, audit logs, idempotency, and system settings.
+- [x] **Common Architecture (`com.elanor.common`)**:
+  - Standardized JSON responses via `ApiResponse<T>`.
+  - Machine-readable enum error codes in `ErrorCode`.
+  - Central `GlobalExceptionHandler` with trace ID logging.
+  - Spring Security stateless JWT filter with CORS and BCrypt password encryption.
 
 ---
 
-### 📱 Mobile-First Navigation & UX
-- [x] **Mobile Bottom Navigation (`MobileBottomNav.tsx`)**: Thumb-accessible 5-tab dock on mobile screens (`/`, `/shop`, `/routine-builder`, `/wishlist`, and Bag Drawer).
-- [x] **Sticky Mobile Purchase Bar**: Integrated on Product Details Page for instant 1-tap cart addition without scrolling back up.
-- [x] **Touch Targets & Breakpoints**: Audited for 390px (mobile), 768px (tablet), 1024px (laptop), and 1440px+ (desktop).
+### ✅ Phase 2 — Authentication, Accounts & Profiles (`com.elanor.auth`, `com.elanor.customer`)
+- [x] **Authentication Matrix**:
+  - Email + Password registration & login with email verification token lifecycle.
+  - Phone OTP authentication with attempt limits, expiry, and rate limiting.
+  - Pluggable Google OAuth social login adapter (`SocialAuthProvider` -> `GoogleAuthProvider`).
+  - Short-lived, single-use password reset tokens with verification.
+- [x] **Customer Profiles & Addresses**:
+  - Customer profile management (`GET /PUT /api/v1/customers/me`).
+  - Multiple saved delivery addresses with default selection (`/api/v1/customers/me/addresses`).
 
 ---
 
-### 🛍️ Complete 12-Screen & Component Suite
-
-| Screen / Component | Route | Key Features & Implementation | E2E Status |
-|---|---|---|---|
-| **Editorial Home** | [`/`](file:///e:/Elanor/app/page.tsx) | GSAP hero reveal, floating brand canvas, marquee ribbon, bestsellers, concern spotlight, AI diagnostic teaser, clinical trials. | ✅ `200 OK` |
-| **Curated Shop (PLP)** | [`/shop`](file:///e:/Elanor/app/shop/page.tsx) | Multi-facet sidebar filters (category, concern, active ingredient, price/rating sort, mobile filter sheet) wrapped in `<Suspense>`. | ✅ `200 OK` |
-| **Product Details (PDP)** | [`/product/[id]`](file:///e:/Elanor/app/product/%5Bid%5D/page.tsx) | High-res gallery switcher, marble pedestal staging, clinical metrics, ritual tabs, full INCI breakdown, sticky mobile bar, `useParams()` resolution. | ✅ `200 OK` |
-| **AI Routine Builder** | [`/routine-builder`](file:///e:/Elanor/app/routine-builder/page.tsx) | 4-step diagnostic quiz (skin type, concern, climate, pace), animated computation, Morning & Evening regimens, 1-Click bundle discount (15% off). | ✅ `200 OK` |
-| **Ingredient Explorer** | [`/ingredients`](file:///e:/Elanor/app/ingredients/page.tsx) | Searchable botanical active directory, wild-harvest origins, bio-synergies, and compatibility tags. | ✅ `200 OK` |
-| **Formula Comparator** | [`/compare`](file:///e:/Elanor/app/compare/page.tsx) | Side-by-side comparison table of 2–3 formulations comparing actives, texture, clinical results, volume, and pH. | ✅ `200 OK` |
-| **Shop by Concern** | [`/concern/[slug]`](file:///e:/Elanor/app/concern/%5Bslug%5D/page.tsx) | 6 dedicated landing pages (Radiance, Anti-Aging, Barrier Repair, Hydration, Calming, Clarifying) with dermatological protocols. | ✅ `200 OK` |
-| **Maison Élanor Story** | [`/brands`](file:///e:/Elanor/app/brands/page.tsx) | Brand manifesto, Paris Atelier at Place Vendôme, wild harvesting in Grasse, and Miron violet glass preservation. | ✅ `200 OK` |
-| **Sacred Wishlist** | [`/wishlist`](file:///e:/Elanor/app/wishlist/page.tsx) | Persistent saved items, count badge, and 1-tap "Move All to Sacred Bag". | ✅ `200 OK` |
-| **Cart Drawer** | [`components/CartDrawer.tsx`](file:///e:/Elanor/components/CartDrawer.tsx) | Slide-over drawer, live subtotal, $200 free shipping meter, deluxe trial sample selector, gold rigid gift packaging toggle. | ✅ `200 OK` |
-| **Full Cart Page** | [`/cart`](file:///e:/Elanor/app/cart/page.tsx) | Quantity adjustment, item removal, free shipping progress, deluxe sample selector, gift message textarea, order summary. | ✅ `200 OK` |
-| **3-Step Checkout** | [`/checkout`](file:///e:/Elanor/app/checkout/page.tsx) | Step 1: Sanctuary Address, Step 2: Packaging Selection, Step 3: Sandboxed Payment Authorization. | ✅ `200 OK` |
-| **Order Confirmation** | [`/checkout` (modal state)](file:///e:/Elanor/app/checkout/page.tsx) | Celebratory order confirmation screen with auto-generated order code (e.g. `ELANOR-849201`), packaging recap, and return-to-shop action. | ✅ `200 OK` |
+### ✅ Phase 3 — Catalog, Categories, Collections & Variants (`com.elanor.catalog`, `category`, `collection`)
+- [x] **Hierarchy & Merchandising**:
+  - Self-referencing category tree (`Category` -> `Subcategory`).
+  - Curated collections independent of product hierarchy.
+- [x] **Product Lifecycle & Variants**:
+  - Product statuses: `DRAFT`, `SCHEDULED`, `ACTIVE`, `OUT_OF_STOCK`, `ARCHIVED`.
+  - Scheduled publishing timestamp enforcement (`isCurrentlyPublishable()`).
+  - Generic JSONB variant attribute dimensions (volume, shade, packaging).
+  - Media gallery with cover image flags and display order.
 
 ---
 
-### 🛡️ Quality & Architecture Guarantees
-- [x] **Frontend Quality Guarantee**: Frontend visual components, styling, Lenis scroll physics, and luxury animations are locked. Backend development will only wire backend routes and APIs without modifying or degrading visual design.
-- [x] **Clean Archive Package**: [**`Elanor_Codebase.zip`**](file:///e:/Elanor/Elanor_Codebase.zip) (~4.9 MB) generated with all code, prompts, configs, and assets (excluding `node_modules`, `.next`, `.git`).
-- [x] **Zero Build Errors**: TypeScript typecheck passes with 0 errors.
+### ✅ Phase 4 — Search & Filtering (`com.elanor.search`)
+- [x] **Keyword Search**: Authoritative search across product name, SKU, description, category, and attributes.
+- [x] **Multi-Facet Filtering**: Dynamic specification-based filtering by category, price ranges, attributes, availability, and ratings with Spring Data pagination.
 
 ---
 
-## 3. Session Context Automation Protocol
-- **Auto-Discovery Rule**: At the start of every session, the assistant automatically reads [`progress.md`](file:///e:/Elanor/progress.md), [`AGENTS_Elanor.md`](file:///e:/Elanor/AGENTS_Elanor.md), and [`technical-depth.md`](file:///e:/Elanor/technical-depth.md) to instantly sync repository state.
-- **Auto-Checkpoint Rule**: At the completion of each task/phase, `progress.md` is updated with all accomplishments and the next immediate steps.
+### ✅ Phase 5 — Wishlist & Cart (`com.elanor.wishlist`, `com.elanor.cart`)
+- [x] **Guest & Authenticated Wishlist**: Real-time management and deduplicating merge on authentication.
+- [x] **Commerce Cart Engine**:
+  - Guest and customer cart with secure token identification.
+  - Real-time stock validation and capping during cart merge upon login.
+  - Backend authoritative calculations for subtotal, dynamic shipping, discounts, and totals.
+
+---
+
+### ✅ Phase 6 — Coupons & Promotional Engine (`com.elanor.coupon`)
+- [x] **Discount Engine**:
+  - Percentage and fixed-amount discounts with minimum order amount requirements.
+  - Optional maximum discount capping (`maxDiscountAmount`).
+  - Active date windows (`startDate`, `endDate`), usage limits, and atomic usage counters (`incrementUsage`).
+- [x] **Cart Integration**: `POST /api/v1/cart/coupon` and `DELETE /api/v1/cart/coupon` endpoints with automatic discount reconciliation in cart summaries.
+
+---
+
+### ✅ Phase 7 — Checkout & Order Creation (`com.elanor.checkout`, `com.elanor.order`)
+- [x] **Shipping Quote (`POST /api/v1/checkout/quote`)**: Dynamic quote calculating threshold progress (₹1,500 free shipping default) and estimated delivery timeframe (3-7 business days).
+- [x] **Pre-Flight Validation (`POST /api/v1/checkout/validate`)**: Validates live stock, variant active status, published product status, delivery address integrity, and coupon eligibility.
+- [x] **Atomic Order Placement (`POST /api/v1/checkout/order`)**:
+  - Generates immutable snapshots: `OrderAddress` and `OrderItem` (unit price, SKU, product name).
+  - Triggers inventory stock reservation (`InventoryService.reserveStock`).
+  - Increments coupon usage counters and clears active cart.
+  - Supports server-side deduplication via `Idempotency-Key` headers.
+- [x] **Customer & Admin Order Endpoints**:
+  - `GET /api/v1/orders` and `GET /api/v1/orders/{id}` with timeline logs.
+  - `GET /api/v1/admin/orders` and `PUT /api/v1/admin/orders/{id}/status`.
+
+---
+
+### ✅ Phase 8 — Payments + Order State Machine (`com.elanor.payment`)
+- [x] **Provider Port Architecture**:
+  - `PaymentProvider` interface decoupling gateway implementations from business rules.
+  - `DemoPaymentProvider`: Interactive testing sandbox supporting `Demo Success` and `Demo Failure` simulations.
+  - `CodPaymentProvider`: Cash on Delivery with initial `PENDING` payment state and admin collection verification.
+  - `PaymentProviderFactory`: Dynamic provider lookup.
+- [x] **Payment Lifecycle & Endpoints**:
+  - `POST /api/v1/payments/initiate`: Initializes payment attempt with idempotency caching.
+  - `POST /api/v1/payments/{id}/demo-result`: Executes simulated outcome; automatically transitions order to `CONFIRMED` and commits stock reservations upon success.
+  - `GET /api/v1/payments/{id}` and `GET /api/v1/payments/order/{orderId}`.
+- [x] **Pre-Shipment Order Cancellation (`POST /api/v1/orders/{id}/cancel`)**:
+  - Customer can cancel orders in `CREATED`, `CONFIRMED`, `PROCESSING`, or `PACKED` state.
+  - Automatically releases pending reservations and restocks committed inventory via `InventoryService.adjustStock`.
+  - Rejects cancellation once order is `SHIPPED`, `OUT_FOR_DELIVERY`, or `DELIVERED`.
+- [x] **Admin Payment Controls**:
+  - `GET /api/v1/admin/payments` (search & filter).
+  - `POST /api/v1/admin/payments/{id}/cod-collect` (marks COD cash collected and payment `SUCCESSFUL`).
+
+---
+
+## 3. Immediate Next Phase
+
+### 🚀 Phase 9 — Shipping & Tracking
+**Goal:** Implement manual shipment management, event milestone timelines, delivery estimates, and customer tracking.
+
+1. **Shipping Provider Abstraction (`com.elanor.shipping.provider`)**:
+   - `ShippingProvider` interface with `createShipment`, `getTracking`, `cancelShipment`.
+   - `ManualShippingProvider` implementation (and future `ShiprocketShippingProvider` contract).
+2. **Shipment Entities (`com.elanor.shipping.entity`)**:
+   - `Shipment` (order link, carrier name, tracking number, tracking URL, status, shipped/delivered timestamps).
+   - `ShipmentEvent` (chronological milestone events: location, status, description, timestamp).
+3. **Services & Endpoints**:
+   - Customer tracking endpoint: `GET /api/v1/shipments/order/{orderId}` or `GET /api/v1/shipments/track/{trackingNumber}`.
+   - Admin shipment management: `POST /api/v1/admin/shipments` (create shipment, transition order status to `SHIPPED`), `POST /api/v1/admin/shipments/{id}/events` (add milestone event).
+4. **Integration Testing**:
+   - Full shipment creation, event tracking, and order state synchronization tests.
+
+---
+
+## 4. Remaining Phases Roadmap (10 — 15)
+
+- **Phase 10 — Returns / Replacement / Refund**: 7-day eligibility enforcement, customer return requests, admin inspection workflow, manual refund records, and inventory restocking.
+- **Phase 11 — Reviews + CMS + Blog**: Customer reviews with ratings & media, admin moderation queue, dynamic homepage hero banners, FAQs, navigation, and editorial blog engine.
+- **Phase 12 — Notifications + Analytics + Audit**: Development email provider with transactional notification templates, analytics event capture, admin analytics dashboard, and immutable audit logs.
+- **Phase 13 — Core Hardening**: Concurrency race condition tests, security review (IDOR & RBAC verification), API documentation freeze, and performance optimizations.
+- **Phase 14 — AI Shopping Assistant**: Intent understanding, routine builders, ingredient comparisons, and product Q&A grounded in authoritative backend services.
+- **Phase 15 — Future Provider Readiness**: Plug-and-play validation of live Razorpay and Shiprocket gateway adapters without altering customer-facing business logic.
+
+---
+
+## 5. Verification Status & Test Suite Summary
+
+- **Total Automated Tests:** 37
+- **Test Results:** 37 passed, 0 failures, 0 errors, 0 skipped
+- **Build Status:** Clean Maven compilation (`BUILD SUCCESS`)
+- **Git Tree:** 100% Clean on `main` (Latest Commit: `47855ad`)
