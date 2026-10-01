@@ -30,6 +30,7 @@ public class CartService {
     private final CustomerProfileRepository customerProfileRepository;
     private final ProductVariantRepository productVariantRepository;
     private final InventoryService inventoryService;
+    private final com.elanor.coupon.service.CouponService couponService;
 
     private final BigDecimal freeShippingThreshold;
     private final BigDecimal shippingCharge;
@@ -40,6 +41,7 @@ public class CartService {
             CustomerProfileRepository customerProfileRepository,
             ProductVariantRepository productVariantRepository,
             InventoryService inventoryService,
+            com.elanor.coupon.service.CouponService couponService,
             @Value("${elanor.shipping.free-threshold:1500.00}") BigDecimal freeShippingThreshold,
             @Value("${elanor.shipping.below-threshold-charge:99.00}") BigDecimal shippingCharge) {
         this.cartRepository = cartRepository;
@@ -47,6 +49,7 @@ public class CartService {
         this.customerProfileRepository = customerProfileRepository;
         this.productVariantRepository = productVariantRepository;
         this.inventoryService = inventoryService;
+        this.couponService = couponService;
         this.freeShippingThreshold = freeShippingThreshold;
         this.shippingCharge = shippingCharge;
     }
@@ -198,6 +201,44 @@ public class CartService {
         return mapToDto(customerCart);
     }
 
+    @Transactional
+    public CartDto applyCoupon(UUID userId, String guestToken, String couponCode) {
+        Cart cart = getOrCreateCart(userId, guestToken);
+        if (cart.getItems().isEmpty()) {
+            throw new BusinessException(ErrorCode.VALIDATION_ERROR, "Cannot apply coupon to an empty cart.");
+        }
+
+        BigDecimal subtotal = BigDecimal.ZERO;
+        for (CartItem item : cart.getItems()) {
+            subtotal = subtotal.add(item.getVariant().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
+        }
+
+        com.elanor.coupon.dto.CouponValidationResponse validation = couponService.validateCoupon(couponCode, subtotal);
+        if (!validation.isValid()) {
+            throw new BusinessException(ErrorCode.COUPON_INVALID, validation.getMessage());
+        }
+
+        cart.setAppliedCouponCode(validation.getCode());
+        cartRepository.save(cart);
+
+        return mapToDto(cart);
+    }
+
+    @Transactional
+    public CartDto removeCoupon(UUID userId, String guestToken) {
+        Cart cart = getOrCreateCart(userId, guestToken);
+        cart.setAppliedCouponCode(null);
+        cartRepository.save(cart);
+        return mapToDto(cart);
+    }
+
+    @Transactional
+    public void clearCart(Cart cart) {
+        cart.getItems().clear();
+        cart.setAppliedCouponCode(null);
+        cartRepository.save(cart);
+    }
+
     public CartDto mapToDto(Cart cart) {
         List<CartItemDto> itemDtos = new ArrayList<>();
         BigDecimal subtotal = BigDecimal.ZERO;
@@ -232,12 +273,26 @@ public class CartService {
         }
 
         BigDecimal discount = BigDecimal.ZERO;
+        if (cart.getAppliedCouponCode() != null && !cart.getAppliedCouponCode().isBlank() && subtotal.compareTo(BigDecimal.ZERO) > 0) {
+            com.elanor.coupon.dto.CouponValidationResponse validation = couponService.validateCoupon(cart.getAppliedCouponCode(), subtotal);
+            if (validation.isValid()) {
+                discount = validation.getDiscountAmount();
+            } else {
+                // Auto-clear invalid/expired coupon
+                cart.setAppliedCouponCode(null);
+                cartRepository.save(cart);
+            }
+        }
+
         boolean eligibleForFreeShipping = subtotal.compareTo(freeShippingThreshold) >= 0;
         BigDecimal calculatedShipping = (subtotal.compareTo(BigDecimal.ZERO) > 0 && !eligibleForFreeShipping)
                 ? shippingCharge
                 : BigDecimal.ZERO;
         BigDecimal tax = BigDecimal.ZERO;
         BigDecimal finalTotal = subtotal.subtract(discount).add(calculatedShipping).add(tax);
+        if (finalTotal.compareTo(BigDecimal.ZERO) < 0) {
+            finalTotal = BigDecimal.ZERO;
+        }
 
         CartDto dto = new CartDto();
         dto.setId(cart.getId());

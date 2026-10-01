@@ -38,6 +38,21 @@ public class CreateCouponRequest {
 
     public CreateCouponRequest() {}
 
+    public CreateCouponRequest(String code, String description, DiscountType discountType, BigDecimal discountValue,
+                               BigDecimal minOrderAmount, BigDecimal maxDiscountAmount, Instant startDate,
+                               Instant endDate, Integer usageLimit, Boolean isActive) {
+        this.code = code;
+        this.description = description;
+        this.discountType = discountType;
+        this.discountValue = discountValue;
+        this.minOrderAmount = minOrderAmount;
+        this.maxDiscountAmount = maxDiscountAmount;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.usageLimit = usageLimit;
+        this.isActive = isActive != null ? isActive : true;
+    }
+
     public String getCode() {
         return code;
     }

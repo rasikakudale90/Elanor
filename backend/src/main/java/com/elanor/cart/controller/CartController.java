@@ -68,6 +68,27 @@ public class CartController {
         return ResponseEntity.ok(ApiResponse.ok(updated, "Item removed from cart"));
     }
 
+    @PostMapping("/coupon")
+    @Operation(summary = "Apply a promotional coupon code to the cart")
+    public ResponseEntity<ApiResponse<CartDto>> applyCoupon(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader(value = "X-Guest-Token", required = false) String guestToken,
+            @Valid @RequestBody ApplyCartCouponRequest request) {
+        UUID userId = principal != null ? principal.getId() : null;
+        CartDto updated = cartService.applyCoupon(userId, guestToken, request.getCouponCode());
+        return ResponseEntity.ok(ApiResponse.ok(updated, "Coupon applied successfully"));
+    }
+
+    @DeleteMapping("/coupon")
+    @Operation(summary = "Remove applied coupon from the cart")
+    public ResponseEntity<ApiResponse<CartDto>> removeCoupon(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader(value = "X-Guest-Token", required = false) String guestToken) {
+        UUID userId = principal != null ? principal.getId() : null;
+        CartDto updated = cartService.removeCoupon(userId, guestToken);
+        return ResponseEntity.ok(ApiResponse.ok(updated, "Coupon removed"));
+    }
+
     @PostMapping("/merge")
     @Operation(summary = "Merge guest cart into customer cart upon login")
     public ResponseEntity<ApiResponse<CartDto>> mergeCart(
