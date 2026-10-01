@@ -3,15 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import gsap from 'gsap';
-import {
-  Sparkles,
-  ArrowRight,
-  ShieldCheck,
-  HeartHandshake,
-  Activity,
-  Droplets,
-  Scan,
-} from 'lucide-react';
+import { ArrowRight, Leaf, User, Sparkles } from 'lucide-react';
 
 interface IntroScreenProps {
   onStart: () => void;
@@ -19,23 +11,29 @@ interface IntroScreenProps {
 
 export default function IntroScreen({ onStart }: IntroScreenProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const badgeRef = useRef<HTMLDivElement>(null);
-  const headlineRef = useRef<HTMLHeadingElement>(null);
+  const brandRef = useRef<HTMLDivElement>(null);
+  const headlineLine1Ref = useRef<HTMLSpanElement>(null);
+  const headlineLine2Ref = useRef<HTMLSpanElement>(null);
+  const headlineLine3Ref = useRef<HTMLSpanElement>(null);
   const subtextRef = useRef<HTMLParagraphElement>(null);
   const ctaRef = useRef<HTMLButtonElement>(null);
-  const heroCardRef = useRef<HTMLDivElement>(null);
-  const imageInnerRef = useRef<HTMLDivElement>(null);
-  const metaRef = useRef<HTMLDivElement>(null);
+
+  // Center model and bounding boxes
+  const modelWrapperRef = useRef<HTMLDivElement>(null);
+  const modelImageRef = useRef<HTMLDivElement>(null);
   const scanLineRef = useRef<HTMLDivElement>(null);
+  const boxHydrationRef = useRef<HTMLDivElement>(null);
+  const boxFineLinesRef = useRef<HTMLDivElement>(null);
+  const boxTextureRef = useRef<HTMLDivElement>(null);
 
-  // Floating badges refs for parallax
-  const badge1Ref = useRef<HTMLDivElement>(null);
-  const badge2Ref = useRef<HTMLDivElement>(null);
-  const badge3Ref = useRef<HTMLDivElement>(null);
+  // Right column metric cards
+  const metricCard1Ref = useRef<HTMLDivElement>(null);
+  const metricCard2Ref = useRef<HTMLDivElement>(null);
+  const metricCard3Ref = useRef<HTMLDivElement>(null);
 
-  const [activeHotspot, setActiveHotspot] = useState<string | null>('cheek');
+  const [hoveredBox, setHoveredBox] = useState<string | null>(null);
 
-  // GSAP Page Entrance & Scanning Loop
+  // GSAP Entrance Timeline & Idle Animations
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReducedMotion) return;
@@ -43,349 +41,348 @@ export default function IntroScreen({ onStart }: IntroScreenProps) {
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
+      // Initial state reveals
       tl.fromTo(
-        heroCardRef.current,
-        { scale: 1.05, opacity: 0, y: 30 },
-        { scale: 1, opacity: 1, y: 0, duration: 1.2 }
+        brandRef.current,
+        { y: -20, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.8 }
       )
         .fromTo(
-          badgeRef.current,
-          { y: -20, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.8 },
-          '-=0.9'
-        )
-        .fromTo(
-          headlineRef.current,
-          { y: 30, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.9 },
-          '-=0.6'
+          [headlineLine1Ref.current, headlineLine2Ref.current, headlineLine3Ref.current],
+          { y: 35, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.9, stagger: 0.12 },
+          '-=0.5'
         )
         .fromTo(
           subtextRef.current,
           { y: 20, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.8 },
-          '-=0.6'
+          { y: 0, opacity: 1, duration: 0.7 },
+          '-=0.5'
         )
         .fromTo(
           ctaRef.current,
-          { scale: 0.95, opacity: 0 },
-          { scale: 1, opacity: 1, duration: 0.7 },
+          { scale: 0.92, opacity: 0 },
+          { scale: 1, opacity: 1, duration: 0.6, ease: 'back.out(1.5)' },
           '-=0.4'
         )
         .fromTo(
-          [badge1Ref.current, badge2Ref.current, badge3Ref.current],
-          { scale: 0.85, opacity: 0, y: 15 },
-          { scale: 1, opacity: 1, y: 0, stagger: 0.15, duration: 0.8, ease: 'back.out(1.4)' },
-          '-=0.4'
+          modelImageRef.current,
+          { scale: 1.08, opacity: 0 },
+          { scale: 1, opacity: 1, duration: 1.2 },
+          '-=1.2'
         )
         .fromTo(
-          metaRef.current,
-          { opacity: 0 },
-          { opacity: 1, duration: 0.8 },
-          '-=0.3'
+          [boxHydrationRef.current, boxFineLinesRef.current, boxTextureRef.current],
+          { scale: 0.75, opacity: 0 },
+          { scale: 1, opacity: 1, duration: 0.8, stagger: 0.18, ease: 'back.out(1.6)' },
+          '-=0.6'
+        )
+        .fromTo(
+          [metricCard1Ref.current, metricCard2Ref.current, metricCard3Ref.current],
+          { x: 35, opacity: 0 },
+          { x: 0, opacity: 1, duration: 0.8, stagger: 0.15, ease: 'power2.out' },
+          '-=0.7'
         );
 
-      // Continuous Scanning Line Animation across Model Portrait
+      // Scanning Laser Beam Animation
       if (scanLineRef.current) {
         gsap.to(scanLineRef.current, {
-          y: '380px',
-          duration: 3.8,
+          y: '400px',
+          duration: 3.6,
           ease: 'power1.inOut',
           repeat: -1,
           yoyo: true,
         });
       }
 
-      // Floating Badges Gentle Idle Bobbing
-      gsap.to(badge1Ref.current, {
-        y: '-=8px',
-        duration: 2.8,
+      // Gentle Floating Effect for Bounding Target Boxes
+      gsap.to(boxHydrationRef.current, {
+        y: '-=5px',
+        duration: 2.6,
         repeat: -1,
         yoyo: true,
         ease: 'sine.inOut',
       });
-      gsap.to(badge2Ref.current, {
-        y: '+=10px',
-        duration: 3.4,
+      gsap.to(boxFineLinesRef.current, {
+        y: '+=6px',
+        duration: 3.1,
         repeat: -1,
         yoyo: true,
         ease: 'sine.inOut',
-        delay: 0.4,
+        delay: 0.3,
       });
-      gsap.to(badge3Ref.current, {
-        y: '-=6px',
-        duration: 3.0,
+      gsap.to(boxTextureRef.current, {
+        y: '-=4px',
+        duration: 2.9,
         repeat: -1,
         yoyo: true,
         ease: 'sine.inOut',
-        delay: 0.8,
+        delay: 0.6,
       });
     }, containerRef);
 
     return () => ctx.revert();
   }, []);
 
-  // Mouse Parallax Effect on Hero Card & Floating Badges
+  // 3D Parallax on Mouse Move
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!heroCardRef.current || window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !modelWrapperRef.current)
       return;
 
-    const rect = heroCardRef.current.getBoundingClientRect();
+    const rect = modelWrapperRef.current.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width - 0.5;
     const y = (e.clientY - rect.top) / rect.height - 0.5;
 
-    gsap.to(heroCardRef.current, {
-      rotationY: x * 10,
-      rotationX: -y * 10,
-      transformPerspective: 1000,
-      duration: 0.6,
+    gsap.to(modelImageRef.current, {
+      x: x * 16,
+      y: y * 16,
+      duration: 0.7,
       ease: 'power1.out',
     });
 
-    if (imageInnerRef.current) {
-      gsap.to(imageInnerRef.current, {
-        x: -x * 14,
-        y: -y * 14,
-        duration: 0.6,
-        ease: 'power1.out',
-      });
+    if (boxHydrationRef.current) {
+      gsap.to(boxHydrationRef.current, { x: x * 26, y: y * 26, duration: 0.8 });
     }
-
-    if (badge1Ref.current) {
-      gsap.to(badge1Ref.current, { x: x * 22, y: y * 22, duration: 0.7 });
+    if (boxFineLinesRef.current) {
+      gsap.to(boxFineLinesRef.current, { x: x * 22, y: y * 22, duration: 0.8 });
     }
-    if (badge2Ref.current) {
-      gsap.to(badge2Ref.current, { x: -x * 26, y: -y * 26, duration: 0.7 });
-    }
-    if (badge3Ref.current) {
-      gsap.to(badge3Ref.current, { x: x * 18, y: -y * 18, duration: 0.7 });
+    if (boxTextureRef.current) {
+      gsap.to(boxTextureRef.current, { x: x * 28, y: y * 28, duration: 0.8 });
     }
   };
 
   const handleMouseLeave = () => {
-    if (!heroCardRef.current) return;
-    gsap.to(heroCardRef.current, {
-      rotationY: 0,
-      rotationX: 0,
-      duration: 0.8,
-      ease: 'power2.out',
-    });
-    if (imageInnerRef.current) {
-      gsap.to(imageInnerRef.current, { x: 0, y: 0, duration: 0.8, ease: 'power2.out' });
-    }
-    if (badge1Ref.current) gsap.to(badge1Ref.current, { x: 0, duration: 0.8 });
-    if (badge2Ref.current) gsap.to(badge2Ref.current, { x: 0, duration: 0.8 });
-    if (badge3Ref.current) gsap.to(badge3Ref.current, { x: 0, duration: 0.8 });
+    if (!modelImageRef.current) return;
+    gsap.to(modelImageRef.current, { x: 0, y: 0, duration: 0.8, ease: 'power2.out' });
+    if (boxHydrationRef.current) gsap.to(boxHydrationRef.current, { x: 0, duration: 0.8 });
+    if (boxFineLinesRef.current) gsap.to(boxFineLinesRef.current, { x: 0, duration: 0.8 });
+    if (boxTextureRef.current) gsap.to(boxTextureRef.current, { x: 0, duration: 0.8 });
   };
 
   return (
     <div
       ref={containerRef}
-      className="min-h-[88vh] flex flex-col justify-center items-center relative overflow-hidden py-10 px-6 sm:px-12"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      className="min-h-[88vh] flex items-center justify-center relative overflow-hidden bg-[#FAF7F2] py-8 sm:py-12 px-6 sm:px-12 lg:px-16"
     >
-      {/* Background Atmosphere */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-[#E4C894]/15 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-10 right-10 w-[400px] h-[400px] bg-[#7D9075]/10 rounded-full blur-3xl pointer-events-none" />
+      {/* Background Ambience */}
+      <div className="absolute top-1/3 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[650px] bg-[#EFE3D3]/40 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-10 right-1/4 w-[450px] h-[450px] bg-[#E4C894]/15 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="max-w-6xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center relative z-10">
-        {/* Left Column: Editorial Headline & Consultation Invitation */}
-        <div className="lg:col-span-7 space-y-8 text-left">
-          <div
-            ref={badgeRef}
-            className="inline-flex items-center space-x-2.5 px-4 py-1.5 rounded-full bg-[#FFFDF9] border border-[#E4D7C5] shadow-sm text-xs font-semibold text-[#7D9075]"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-[#C8A46A]" />
-            <span className="uppercase tracking-[0.2em] text-[11px]">
-              Élanor Haute Skin Concierge
-            </span>
-          </div>
-
-          <div className="space-y-4">
-            <h1
-              ref={headlineRef}
-              className="font-serif-luxury text-4xl sm:text-6xl lg:text-7xl text-[#1B1A17] font-normal leading-[1.05] tracking-tight"
-            >
-              Your skin has a story. <br />
-              <span className="italic font-light text-[#8E857A]">
-                Let&apos;s understand yours.
+      {/* Main Luxury 3-Column Grid */}
+      <div className="max-w-[1400px] w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 items-center relative z-10">
+        {/* ================= LEFT COLUMN: Brand & Invitation ================= */}
+        <div className="lg:col-span-4 space-y-7 text-left">
+          {/* Brand Mark with Botanical Leaf Emblem */}
+          <div ref={brandRef} className="space-y-1">
+            <div className="flex items-center space-x-2">
+              <span className="font-serif-luxury text-2xl sm:text-3xl tracking-[0.22em] text-[#1B1A17] uppercase font-medium">
+                É L A N O R
               </span>
-            </h1>
-
-            <p
-              ref={subtextRef}
-              className="text-sm sm:text-base text-[#5E584F] leading-relaxed max-w-xl font-light"
-            >
-              A private 2-minute clinical &amp; botanical consultation. Our AI diagnostician
-              evaluates your moisture mantle, cellular luminescence, and environmental exposure to
-              synthesize your bespoke morning and evening regimen.
+              {/* Botanical Leaf SVG Emblem */}
+              <svg
+                className="w-5 h-5 text-[#9E5D46]"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
+                <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+              </svg>
+            </div>
+            <p className="text-[10px] uppercase tracking-[0.32em] text-[#8E857A] font-semibold">
+              A I &nbsp; S K I N &nbsp; C O N C I E R G E
             </p>
           </div>
 
-          <div className="pt-2 flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
+          {/* Editorial Headline */}
+          <div className="space-y-1">
+            <h1 className="font-serif-luxury text-4xl sm:text-5xl lg:text-6xl text-[#1B1A17] font-normal leading-[1.04] tracking-tight">
+              <span ref={headlineLine1Ref} className="block">
+                Understand
+              </span>
+              <span
+                ref={headlineLine2Ref}
+                className="block italic font-light text-[#9E5D46] tracking-tight"
+              >
+                your skin&apos;s
+              </span>
+              <span ref={headlineLine3Ref} className="block">
+                true potential
+              </span>
+            </h1>
+          </div>
+
+          {/* Subtitle */}
+          <p
+            ref={subtextRef}
+            className="text-xs sm:text-sm text-[#5E584F] leading-relaxed max-w-sm font-light"
+          >
+            Our AI Skin Concierge analyzes your skin and reveals a personalized Élanor ritual, made for you.
+          </p>
+
+          {/* Primary Terracotta CTA Button */}
+          <div className="pt-1">
             <button
               ref={ctaRef}
               onClick={onStart}
-              className="w-full sm:w-auto px-10 py-5 bg-[#1B1A17] text-[#FFFDF9] rounded-full text-xs uppercase tracking-[0.2em] font-semibold hover:bg-[#322F2A] hover:shadow-floating transition-all duration-300 flex items-center justify-center space-x-3 group cursor-pointer"
+              className="w-full sm:w-auto px-9 py-4 bg-[#9E5D46] text-[#FFFDF9] rounded-2xl text-xs uppercase tracking-[0.2em] font-semibold hover:bg-[#884B35] hover:shadow-floating transition-all duration-300 flex items-center justify-center space-x-3 group cursor-pointer"
             >
-              <span>Begin Consultation</span>
+              <span>Start Analysis</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
             </button>
-
-            <span className="text-xs text-[#8E857A] tracking-wider uppercase font-medium">
-              4 Questions • 2 Minutes
-            </span>
           </div>
+        </div>
 
-          {/* Pillars */}
-          <div
-            ref={metaRef}
-            className="pt-6 border-t border-[#EADFCF] grid grid-cols-2 sm:grid-cols-3 gap-6 text-xs text-[#5E584F]"
-          >
-            <div className="flex items-center space-x-2.5">
-              <ShieldCheck className="w-4 h-4 text-[#7D9075]" />
-              <span>Grounded in Real Formulations</span>
+        {/* ================= CENTER COLUMN: Model with Targeted Bounding Boxes ================= */}
+        <div
+          ref={modelWrapperRef}
+          className="lg:col-span-5 flex justify-center items-center relative select-none"
+        >
+          <div className="relative w-full max-w-[460px] aspect-[4/4.8] rounded-[36px] overflow-hidden">
+            {/* The Model Portrait Image from skin9.png */}
+            <div ref={modelImageRef} className="absolute inset-0 w-full h-full">
+              <Image
+                src="/images/skin9.png"
+                alt="Élanor AI Skin Concierge - Personalized Analysis"
+                fill
+                priority
+                className="object-cover object-center"
+                sizes="(max-width: 768px) 100vw, 460px"
+              />
             </div>
-            <div className="flex items-center space-x-2.5">
-              <HeartHandshake className="w-4 h-4 text-[#C8A46A]" />
-              <span>Zero Artificial Claims</span>
+
+            {/* Soft Bottom Gradient Fade */}
+            <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#FAF7F2] via-[#FAF7F2]/60 to-transparent pointer-events-none" />
+
+            {/* Continuous Laser Scanning Line Sweep */}
+            <div
+              ref={scanLineRef}
+              className="absolute top-0 inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-[#9E5D46] to-transparent shadow-[0_0_12px_#9E5D46] opacity-75 pointer-events-none z-20"
+            />
+
+            {/* TARGET BOUNDING BOX 1: Forehead (Hydration Level) */}
+            <div
+              ref={boxHydrationRef}
+              onMouseEnter={() => setHoveredBox('hydration')}
+              onMouseLeave={() => setHoveredBox(null)}
+              className="absolute top-[18%] left-[53%] w-[78px] h-[78px] border border-white/90 rounded-sm z-30 transition-all duration-300 hover:border-[#9E5D46] hover:bg-white/10 cursor-pointer"
+            >
+              {/* Top-left solid white marker */}
+              <div className="absolute top-1 left-1 w-1.5 h-1.5 bg-white" />
+              <div className="absolute bottom-2 left-2 text-[10px] text-white font-medium tracking-wide leading-tight drop-shadow-md">
+                Hydration
+                <br />
+                Level
+              </div>
+              {hoveredBox === 'hydration' && (
+                <div className="absolute -top-7 left-0 bg-[#1B1A17]/90 backdrop-blur-md text-[#FFFDF9] text-[9px] px-2 py-0.5 rounded shadow-card whitespace-nowrap">
+                  94.2% Optimal
+                </div>
+              )}
             </div>
-            <div className="hidden sm:flex items-center space-x-2.5">
-              <Sparkles className="w-4 h-4 text-[#6F8FAF]" />
-              <span>Bespoke 15% Ritual Benefit</span>
+
+            {/* TARGET BOUNDING BOX 2: Eye / Periorbital (Fine Lines) */}
+            <div
+              ref={boxFineLinesRef}
+              onMouseEnter={() => setHoveredBox('lines')}
+              onMouseLeave={() => setHoveredBox(null)}
+              className="absolute top-[37%] left-[54%] w-[84px] h-[72px] border border-white/90 rounded-sm z-30 transition-all duration-300 hover:border-[#9E5D46] hover:bg-white/10 cursor-pointer"
+            >
+              {/* Top-left solid white marker */}
+              <div className="absolute top-1 left-1 w-1.5 h-1.5 bg-white" />
+              <div className="absolute bottom-2 left-2 text-[10px] text-white font-medium tracking-wide leading-tight drop-shadow-md">
+                Fine
+                <br />
+                Lines
+              </div>
+              {hoveredBox === 'lines' && (
+                <div className="absolute -top-7 left-0 bg-[#1B1A17]/90 backdrop-blur-md text-[#FFFDF9] text-[9px] px-2 py-0.5 rounded shadow-card whitespace-nowrap">
+                  Tri-Peptide Restored
+                </div>
+              )}
+            </div>
+
+            {/* TARGET BOUNDING BOX 3: Cheek (Skin Texture) */}
+            <div
+              ref={boxTextureRef}
+              onMouseEnter={() => setHoveredBox('texture')}
+              onMouseLeave={() => setHoveredBox(null)}
+              className="absolute top-[58%] left-[40%] w-[72px] h-[64px] border border-white/90 rounded-sm z-30 transition-all duration-300 hover:border-[#9E5D46] hover:bg-white/10 cursor-pointer"
+            >
+              {/* Top-left solid white marker */}
+              <div className="absolute top-1 left-1 w-1.5 h-1.5 bg-white" />
+              <div className="absolute bottom-2 left-2 text-[10px] text-white font-medium tracking-wide leading-tight drop-shadow-md">
+                Skin
+                <br />
+                Texture
+              </div>
+              {hoveredBox === 'texture' && (
+                <div className="absolute -top-7 left-0 bg-[#1B1A17]/90 backdrop-blur-md text-[#FFFDF9] text-[9px] px-2 py-0.5 rounded shadow-card whitespace-nowrap">
+                  Smooth &amp; Refined
+                </div>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Right Column: Interactive AI Skincare Model Portrait with Animated Diagnostics */}
-        <div
-          className="lg:col-span-5 flex justify-center perspective-[1200px]"
-          onMouseMove={handleMouseMove}
-          onMouseLeave={handleMouseLeave}
-        >
+        {/* ================= RIGHT COLUMN: 3 Feature Metric Cards ================= */}
+        <div className="lg:col-span-3 space-y-4 text-left">
+          {/* Metric Card 1: 95% Accurate Skin Analysis */}
           <div
-            ref={heroCardRef}
-            className="relative w-full max-w-[420px] aspect-[4/5] rounded-[36px] overflow-hidden shadow-floating border border-[#E4D7C5] bg-[#1B1A17] select-none"
-            style={{ transformStyle: 'preserve-3d' }}
+            ref={metricCard1Ref}
+            className="p-5 rounded-3xl bg-[#FFFDF9] border border-[#EFE3D3] shadow-card hover:shadow-floating transition-all duration-300 flex items-center space-x-4 group"
           >
-            {/* Model Image with GSAP Inner Parallax */}
-            <div ref={imageInnerRef} className="absolute inset-[-5%] w-[110%] h-[110%]">
-              <Image
-                src="/images/skin7.png"
-                alt="Élanor AI Skincare Cosmetologist Diagnostic"
-                fill
-                priority
-                className="object-cover object-top"
-                sizes="(max-width: 768px) 100vw, 420px"
-              />
+            <div className="w-12 h-12 rounded-2xl bg-[#F6EFE9] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <Leaf className="w-5 h-5 text-[#9E5D46]" strokeWidth={1.75} />
             </div>
-
-            {/* Subtle Gradient Overlays for Luxury Contrast */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#1B1A17]/85 via-transparent to-[#1B1A17]/20 pointer-events-none" />
-
-            {/* Glowing Laser Scan Beam across Model Face */}
-            <div
-              ref={scanLineRef}
-              className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-[#C8A46A] to-transparent shadow-[0_0_15px_#C8A46A] opacity-80 pointer-events-none z-20"
-            />
-
-            {/* Interactive Dermal Hotspots on Face */}
-            {/* 1. Forehead Hotspot */}
-            <button
-              onClick={() => setActiveHotspot('forehead')}
-              className="absolute top-[22%] left-[48%] -translate-x-1/2 -translate-y-1/2 z-30 group cursor-pointer"
-              aria-label="Forehead Barrier Point"
-            >
-              <span className="relative flex h-5 w-5 items-center justify-center">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#E4C894] opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#C8A46A] border border-[#FFFDF9]"></span>
-              </span>
-            </button>
-
-            {/* 2. Cheek Hotspot */}
-            <button
-              onClick={() => setActiveHotspot('cheek')}
-              className="absolute top-[42%] left-[34%] -translate-x-1/2 -translate-y-1/2 z-30 group cursor-pointer"
-              aria-label="Cheek Luminescence Point"
-            >
-              <span className="relative flex h-5 w-5 items-center justify-center">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#7D9075] opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#7D9075] border border-[#FFFDF9]"></span>
-              </span>
-            </button>
-
-            {/* 3. Jawline Hotspot */}
-            <button
-              onClick={() => setActiveHotspot('jawline')}
-              className="absolute top-[58%] left-[62%] -translate-x-1/2 -translate-y-1/2 z-30 group cursor-pointer"
-              aria-label="Jawline Elasticity Point"
-            >
-              <span className="relative flex h-5 w-5 items-center justify-center">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#6F8FAF] opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#6F8FAF] border border-[#FFFDF9]"></span>
-              </span>
-            </button>
-
-            {/* Floating Glass Diagnostic Badge 1 (Top-Right) */}
-            <div
-              ref={badge1Ref}
-              className="absolute top-6 right-5 z-30 bg-[#FFFDF9]/90 backdrop-blur-md rounded-2xl px-3.5 py-2 border border-[#EADFCF] shadow-card flex items-center space-x-2.5"
-            >
-              <div className="w-6 h-6 rounded-full bg-[#7D9075]/20 flex items-center justify-center text-[#7D9075]">
-                <Droplets className="w-3.5 h-3.5" />
-              </div>
-              <div className="text-left">
-                <p className="text-[9px] uppercase tracking-widest text-[#8E857A] font-semibold">
-                  Moisture Index
-                </p>
-                <p className="text-xs font-bold text-[#1B1A17]">94.2% Quenched</p>
-              </div>
+            <div>
+              <p className="font-serif-luxury text-3xl font-bold text-[#1B1A17] leading-none">
+                95%
+              </p>
+              <p className="text-xs text-[#5E584F] mt-1 font-light leading-snug">
+                accurate skin analysis
+              </p>
             </div>
+          </div>
 
-            {/* Floating Glass Diagnostic Badge 2 (Mid-Left) */}
-            <div
-              ref={badge2Ref}
-              className="absolute top-[46%] left-4 z-30 bg-[#1B1A17]/85 backdrop-blur-md rounded-2xl px-3.5 py-2 border border-[#484239] text-[#FFFDF9] shadow-floating flex items-center space-x-2.5"
-            >
-              <div className="w-6 h-6 rounded-full bg-[#C8A46A]/20 flex items-center justify-center text-[#C8A46A]">
-                <Scan className="w-3.5 h-3.5" />
-              </div>
-              <div className="text-left">
-                <p className="text-[9px] uppercase tracking-widest text-[#E4C894] font-semibold">
-                  Cellular Scan
-                </p>
-                <p className="text-xs font-semibold text-[#FFFDF9]">5-Ceramide Sync</p>
-              </div>
+          {/* Metric Card 2: 30+ Skin Concerns Analyzed */}
+          <div
+            ref={metricCard2Ref}
+            className="p-5 rounded-3xl bg-[#FFFDF9] border border-[#EFE3D3] shadow-card hover:shadow-floating transition-all duration-300 flex items-center space-x-4 group"
+          >
+            <div className="w-12 h-12 rounded-2xl bg-[#F6EFE9] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <User className="w-5 h-5 text-[#9E5D46]" strokeWidth={1.75} />
             </div>
+            <div>
+              <p className="font-serif-luxury text-3xl font-bold text-[#1B1A17] leading-none">
+                30+
+              </p>
+              <p className="text-xs text-[#5E584F] mt-1 font-light leading-snug">
+                skin concerns analyzed
+              </p>
+            </div>
+          </div>
 
-            {/* Floating Glass Diagnostic Badge 3 (Bottom) */}
-            <div
-              ref={badge3Ref}
-              className="absolute bottom-6 inset-x-5 z-30 bg-[#FFFDF9]/95 backdrop-blur-md rounded-2xl p-3.5 border border-[#EADFCF] shadow-card flex items-center justify-between"
-            >
-              <div className="flex items-center space-x-3">
-                <div className="w-7 h-7 rounded-xl bg-[#C8A46A]/15 flex items-center justify-center text-[#C8A46A]">
-                  <Activity className="w-4 h-4 animate-pulse" />
-                </div>
-                <div>
-                  <p className="text-[10px] uppercase tracking-wider font-semibold text-[#1B1A17]">
-                    {activeHotspot === 'forehead'
-                      ? 'Zone: Forehead Mantle'
-                      : activeHotspot === 'jawline'
-                      ? 'Zone: Periorbital & Jawline'
-                      : 'Zone: Malar Radiance Scan'}
-                  </p>
-                  <p className="text-[11px] text-[#5E584F]">
-                    {activeHotspot === 'forehead'
-                      ? 'Hydro-lipid equilibrium: 91%'
-                      : activeHotspot === 'jawline'
-                      ? 'Collagen bounce elasticity: 96%'
-                      : 'Phytomolecular affinity: 98.4%'}
-                  </p>
-                </div>
-              </div>
-              <span className="text-[10px] bg-[#F2EBE2] text-[#7D9075] px-2 py-1 rounded-full font-bold uppercase tracking-wider">
-                Active
-              </span>
+          {/* Metric Card 3: 7-day Personalized Élanor Ritual */}
+          <div
+            ref={metricCard3Ref}
+            className="p-5 rounded-3xl bg-[#FFFDF9] border border-[#EFE3D3] shadow-card hover:shadow-floating transition-all duration-300 flex items-center space-x-4 group"
+          >
+            <div className="w-12 h-12 rounded-2xl bg-[#F6EFE9] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <Sparkles className="w-5 h-5 text-[#9E5D46]" strokeWidth={1.75} />
+            </div>
+            <div>
+              <p className="font-serif-luxury text-3xl font-bold text-[#1B1A17] leading-none">
+                7-day
+              </p>
+              <p className="text-xs text-[#5E584F] mt-1 font-light leading-snug">
+                personalized Élanor ritual
+              </p>
             </div>
           </div>
         </div>

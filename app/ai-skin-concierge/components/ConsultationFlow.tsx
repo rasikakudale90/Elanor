@@ -446,10 +446,10 @@ export default function ConsultationFlow({
           {/* Miniature Animated Model Diagnostic View */}
           <div className="relative w-full aspect-[4/4.2] rounded-2xl overflow-hidden border border-[#484239] bg-[#262420]">
             <Image
-              src="/images/skin7.png"
+              src="/images/skin9.png"
               alt="Live Diagnostic Model"
               fill
-              className="object-cover object-top"
+              className="object-cover object-center"
               sizes="300px"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#1B1A17]/80 via-transparent to-transparent pointer-events-none" />
