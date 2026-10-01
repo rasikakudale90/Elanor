@@ -137,7 +137,34 @@ graph TD
 
 ---
 
-## 3. Immediate Next Phase
+---
+
+## 3. Frontend Milestones & Experience Deliveries
+
+### ✅ Haute AI Skin Concierge (`/ai-skin-concierge`)
+- [x] **Cinematic Editorial Hero (`skin9.png`)**:
+  - Exact 3-column layout matching QClay reference aesthetic.
+  - Interactive model portrait with 3D mouse parallax and continuous laser scanner sweep.
+  - 3 Interactive Dermal Target Bounding Boxes: `Hydration Level` (Forehead), `Fine Lines` (Periorbital), `Skin Texture` (Cheek/Mouth) with live diagnostic tooltips.
+  - 3 Right-column feature metric badges: `95% accurate skin analysis`, `30+ skin concerns analyzed`, `7-day personalized Élanor ritual`.
+- [x] **4-Step Consultation Flow**:
+  - Step 1: Baseline Phenotype & Midday feel.
+  - Step 2: Dermal Priorities (Multi-select).
+  - Step 3: Environmental Stressors & Micro-climates.
+  - Step 4: Sensory Ritual Depth & Formulation Textures.
+  - Live desktop Cosmetologist side diagnostic monitor with animated scanning feedback.
+- [x] **Sequential 4-Stage Analysis Animation**:
+  - GSAP timeline progressing through *Dermal Profile → Concern Compatibility → Formula Selection → Ritual Architecture*.
+- [x] **Personalized Skin Prescription & Bespoke Routine**:
+  - Dermal Vitality Matrix with animated percentage meters (*Hydration, Barrier Integrity, Cellular Radiance, Dermal Reactivity*).
+  - Morning (AM) & Evening (PM) ritual breakdown with *"Why It's In Your Ritual"* formulation reasons and step-by-step application instructions.
+  - Sticky bottom action bar with **"Add Entire Ritual to Bag"** (automatic 15% concierge benefit and direct cart synchronization via `StoreContext`).
+- [x] **Curated Masterpieces Catalog Expansion**:
+  - Added **Soothing Balm** (*Baume Apaisant Réparateur aux Plantes Rares*) with `skin8.png` to "The Iconic Formulations" on the homepage and catalog.
+
+---
+
+## 4. Immediate Next Phase
 
 ### 🚀 Phase 9 — Shipping & Tracking
 **Goal:** Implement manual shipment management, event milestone timelines, delivery estimates, and customer tracking.
@@ -156,7 +183,7 @@ graph TD
 
 ---
 
-## 4. Remaining Phases Roadmap (10 — 15)
+## 5. Remaining Phases Roadmap (10 — 15)
 
 - **Phase 10 — Returns / Replacement / Refund**: 7-day eligibility enforcement, customer return requests, admin inspection workflow, manual refund records, and inventory restocking.
 - **Phase 11 — Reviews + CMS + Blog**: Customer reviews with ratings & media, admin moderation queue, dynamic homepage hero banners, FAQs, navigation, and editorial blog engine.
@@ -167,10 +194,10 @@ graph TD
 
 ---
 
-## 5. Verification Status & Test Suite Summary
+## 6. Verification Status & Test Suite Summary
 
 - **Backend Automated Tests:** 37 passed, 0 failures, 0 errors, 0 skipped
 - **Backend Build:** Clean Maven compilation (`BUILD SUCCESS`)
 - **Frontend Build:** Clean Next.js 15 production build (`13/13 static pages generated successfully`, 0 TypeScript/Lint errors)
-- **Frontend Feature Delivered:** Haute AI Skin Concierge (`/ai-skin-concierge`) with cinematic intro, 4-question consultation flow, sequential analysis animation, animated vitality matrix metrics, bespoke AM/PM routine architecture, and direct cart bundle integration.
-
+- **Live Vercel Deployment:** [https://elanor-eta.vercel.app](https://elanor-eta.vercel.app)
+- **Git Tree:** 100% Clean on `main` (Latest Commit: `7996f4d`)
