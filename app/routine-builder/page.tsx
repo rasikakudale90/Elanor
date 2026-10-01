@@ -78,6 +78,16 @@ export default function RoutineBuilderPage() {
           <p className="text-xs sm:text-sm text-[#5E584F] leading-relaxed">
             Answer 4 diagnostic inquiries to configure your optimal botanical sequence tailored to your cellular barrier and environmental exposures.
           </p>
+
+          <div className="pt-2">
+            <Link
+              href="/ai-skin-concierge"
+              className="inline-flex items-center space-x-2 px-6 py-2.5 bg-[#1B1A17] text-[#FFFDF9] rounded-full text-xs font-semibold uppercase tracking-widest hover:bg-[#322F2A] transition-all shadow-sm"
+            >
+              <span>Launch Haute AI Skin Concierge Consultation</span>
+              <ArrowRight className="w-3.5 h-3.5 text-[#C8A46A]" />
+            </Link>
+          </div>
         </div>
 
         {/* QUIZ IN PROGRESS */}

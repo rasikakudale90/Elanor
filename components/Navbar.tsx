@@ -116,11 +116,11 @@ export default function Navbar() {
                       </ul>
                       <div className="mt-4 pt-3 border-t border-[#EADFCF]">
                         <Link
-                          href="/routine-builder"
+                          href="/ai-skin-concierge"
                           className="text-xs font-medium text-[#7D9075] flex items-center space-x-1.5 hover:underline"
                         >
                           <Sparkles className="w-3.5 h-3.5" />
-                          <span>Try AI Routine Diagnosis</span>
+                          <span>Meet AI Skin Concierge</span>
                         </Link>
                       </div>
                     </div>
@@ -130,13 +130,13 @@ export default function Navbar() {
             </div>
 
             <Link
-              href="/routine-builder"
+              href="/ai-skin-concierge"
               className={`flex items-center space-x-1.5 transition-colors duration-200 hover:text-[#1B1A17] ${
-                pathname === '/routine-builder' ? 'text-[#1B1A17] font-semibold' : ''
+                pathname === '/ai-skin-concierge' ? 'text-[#1B1A17] font-semibold' : ''
               }`}
             >
               <Sparkles className="w-3.5 h-3.5 text-[#C8A46A]" />
-              <span>AI Routine Builder</span>
+              <span>Skin Concierge</span>
             </Link>
 
             <Link

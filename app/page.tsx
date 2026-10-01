@@ -265,10 +265,10 @@ export default function HomePage() {
 
               <div className="pt-2 flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
                 <Link
-                  href="/routine-builder"
+                  href="/ai-skin-concierge"
                   className="px-8 py-4 bg-[#C8A46A] text-[#1B1A17] rounded-full text-xs uppercase tracking-widest font-semibold hover:bg-[#E4C894] transition-all duration-300 shadow-md flex items-center justify-center space-x-2 group"
                 >
-                  <span>Start AI Consultation (2 Mins)</span>
+                  <span>Meet Your Skin Concierge</span>
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
                 </Link>
 

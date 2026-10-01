@@ -37,13 +37,13 @@ export default function MobileBottomNav() {
 
         {/* AI Routine Diagnostic */}
         <Link
-          href="/routine-builder"
+          href="/ai-skin-concierge"
           className={`flex flex-col items-center justify-center p-1.5 transition-colors ${
-            pathname === '/routine-builder' ? 'text-[#C8A46A]' : 'text-[#5E584F] hover:text-[#1B1A17]'
+            pathname === '/ai-skin-concierge' ? 'text-[#C8A46A]' : 'text-[#5E584F] hover:text-[#1B1A17]'
           }`}
         >
           <Sparkles className="w-5 h-5 text-[#C8A46A]" strokeWidth={2} />
-          <span className="text-[10px] font-medium mt-0.5 tracking-tight">AI Ritual</span>
+          <span className="text-[10px] font-medium mt-0.5 tracking-tight">AI Concierge</span>
         </Link>
 
         {/* Search */}
