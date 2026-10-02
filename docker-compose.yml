@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: elanor-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: elanor_db
+      POSTGRES_USER: elanor_user
+      POSTGRES_PASSWORD: elanor_secure_password_2026
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U elanor_user -d elanor_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - elanor-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: elanor-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/elanor_db
+      SPRING_DATASOURCE_USERNAME: elanor_user
+      SPRING_DATASOURCE_PASSWORD: elanor_secure_password_2026
+      ELANOR_SECURITY_JWT_SECRET: c2VjdXJlaGF1dGVib3RhbmlxdWVlbGFub3Jqd3RzZWNyZXRrZXkyMDI2bHV4dXJ5
+      ELANOR_SECURITY_JWT_EXPIRATION_MS: 86400000
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:8080/api/v1/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 25s
+    networks:
+      - elanor-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: elanor-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: http://localhost:8080/api/v1
+    ports:
+      - "3000:3000"
+    networks:
+      - elanor-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  elanor-network:
+    driver: bridge
