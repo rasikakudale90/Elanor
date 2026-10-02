@@ -62,11 +62,14 @@ graph TD
   - Active catalogue: `HAUTE20` (20% Off), `CONCIERGE15` (15% Off), `GOLD10` (10% Off), `WELCOME50` ($50 Off).
   - Click-to-apply interactive promo pill badges embedded across **Checkout** (`/checkout`), **Cart** (`/cart`), and sliding **Bag Drawer** (`components/CartDrawer.tsx`).
   - Real-time subtotal discount deductions with minimum order validation and localStorage persistence.
+* **Dynamic Catalog & Formulation Engine (`context/StoreContext.tsx` + `app/admin/page.tsx`):**
+  - Storefront and Admin share real-time dynamic `products` catalog state synchronized with persistent storage and backend REST APIs (`GET /api/v1/products`).
+  - **Admin Formulation Creator**: Interactive modal in `/admin` allowing administrators to create and publish new botanical formulations with price, category, skin concern, volume, stock, clinical benefits, and visual asset selection.
+  - **Dynamic Multi-Screen Propagation**: Newly published formulations instantly appear in Homepage bento grids, Shop filters, Formulation detail (`/product/[id]`), Concern protocols, and Search modal.
 * **Maison Élanor Executive Administration Vault (`app/admin/page.tsx`):**
-  - **Security Gate Access Barrier**: Gated by Administrator Email (`admin@elanor.com`) and Passcode (`elanor2026`).
-  - **Session Management**: 256-bit TLS encrypted session memory (`localStorage.getItem('elanor_admin_session')`) with "Remember this terminal".
-  - **Lock Vault / Sign Out**: Instant lock action in both sidebar and top operational bar.
-  - **Interactive Telemetry**: Real-time customer order lifecycle, inventory on-hand/reserved counters with +25 restock actions, return approval console, review moderation, coupon manager, and live audit feed.
+  - **Security Gate Access Barrier**: Strictly gated by Administrator Email (`admin@elanor.com`) and Passcode (`elanor2026`).
+  - **Total UI Isolation**: All `/admin` navigation links removed from customer sanctuary modals and public footers.
+  - **Interactive Telemetry**: Real-time customer order lifecycle, formulation creator, inventory on-hand/reserved counters with +25 restock actions, return approval console, review moderation, coupon manager, and live audit feed.
 
 ---
 
@@ -86,7 +89,7 @@ graph TD
 * **Motion Resilience (`gsap`):**
   - GSAP 3 hero animations wrapped with null-checks and safe progressive enhancement, preventing UI render blocking if script execution is constrained.
 * **Static Page Generation:**
-  - 14/14 static and dynamic routes compiled in 7.7s (`14/14 static pages generated successfully`, 0 TypeScript/Lint errors).
+  - 14/14 static and dynamic routes compiled in 8.6s (`14/14 static pages generated successfully`, 0 TypeScript/Lint errors).
 
 ---
 
@@ -97,9 +100,11 @@ graph TD
 | **Backend Core Monolith** | ✅ Complete | Spring Boot 3.3.5 / Java 21 | 60/60 JUnit & 41/41 Postman Tests |
 | **Database Schema (25 Tables)** | ✅ Complete | PostgreSQL / Flyway | Flyway V1 Initial Schema Migration |
 | **Auth & Customer Sanctuary** | ✅ Complete | JWT + Next.js StoreContext | Email/Pass, OTP & VIP 1-Click |
+| **Dynamic Product Catalog** | ✅ Complete | StoreContext + Admin Portal | Real-time creation & multi-screen sync |
 | **Promotional Coupon Engine** | ✅ Complete | StoreContext + Checkout/Drawer | Real-time discount calculation |
 | **Admin Governance & Vault** | ✅ Complete | Next.js Gated Portal (`/admin`) | Email & Password Auth + Audit Logs |
 | **AI Skin Diagnostic Engine** | ✅ Complete | `/ai-skin-concierge` + Spring AI | Heuristic Dermal Scoring + Regimen Builder |
 | **Live Webhook Ingestion** | ✅ Complete | Razorpay & Shiprocket Ports | HMAC-SHA256 Signature Verification |
 | **Vercel Edge Deployment** | ✅ Live | Next.js 15 App Router | [elanor-spendora2.vercel.app](https://elanor-spendora2.vercel.app) |
+
 
