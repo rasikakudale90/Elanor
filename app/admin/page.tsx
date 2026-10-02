@@ -302,6 +302,46 @@ export default function AdminPortal() {
     );
   };
 
+  const handleSimulateOrder = () => {
+    const randomNum = Math.floor(1000 + Math.random() * 9000);
+    const demoNames = [
+      'Valued Guest',
+      'Camille Roussel',
+      'Antoine De La Tour',
+      'Hélène Marchand',
+      'Isabelle Beaufort'
+    ];
+    const pickedName = demoNames[Math.floor(Math.random() * demoNames.length)];
+    const newDemoOrder: OrderMock = {
+      id: `ord-${Date.now()}`,
+      orderNumber: `ELN-2026-${randomNum}`,
+      customerName: pickedName,
+      customerEmail: `${pickedName.toLowerCase().replace(/\s+/g, '.')}@sanctuary.com`,
+      date: 'Just now',
+      total: Math.floor(3500 + Math.random() * 8500),
+      status: 'CONFIRMED',
+      paymentMethod: 'ONLINE_PAID',
+      itemsCount: Math.floor(1 + Math.random() * 3),
+    };
+
+    setOrders((prev) => {
+      const updated = [newDemoOrder, ...prev];
+      try {
+        localStorage.setItem('elanor_orders', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  };
+
+  const handleManualRefresh = () => {
+    try {
+      const stored = localStorage.getItem('elanor_orders');
+      if (stored) {
+        setOrders(JSON.parse(stored));
+      }
+    } catch {}
+  };
+
   const handleRestock = (productId: string, amount: number) => {
     setInventoryList((prev) =>
       prev.map((item) => {
@@ -520,7 +560,23 @@ export default function AdminPortal() {
             </h1>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center flex-wrap gap-2.5">
+            <button
+              onClick={handleManualRefresh}
+              title="Sync latest placed orders"
+              className="px-3.5 py-2 bg-[#FAF7F2] text-[#1B1A17] border border-[#EADFCF] rounded-full text-xs font-semibold hover:bg-[#EADFCF] transition-all flex items-center space-x-1.5 shadow-sm cursor-pointer"
+            >
+              <RefreshCw className="w-3.5 h-3.5 text-[#7D9075]" />
+              <span className="hidden sm:inline">Sync Orders</span>
+            </button>
+            <button
+              onClick={handleSimulateOrder}
+              title="Simulate instant customer checkout"
+              className="px-3.5 py-2 bg-[#C8A46A] text-[#1B1A17] rounded-full text-xs font-bold hover:bg-[#E4C894] transition-all flex items-center space-x-1.5 shadow-sm cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>+ Simulate Order</span>
+            </button>
             <div className="relative">
               <Search className="w-4 h-4 text-[#8E857A] absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
@@ -528,7 +584,7 @@ export default function AdminPortal() {
                 placeholder="Search orders, SKUs, guests..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 pr-4 py-2 bg-[#FFFDF9] border border-[#EADFCF] rounded-full text-xs text-[#1B1A17] focus:outline-none focus:border-[#C8A46A] shadow-sm w-56 sm:w-64"
+                className="pl-9 pr-4 py-2 bg-[#FFFDF9] border border-[#EADFCF] rounded-full text-xs text-[#1B1A17] focus:outline-none focus:border-[#C8A46A] shadow-sm w-44 sm:w-56"
               />
             </div>
             <Link
