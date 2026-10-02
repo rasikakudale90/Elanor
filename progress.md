@@ -4,7 +4,7 @@
 > **Brand Slogan:** Pure Beauty. Naturally.  
 > **Brand Essence:** Haute Botanique & Clinical Cellular Longevity  
 > **Architecture:** Modular Monolith with Replaceable Provider Ports (Spring Boot 3.3.5 + Java 21 + PostgreSQL + Flyway)  
-> **Current Status:** Backend Phases 1 through 10 Complete & Verified (42/42 Tests Passing, 100% Clean Git Tree)  
+> **Current Status:** Backend Phases 1 through 11 Complete & Verified (46/46 Tests Passing, 100% Clean Git Tree)  
 > **Repository:** [https://github.com/rasikakudale90/Elanor](https://github.com/rasikakudale90/Elanor)  
 > **Authoritative Specification:** [`docs/ELANOR_BACKEND_TECHNICAL_SRS.md`](file:///e:/Elanor/docs/ELANOR_BACKEND_TECHNICAL_SRS.md)  
 > **Last Updated:** October 2, 2026  
@@ -15,11 +15,11 @@
 
 ```mermaid
 graph TD
-    A[Élanor Backend Architecture] --> B[Core Platform, Logistics & Returns: Phases 1-10 (100% COMPLETE)]
-    A --> C[Customer Experience & Content: Phases 11-12 (NEXT SESSIONS)]
+    A[Élanor Backend Architecture] --> B[Core Platform, Logistics & Content: Phases 1-11 (100% COMPLETE)]
+    A --> C[Telemetry & Observability: Phase 12 (NEXT SESSIONS)]
     A --> D[Hardening & AI: Phases 13-15 (FINAL GATES)]
 
-    subgraph Completed [Phases 1 - 10 Complete]
+    subgraph Completed [Phases 1 - 11 Complete]
         B1[Phase 1: Database & Core Baseline]
         B2[Phase 2: Auth, OTP, Google & Profile]
         B3[Phase 3: Catalog, Categories & Variants]
@@ -30,11 +30,11 @@ graph TD
         B8[Phase 8: Payments, State Machine & Cancellation]
         B9[Phase 9: Shipping, Tracking & Milestone Timeline]
         B10[Phase 10: Returns, Replacements & Manual Refunds]
+        B11[Phase 11: Reviews Moderation, CMS & Editorial Blog]
     end
 
     subgraph Upcoming [Next Phases]
-        C1[Phase 11: Reviews Moderation, CMS & Blog (NEXT)]
-        C2[Phase 12: Notifications, Analytics & Audit Logs]
+        C1[Phase 12: Notifications, Analytics & Audit Logs (NEXT)]
         D1[Phase 13: Core Hardening & Concurrency Gate]
         D2[Phase 14: AI Shopping Assistant & Regimens]
         D3[Phase 15: Razorpay & Shiprocket Live Adapters]
@@ -166,6 +166,18 @@ graph TD
 
 ---
 
+### ✅ Phase 11 — Reviews Moderation, CMS & Editorial Blog (`com.elanor.review`, `com.elanor.cms`, `com.elanor.blog`)
+- [x] **Customer Reviews & Moderation Queue**:
+  - Reviews submitted by authenticated or guest users default to `PENDING`.
+  - Public product review listings strictly filter for `APPROVED` reviews.
+  - Admin moderation controls (`GET /api/v1/admin/reviews`, `PUT /api/v1/admin/reviews/{id}/status`).
+- [x] **CMS Engine**:
+  - Dynamic hero banners with placement, scheduling, priority display ordering, and CRUD APIs.
+- [x] **Editorial Blog & Journal**:
+  - Markdown content support, SEO slug lookup, author metadata, and `DRAFT` / `PUBLISHED` lifecycle transitions.
+
+---
+
 ---
 
 ## 3. Frontend Milestones & Experience Deliveries
@@ -195,32 +207,28 @@ graph TD
 
 ## 4. Immediate Next Phase
 
-### 🚀 Phase 11 — Reviews Moderation, CMS & Editorial Blog
-**Goal:** Implement customer reviews with ratings, admin moderation workflow, dynamic homepage CMS hero banners/sections, FAQs, and editorial blog engine.
+### 🚀 Phase 12 — Notifications, Analytics & Audit Logs
+**Goal:** Implement transactional email provider abstraction with development template engine, event tracking telemetry, administrative analytics metrics, and immutable audit logs.
 
-1. **Domain Models & Enums (`com.elanor.review`, `com.elanor.cms`, `com.elanor.blog`)**:
-   - `ReviewStatus`: `PENDING`, `APPROVED`, `REJECTED`
-   - `Review`, `ReviewMedia` entities.
-   - `CmsBanner`, `CmsSection`, `FaqItem` entities.
-   - `BlogPost`, `BlogCategory` entities with `PUBLISHED`, `DRAFT` statuses and slug indexing.
-2. **Business Rules**:
-   - Reviews can be submitted by anyone or verified purchasers, with initial status `PENDING`.
-   - Only `APPROVED` reviews are exposed on public product endpoints.
-   - Rating recalculation on product when review is approved.
-   - Dynamic CMS hero banner & FAQ management with display order and active scheduling.
-   - Blog posts with markdown content, slug lookup, and tag filtering.
-3. **Endpoints**:
-   - Public: `GET /api/v1/products/{id}/reviews`, `POST /api/v1/products/{id}/reviews`, `GET /api/v1/cms/banners`, `GET /api/v1/cms/faqs`, `GET /api/v1/blog/posts`, `GET /api/v1/blog/posts/{slug}`.
-   - Admin: `GET /api/v1/admin/reviews` (moderation queue), `PUT /api/v1/admin/reviews/{id}/status`, `POST / PUT / DELETE /api/v1/admin/cms/**`, `POST / PUT / DELETE /api/v1/admin/blog/**`.
+1. **Domain Models & Enums (`com.elanor.notification`, `com.elanor.analytics`, `com.elanor.audit`)**:
+   - `NotificationChannel`: `EMAIL`, `SMS`
+   - `AuditLog` entity (actor, action, entityType, entityId, detailsJson, ipAddress, createdAt)
+   - `AnalyticsEvent` entity (eventType, userId, guestToken, sessionId, metadataJson, createdAt)
+2. **Provider Abstraction**:
+   - `EmailProvider` interface (`sendEmail`, `sendTemplateEmail`)
+   - `DevelopmentEmailProvider` implementation (logging to console and test sink)
+3. **Services & Endpoints**:
+   - `AuditLogService` with automated transactional audit recording.
+   - `AnalyticsService` for event capture and aggregated dashboard metrics (`GET /api/v1/admin/analytics/overview` - revenue, order counts, top products, conversion).
+   - `GET /api/v1/admin/audit-logs` with pagination and entity filtering.
+   - Public event tracker: `POST /api/v1/analytics/events`.
 4. **Integration Testing**:
-   - Review submission -> pending state -> public filter verification -> admin approval -> public availability.
-   - CMS banner management and blog publishing lifecycle.
+   - Event logging, transactional audit trail verification, analytics aggregation, and security authorization.
 
 ---
 
-## 5. Remaining Phases Roadmap (12 — 15)
+## 5. Remaining Phases Roadmap (13 — 15)
 
-- **Phase 12 — Notifications + Analytics + Audit**: Development email provider with transactional notification templates, analytics event capture, admin analytics dashboard, and immutable audit logs.
 - **Phase 13 — Core Hardening**: Concurrency race condition tests, security review (IDOR & RBAC verification), API documentation freeze, and performance optimizations.
 - **Phase 14 — AI Shopping Assistant**: Intent understanding, routine builders, ingredient comparisons, and product Q&A grounded in authoritative backend services.
 - **Phase 15 — Future Provider Readiness**: Plug-and-play validation of live Razorpay and Shiprocket gateway adapters without altering customer-facing business logic.
@@ -229,7 +237,7 @@ graph TD
 
 ## 6. Verification Status & Test Suite Summary
 
-- **Backend Automated Tests:** 42 passed, 0 failures, 0 errors, 0 skipped
+- **Backend Automated Tests:** 46 passed, 0 failures, 0 errors, 0 skipped
 - **Backend Build:** Clean Maven compilation (`BUILD SUCCESS`)
 - **Frontend Build:** Clean Next.js 15 production build (`13/13 static pages generated successfully`, 0 TypeScript/Lint errors)
 - **Live Vercel Deployment:** [https://elanor-eta.vercel.app](https://elanor-eta.vercel.app)
