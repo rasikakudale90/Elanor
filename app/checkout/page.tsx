@@ -39,8 +39,39 @@ export default function CheckoutPage() {
   const handlePlaceOrder = () => {
     setIsSubmitting(true);
     setTimeout(() => {
-      const generatedId = `ELANOR-${Math.floor(100000 + Math.random() * 900000)}`;
+      const generatedId = `ELN-2026-${Math.floor(1000 + Math.random() * 9000)}`;
       setOrderId(generatedId);
+
+      try {
+        const newOrder = {
+          id: `ord-${Date.now()}`,
+          orderNumber: generatedId,
+          customerName: `${formData.firstName} ${formData.lastName}`.trim() || 'Valued Guest',
+          customerEmail: formData.email || 'guest@elanor.com',
+          date: 'Today, ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          total: total,
+          status: 'CONFIRMED' as const,
+          paymentMethod: 'ONLINE_PAID',
+          itemsCount: cart.reduce((acc, item) => acc + item.quantity, 0) || 1,
+          items: cart.map((item) => ({
+            name: item.product.name,
+            quantity: item.quantity,
+            price: item.product.price,
+          })),
+          address: `${formData.address}, ${formData.city}, ${formData.state} ${formData.zip}`,
+        };
+
+        const existingRaw = typeof window !== 'undefined' ? localStorage.getItem('elanor_orders') : null;
+        const existingOrders = existingRaw ? JSON.parse(existingRaw) : [];
+        const updatedOrders = [newOrder, ...existingOrders];
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('elanor_orders', JSON.stringify(updatedOrders));
+          window.dispatchEvent(new Event('elanor_order_placed'));
+        }
+      } catch (err) {
+        console.error('Failed to sync order locally', err);
+      }
+
       setIsSubmitting(false);
       setOrderConfirmed(true);
       clearCart();

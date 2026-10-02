@@ -89,8 +89,7 @@ export default function AdminPortal() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
 
-  // Interactive state
-  const [orders, setOrders] = useState<OrderMock[]>([
+  const INITIAL_SEED_ORDERS: OrderMock[] = [
     {
       id: 'ord-101',
       orderNumber: 'ELN-2026-8941',
@@ -99,7 +98,7 @@ export default function AdminPortal() {
       date: 'Today, 13:45',
       total: 7200,
       status: 'CONFIRMED',
-      paymentMethod: 'DEMO_ONLINE',
+      paymentMethod: 'ONLINE_PAID',
       itemsCount: 2,
     },
     {
@@ -110,7 +109,7 @@ export default function AdminPortal() {
       date: 'Today, 11:20',
       total: 4500,
       status: 'SHIPPED',
-      paymentMethod: 'DEMO_ONLINE',
+      paymentMethod: 'ONLINE_PAID',
       itemsCount: 1,
       trackingNumber: 'ELN-TRK-7782',
     },
@@ -134,10 +133,58 @@ export default function AdminPortal() {
       date: '2 Oct 2026',
       total: 3900,
       status: 'PACKED',
-      paymentMethod: 'DEMO_ONLINE',
+      paymentMethod: 'ONLINE_PAID',
       itemsCount: 1,
     }
-  ]);
+  ];
+
+  // Interactive state
+  const [orders, setOrders] = useState<OrderMock[]>(INITIAL_SEED_ORDERS);
+
+  // Sync orders from localStorage on load and on order placement event
+  useEffect(() => {
+    const loadOrders = () => {
+      try {
+        const stored = localStorage.getItem('elanor_orders');
+        if (stored) {
+          const parsed = JSON.parse(stored) as OrderMock[];
+          // Merge newly placed orders at the top, avoiding duplicate order numbers
+          const seenNumbers = new Set<string>();
+          const merged: OrderMock[] = [];
+
+          parsed.forEach((ord) => {
+            if (!seenNumbers.has(ord.orderNumber)) {
+              seenNumbers.add(ord.orderNumber);
+              merged.push(ord);
+            }
+          });
+
+          INITIAL_SEED_ORDERS.forEach((ord) => {
+            if (!seenNumbers.has(ord.orderNumber)) {
+              seenNumbers.add(ord.orderNumber);
+              merged.push(ord);
+            }
+          });
+
+          setOrders(merged);
+        } else {
+          setOrders(INITIAL_SEED_ORDERS);
+          localStorage.setItem('elanor_orders', JSON.stringify(INITIAL_SEED_ORDERS));
+        }
+      } catch (err) {
+        console.error('Error loading orders:', err);
+      }
+    };
+
+    loadOrders();
+    window.addEventListener('storage', loadOrders);
+    window.addEventListener('elanor_order_placed', loadOrders);
+
+    return () => {
+      window.removeEventListener('storage', loadOrders);
+      window.removeEventListener('elanor_order_placed', loadOrders);
+    };
+  }, []);
 
   const [returns, setReturns] = useState<ReturnMock[]>([
     {
@@ -234,9 +281,13 @@ export default function AdminPortal() {
 
   // Status Actions
   const handleUpdateOrderStatus = (orderId: string, nextStatus: OrderMock['status']) => {
-    setOrders((prev) =>
-      prev.map((o) => (o.id === orderId ? { ...o, status: nextStatus } : o))
-    );
+    setOrders((prev) => {
+      const updated = prev.map((o) => (o.id === orderId ? { ...o, status: nextStatus } : o));
+      try {
+        localStorage.setItem('elanor_orders', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
   };
 
   const handleApproveReturn = (returnId: string) => {
@@ -502,10 +553,12 @@ export default function AdminPortal() {
                     <TrendingUp className="w-4 h-4" />
                   </div>
                 </div>
-                <p className="font-serif-luxury text-3xl font-bold text-[#1B1A17] mt-3">₹28,400</p>
+                <p className="font-serif-luxury text-3xl font-bold text-[#1B1A17] mt-3">
+                  ₹{orders.reduce((sum, o) => sum + (o.total || 0), 0).toLocaleString()}
+                </p>
                 <div className="flex items-center space-x-1.5 text-[11px] text-[#7D9075] mt-2 font-medium">
                   <ArrowUpRight className="w-3.5 h-3.5" />
-                  <span>+18.4% vs last week</span>
+                  <span>Live telemetry</span>
                 </div>
               </div>
 
@@ -530,7 +583,9 @@ export default function AdminPortal() {
                     <Sparkles className="w-4 h-4" />
                   </div>
                 </div>
-                <p className="font-serif-luxury text-3xl font-bold text-[#1B1A17] mt-3">₹7,100</p>
+                <p className="font-serif-luxury text-3xl font-bold text-[#1B1A17] mt-3">
+                  ₹{orders.length > 0 ? Math.round(orders.reduce((sum, o) => sum + (o.total || 0), 0) / orders.length).toLocaleString() : 0}
+                </p>
                 <p className="text-[11px] text-[#8E857A] mt-2">Haute skincare bundled average</p>
               </div>
 
