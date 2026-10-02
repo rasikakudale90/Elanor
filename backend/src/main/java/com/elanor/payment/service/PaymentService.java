@@ -194,6 +194,34 @@ public class PaymentService {
     }
 
     @Transactional
+    public PaymentDto processExternalPaymentSuccess(String transactionRef, String gatewayPaymentId, String gatewaySignature) {
+        Payment payment = paymentRepository.findByTransactionRef(transactionRef)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "Payment transaction not found for ref: " + transactionRef));
+
+        if (payment.getStatus() == PaymentStatus.SUCCESSFUL) {
+            return new PaymentDto(payment); // Idempotent return
+        }
+
+        payment.setStatus(PaymentStatus.SUCCESSFUL);
+        payment.setErrorMessage(null);
+
+        Order order = payment.getOrder();
+        if (order.getStatus() == OrderStatus.CREATED) {
+            OrderStatus oldStatus = order.getStatus();
+            order.setStatus(OrderStatus.CONFIRMED);
+            order.addStatusHistory(oldStatus, OrderStatus.CONFIRMED, "Payment verified successfully via " + payment.getPaymentProvider() + " (" + gatewayPaymentId + ")", "WEBHOOK");
+            orderRepository.save(order);
+
+            commitOrderReservations(order.getId());
+        }
+
+        paymentRepository.save(payment);
+        log.info("[WEBHOOK PAYMENT] Successfully settled payment [{}] for order [{}] via [{}]",
+                payment.getId(), order.getOrderNumber(), payment.getPaymentProvider());
+        return new PaymentDto(payment);
+    }
+
+    @Transactional
     public PaymentDto confirmCodPaymentCollected(UUID paymentId, String actor) {
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "Payment transaction not found."));

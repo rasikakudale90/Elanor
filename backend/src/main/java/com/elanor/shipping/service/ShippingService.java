@@ -180,6 +180,21 @@ public class ShippingService {
         return new ShipmentResponse(shipment);
     }
 
+    @Transactional
+    public ShipmentResponse processTrackingWebhook(String trackingNumber, String status, String location, String description, Instant eventTime) {
+        Shipment shipment = shipmentRepository.findByTrackingNumber(trackingNumber)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND, "Shipment not found for tracking: " + trackingNumber));
+
+        AddShipmentEventRequest req = new AddShipmentEventRequest(
+                status,
+                location != null ? location : "In Transit Hub",
+                description != null ? description : "Milestone updated via carrier webhook",
+                eventTime != null ? eventTime : Instant.now()
+        );
+
+        return addShipmentEvent(shipment.getId(), req);
+    }
+
     @Transactional(readOnly = true)
     public Page<ShipmentResponse> getAllShipments(Pageable pageable) {
         return shipmentRepository.findAllByOrderByCreatedAtDesc(pageable).map(ShipmentResponse::new);

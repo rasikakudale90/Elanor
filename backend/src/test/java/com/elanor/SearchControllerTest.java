@@ -40,8 +40,20 @@ public class SearchControllerTest {
     @Autowired
     private CategoryRepository categoryRepository;
 
+    @Autowired
+    private com.elanor.inventory.repository.InventoryReservationRepository inventoryReservationRepository;
+
+    @Autowired
+    private com.elanor.inventory.repository.InventoryMovementRepository inventoryMovementRepository;
+
+    @Autowired
+    private com.elanor.inventory.repository.InventoryRepository inventoryRepository;
+
     @BeforeEach
     void setUp() {
+        inventoryReservationRepository.deleteAll();
+        inventoryMovementRepository.deleteAll();
+        inventoryRepository.deleteAll();
         productVariantRepository.deleteAll();
         productRepository.deleteAll();
         categoryRepository.deleteAll();
