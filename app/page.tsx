@@ -15,22 +15,26 @@ export default function HomePage() {
   const concernsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // GSAP Hero Reveal Animation
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        heroTextRef.current,
-        { opacity: 0, y: 40 },
-        { opacity: 1, y: 0, duration: 1.4, ease: 'power3.out', delay: 0.2 }
-      );
+    if (!heroRef.current || !heroTextRef.current || !heroBottleRef.current) return;
+    try {
+      const ctx = gsap.context(() => {
+        gsap.fromTo(
+          heroTextRef.current,
+          { opacity: 0, y: 30 },
+          { opacity: 1, y: 0, duration: 1.2, ease: 'power3.out' }
+        );
 
-      gsap.fromTo(
-        heroBottleRef.current,
-        { opacity: 0, scale: 0.9, y: 60 },
-        { opacity: 1, scale: 1, y: 0, duration: 1.6, ease: 'power3.out', delay: 0.4 }
-      );
-    }, heroRef);
+        gsap.fromTo(
+          heroBottleRef.current,
+          { opacity: 0, scale: 0.95, y: 40 },
+          { opacity: 1, scale: 1, y: 0, duration: 1.4, ease: 'power3.out', delay: 0.2 }
+        );
+      }, heroRef);
 
-    return () => ctx.revert();
+      return () => ctx.revert();
+    } catch (e) {
+      console.warn('Hero GSAP skipped:', e);
+    }
   }, []);
 
   const bestSellers = PRODUCTS.filter((p) => p.isBestSeller);
