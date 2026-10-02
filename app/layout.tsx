@@ -51,18 +51,17 @@ export default function RootLayout({
     <html lang="en" className={`${cormorant.variable} ${manrope.variable}`}>
       <body className="min-h-screen flex flex-col bg-[#F8F3EB] text-[#1B1A17] antialiased pb-16 lg:pb-0">
         <StoreProvider>
-          <SmoothScroll>
-            <Navbar />
-            <main className="flex-1">
-              {children}
-            </main>
-            <Footer />
-            <MobileBottomNav />
-            <CartDrawer />
-            <SearchModal />
-            <QuickViewModal />
-            <AuthModal />
-          </SmoothScroll>
+          <SmoothScroll />
+          <Navbar />
+          <main className="flex-1">
+            {children}
+          </main>
+          <Footer />
+          <MobileBottomNav />
+          <CartDrawer />
+          <SearchModal />
+          <QuickViewModal />
+          <AuthModal />
         </StoreProvider>
       </body>
     </html>

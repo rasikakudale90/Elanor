@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useEffect, ReactNode } from 'react';
+import { useEffect } from 'react';
 
-export default function SmoothScroll({ children }: { children: ReactNode }) {
+export default function SmoothScroll() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -47,6 +47,6 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  return <>{children}</>;
+  return null;
 }
 
