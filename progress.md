@@ -4,7 +4,7 @@
 > **Brand Slogan:** Pure Beauty. Naturally.  
 > **Brand Essence:** Haute Botanique & Clinical Cellular Longevity  
 > **Architecture:** Modular Monolith with Replaceable Provider Ports (Spring Boot 3.3.5 + Java 21 + PostgreSQL + Flyway)  
-> **Current Status:** Backend Phases 1 through 8 Complete & Verified (37/37 Tests Passing, 100% Clean Git Tree)  
+> **Current Status:** Backend Phases 1 through 9 Complete & Verified (39/39 Tests Passing, 100% Clean Git Tree)  
 > **Repository:** [https://github.com/rasikakudale90/Elanor](https://github.com/rasikakudale90/Elanor)  
 > **Authoritative Specification:** [`docs/ELANOR_BACKEND_TECHNICAL_SRS.md`](file:///e:/Elanor/docs/ELANOR_BACKEND_TECHNICAL_SRS.md)  
 > **Last Updated:** October 2, 2026  
@@ -15,11 +15,11 @@
 
 ```mermaid
 graph TD
-    A[Élanor Backend Architecture] --> B[Core Platform: Phases 1-8 (100% COMPLETE)]
-    A --> C[Logistics & Operations: Phases 9-12 (NEXT SESSIONS)]
+    A[Élanor Backend Architecture] --> B[Core Platform & Logistics: Phases 1-9 (100% COMPLETE)]
+    A --> C[Customer Experience & Ops: Phases 10-12 (NEXT SESSIONS)]
     A --> D[Hardening & AI: Phases 13-15 (FINAL GATES)]
 
-    subgraph Completed [Phases 1 - 8 Complete]
+    subgraph Completed [Phases 1 - 9 Complete]
         B1[Phase 1: Database & Core Baseline]
         B2[Phase 2: Auth, OTP, Google & Profile]
         B3[Phase 3: Catalog, Categories & Variants]
@@ -28,13 +28,13 @@ graph TD
         B6[Phase 6: Coupon Engine & Discounts]
         B7[Phase 7: Checkout, Quotes & Order Snapshots]
         B8[Phase 8: Payments, State Machine & Cancellation]
+        B9[Phase 9: Shipping, Tracking & Milestone Timeline]
     end
 
     subgraph Upcoming [Next Phases]
-        C1[Phase 9: Shipping, Tracking & Timeline (NEXT)]
-        C2[Phase 10: Returns, Replacements & Refunds]
-        C3[Phase 11: Reviews Moderation, CMS & Blog]
-        C4[Phase 12: Notifications, Analytics & Audit Logs]
+        C1[Phase 10: Returns, Replacements & Refunds (NEXT)]
+        C2[Phase 11: Reviews Moderation, CMS & Blog]
+        C3[Phase 12: Notifications, Analytics & Audit Logs]
         D1[Phase 13: Core Hardening & Concurrency Gate]
         D2[Phase 14: AI Shopping Assistant & Regimens]
         D3[Phase 15: Razorpay & Shiprocket Live Adapters]
@@ -137,6 +137,22 @@ graph TD
 
 ---
 
+### ✅ Phase 9 — Shipping & Tracking (`com.elanor.shipping`)
+- [x] **Shipping Provider Port Architecture**:
+  - `ShippingProvider` interface with `createShipment`, `cancelShipment`.
+  - `ManualShippingProvider`: Operational default generating carrier tracking numbers and initial milestone events.
+  - `ShiprocketShippingProvider`: Pluggable drop-in adapter contract for future third-party logistics.
+  - `ShippingProviderFactory`: Dynamic provider lookup.
+- [x] **Milestone Tracking & State Synchronization**:
+  - Auto-updates `Order` status to `SHIPPED` upon creation with audit log entry.
+  - Adding `OUT_FOR_DELIVERY` or `DELIVERED` milestone events automatically transitions Order status and sets `deliveredAt` timestamp.
+- [x] **APIs & Security**:
+  - Public tracking lookup: `GET /api/v1/shipments/track/{trackingNumber}`.
+  - Customer order tracking: `GET /api/v1/shipments/order/{orderId}` with customer ownership verification.
+  - Admin controls: `POST /api/v1/admin/shipments`, `POST /api/v1/admin/shipments/{id}/events`, `GET /api/v1/admin/shipments`, and `GET /api/v1/admin/shipments/{id}`.
+
+---
+
 ---
 
 ## 3. Frontend Milestones & Experience Deliveries
@@ -166,26 +182,30 @@ graph TD
 
 ## 4. Immediate Next Phase
 
-### 🚀 Phase 9 — Shipping & Tracking
-**Goal:** Implement manual shipment management, event milestone timelines, delivery estimates, and customer tracking.
+### 🚀 Phase 10 — Returns, Replacements & Manual Refunds
+**Goal:** Implement 7-day post-delivery return eligibility enforcement, customer return/replacement requests, admin inspection workflow, manual refund records, and inventory restocking.
 
-1. **Shipping Provider Abstraction (`com.elanor.shipping.provider`)**:
-   - `ShippingProvider` interface with `createShipment`, `getTracking`, `cancelShipment`.
-   - `ManualShippingProvider` implementation (and future `ShiprocketShippingProvider` contract).
-2. **Shipment Entities (`com.elanor.shipping.entity`)**:
-   - `Shipment` (order link, carrier name, tracking number, tracking URL, status, shipped/delivered timestamps).
-   - `ShipmentEvent` (chronological milestone events: location, status, description, timestamp).
-3. **Services & Endpoints**:
-   - Customer tracking endpoint: `GET /api/v1/shipments/order/{orderId}` or `GET /api/v1/shipments/track/{trackingNumber}`.
-   - Admin shipment management: `POST /api/v1/admin/shipments` (create shipment, transition order status to `SHIPPED`), `POST /api/v1/admin/shipments/{id}/events` (add milestone event).
+1. **Domain Models & Enums (`com.elanor.order.entity`, `com.elanor.returns`)**:
+   - `ReturnStatus`: `REQUESTED`, `APPROVED`, `REJECTED`, `RETURN_IN_PROGRESS`, `RECEIVED`, `INSPECTED`, `REFUND_INITIATED`, `REFUND_COMPLETED`, `REPLACEMENT_ORDER_CREATED`
+   - `RefundStatus`: `REFUND_PENDING`, `REFUND_INITIATED`, `REFUND_COMPLETED`
+   - `RefundMethod`: `ORIGINAL_SOURCE`, `MANUAL_BANK_TRANSFER`, `STORE_CREDIT`
+   - `ReturnRequest`, `ReturnItem`, and `Refund` entities.
+2. **Business Rules**:
+   - 7-day return window calculated from `Order.updatedAt` or `Shipment.deliveredAt` when order is `DELIVERED`.
+   - Prevent duplicate returns on the same item.
+   - Restock inventory upon admin inspection (`RETURN_RECEIVED` -> `InventoryService.adjustStock(MovementType.RETURN)`).
+   - If replacement requested, trigger replacement order creation.
+   - For refunds: record amount, reference ID, and method; prevent over-refunding order total.
+3. **Endpoints**:
+   - Customer: `POST /api/v1/returns` (submit return/replacement request), `GET /api/v1/returns/my` (list customer's returns), `GET /api/v1/returns/{id}`.
+   - Admin: `GET /api/v1/admin/returns`, `PUT /api/v1/admin/returns/{id}/status` (Approve/Reject/Inspect), `POST /api/v1/admin/refunds` (process refund).
 4. **Integration Testing**:
-   - Full shipment creation, event tracking, and order state synchronization tests.
+   - 7-day window enforcement, return submission, admin inspection, restock verification, and refund record creation.
 
 ---
 
-## 5. Remaining Phases Roadmap (10 — 15)
+## 5. Remaining Phases Roadmap (11 — 15)
 
-- **Phase 10 — Returns / Replacement / Refund**: 7-day eligibility enforcement, customer return requests, admin inspection workflow, manual refund records, and inventory restocking.
 - **Phase 11 — Reviews + CMS + Blog**: Customer reviews with ratings & media, admin moderation queue, dynamic homepage hero banners, FAQs, navigation, and editorial blog engine.
 - **Phase 12 — Notifications + Analytics + Audit**: Development email provider with transactional notification templates, analytics event capture, admin analytics dashboard, and immutable audit logs.
 - **Phase 13 — Core Hardening**: Concurrency race condition tests, security review (IDOR & RBAC verification), API documentation freeze, and performance optimizations.
@@ -196,8 +216,8 @@ graph TD
 
 ## 6. Verification Status & Test Suite Summary
 
-- **Backend Automated Tests:** 37 passed, 0 failures, 0 errors, 0 skipped
+- **Backend Automated Tests:** 39 passed, 0 failures, 0 errors, 0 skipped
 - **Backend Build:** Clean Maven compilation (`BUILD SUCCESS`)
 - **Frontend Build:** Clean Next.js 15 production build (`13/13 static pages generated successfully`, 0 TypeScript/Lint errors)
 - **Live Vercel Deployment:** [https://elanor-eta.vercel.app](https://elanor-eta.vercel.app)
-- **Git Tree:** 100% Clean on `main` (Latest Commit: `7996f4d`)
+- **Git Tree:** 100% Clean on `main`
