@@ -89,7 +89,7 @@ public class InventoryService {
         Inventory inventory = getOrCreateInventory(variant);
         int qty = request.getQuantity();
 
-        if (request.getMovementType() == MovementType.RESTOCK) {
+        if (request.getMovementType() == MovementType.RESTOCK || request.getMovementType() == MovementType.RETURN || request.getMovementType() == MovementType.CANCEL) {
             inventory.setOnHand(inventory.getOnHand() + Math.abs(qty));
         } else if (request.getMovementType() == MovementType.DAMAGED || request.getMovementType() == MovementType.ADJUSTMENT) {
             int newOnHand = inventory.getOnHand() + qty;

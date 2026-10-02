@@ -4,7 +4,7 @@
 > **Brand Slogan:** Pure Beauty. Naturally.  
 > **Brand Essence:** Haute Botanique & Clinical Cellular Longevity  
 > **Architecture:** Modular Monolith with Replaceable Provider Ports (Spring Boot 3.3.5 + Java 21 + PostgreSQL + Flyway)  
-> **Current Status:** Backend Phases 1 through 9 Complete & Verified (39/39 Tests Passing, 100% Clean Git Tree)  
+> **Current Status:** Backend Phases 1 through 10 Complete & Verified (42/42 Tests Passing, 100% Clean Git Tree)  
 > **Repository:** [https://github.com/rasikakudale90/Elanor](https://github.com/rasikakudale90/Elanor)  
 > **Authoritative Specification:** [`docs/ELANOR_BACKEND_TECHNICAL_SRS.md`](file:///e:/Elanor/docs/ELANOR_BACKEND_TECHNICAL_SRS.md)  
 > **Last Updated:** October 2, 2026  
@@ -15,11 +15,11 @@
 
 ```mermaid
 graph TD
-    A[Élanor Backend Architecture] --> B[Core Platform & Logistics: Phases 1-9 (100% COMPLETE)]
-    A --> C[Customer Experience & Ops: Phases 10-12 (NEXT SESSIONS)]
+    A[Élanor Backend Architecture] --> B[Core Platform, Logistics & Returns: Phases 1-10 (100% COMPLETE)]
+    A --> C[Customer Experience & Content: Phases 11-12 (NEXT SESSIONS)]
     A --> D[Hardening & AI: Phases 13-15 (FINAL GATES)]
 
-    subgraph Completed [Phases 1 - 9 Complete]
+    subgraph Completed [Phases 1 - 10 Complete]
         B1[Phase 1: Database & Core Baseline]
         B2[Phase 2: Auth, OTP, Google & Profile]
         B3[Phase 3: Catalog, Categories & Variants]
@@ -29,12 +29,12 @@ graph TD
         B7[Phase 7: Checkout, Quotes & Order Snapshots]
         B8[Phase 8: Payments, State Machine & Cancellation]
         B9[Phase 9: Shipping, Tracking & Milestone Timeline]
+        B10[Phase 10: Returns, Replacements & Manual Refunds]
     end
 
     subgraph Upcoming [Next Phases]
-        C1[Phase 10: Returns, Replacements & Refunds (NEXT)]
-        C2[Phase 11: Reviews Moderation, CMS & Blog]
-        C3[Phase 12: Notifications, Analytics & Audit Logs]
+        C1[Phase 11: Reviews Moderation, CMS & Blog (NEXT)]
+        C2[Phase 12: Notifications, Analytics & Audit Logs]
         D1[Phase 13: Core Hardening & Concurrency Gate]
         D2[Phase 14: AI Shopping Assistant & Regimens]
         D3[Phase 15: Razorpay & Shiprocket Live Adapters]
@@ -153,6 +153,19 @@ graph TD
 
 ---
 
+### ✅ Phase 10 — Returns, Replacements & Manual Refunds (`com.elanor.returns`, `com.elanor.refund`)
+- [x] **7-Day Window Enforcement & Return Submission**:
+  - Enforces returns only on `DELIVERED` orders within the strict 7-day post-delivery eligibility window.
+  - Prevents duplicate return submissions on the same order items.
+- [x] **Admin Inspection & Automatic Restocking**:
+  - Admin inspection workflow (`PUT /api/v1/admin/returns/{id}/status`) supporting `APPROVED`, `RECEIVED`, `INSPECTED`.
+  - Automatically restocks returned item quantities via `InventoryService.adjustStock` with `MovementType.RETURN`.
+- [x] **Financial Refund Processing**:
+  - `POST /api/v1/admin/refunds` validates cumulative refund amounts against total order amount to prevent over-refunding.
+  - Updates order status to `REFUNDED` upon full settlement and attaches audit logs.
+
+---
+
 ---
 
 ## 3. Frontend Milestones & Experience Deliveries
@@ -182,31 +195,31 @@ graph TD
 
 ## 4. Immediate Next Phase
 
-### 🚀 Phase 10 — Returns, Replacements & Manual Refunds
-**Goal:** Implement 7-day post-delivery return eligibility enforcement, customer return/replacement requests, admin inspection workflow, manual refund records, and inventory restocking.
+### 🚀 Phase 11 — Reviews Moderation, CMS & Editorial Blog
+**Goal:** Implement customer reviews with ratings, admin moderation workflow, dynamic homepage CMS hero banners/sections, FAQs, and editorial blog engine.
 
-1. **Domain Models & Enums (`com.elanor.order.entity`, `com.elanor.returns`)**:
-   - `ReturnStatus`: `REQUESTED`, `APPROVED`, `REJECTED`, `RETURN_IN_PROGRESS`, `RECEIVED`, `INSPECTED`, `REFUND_INITIATED`, `REFUND_COMPLETED`, `REPLACEMENT_ORDER_CREATED`
-   - `RefundStatus`: `REFUND_PENDING`, `REFUND_INITIATED`, `REFUND_COMPLETED`
-   - `RefundMethod`: `ORIGINAL_SOURCE`, `MANUAL_BANK_TRANSFER`, `STORE_CREDIT`
-   - `ReturnRequest`, `ReturnItem`, and `Refund` entities.
+1. **Domain Models & Enums (`com.elanor.review`, `com.elanor.cms`, `com.elanor.blog`)**:
+   - `ReviewStatus`: `PENDING`, `APPROVED`, `REJECTED`
+   - `Review`, `ReviewMedia` entities.
+   - `CmsBanner`, `CmsSection`, `FaqItem` entities.
+   - `BlogPost`, `BlogCategory` entities with `PUBLISHED`, `DRAFT` statuses and slug indexing.
 2. **Business Rules**:
-   - 7-day return window calculated from `Order.updatedAt` or `Shipment.deliveredAt` when order is `DELIVERED`.
-   - Prevent duplicate returns on the same item.
-   - Restock inventory upon admin inspection (`RETURN_RECEIVED` -> `InventoryService.adjustStock(MovementType.RETURN)`).
-   - If replacement requested, trigger replacement order creation.
-   - For refunds: record amount, reference ID, and method; prevent over-refunding order total.
+   - Reviews can be submitted by anyone or verified purchasers, with initial status `PENDING`.
+   - Only `APPROVED` reviews are exposed on public product endpoints.
+   - Rating recalculation on product when review is approved.
+   - Dynamic CMS hero banner & FAQ management with display order and active scheduling.
+   - Blog posts with markdown content, slug lookup, and tag filtering.
 3. **Endpoints**:
-   - Customer: `POST /api/v1/returns` (submit return/replacement request), `GET /api/v1/returns/my` (list customer's returns), `GET /api/v1/returns/{id}`.
-   - Admin: `GET /api/v1/admin/returns`, `PUT /api/v1/admin/returns/{id}/status` (Approve/Reject/Inspect), `POST /api/v1/admin/refunds` (process refund).
+   - Public: `GET /api/v1/products/{id}/reviews`, `POST /api/v1/products/{id}/reviews`, `GET /api/v1/cms/banners`, `GET /api/v1/cms/faqs`, `GET /api/v1/blog/posts`, `GET /api/v1/blog/posts/{slug}`.
+   - Admin: `GET /api/v1/admin/reviews` (moderation queue), `PUT /api/v1/admin/reviews/{id}/status`, `POST / PUT / DELETE /api/v1/admin/cms/**`, `POST / PUT / DELETE /api/v1/admin/blog/**`.
 4. **Integration Testing**:
-   - 7-day window enforcement, return submission, admin inspection, restock verification, and refund record creation.
+   - Review submission -> pending state -> public filter verification -> admin approval -> public availability.
+   - CMS banner management and blog publishing lifecycle.
 
 ---
 
-## 5. Remaining Phases Roadmap (11 — 15)
+## 5. Remaining Phases Roadmap (12 — 15)
 
-- **Phase 11 — Reviews + CMS + Blog**: Customer reviews with ratings & media, admin moderation queue, dynamic homepage hero banners, FAQs, navigation, and editorial blog engine.
 - **Phase 12 — Notifications + Analytics + Audit**: Development email provider with transactional notification templates, analytics event capture, admin analytics dashboard, and immutable audit logs.
 - **Phase 13 — Core Hardening**: Concurrency race condition tests, security review (IDOR & RBAC verification), API documentation freeze, and performance optimizations.
 - **Phase 14 — AI Shopping Assistant**: Intent understanding, routine builders, ingredient comparisons, and product Q&A grounded in authoritative backend services.
@@ -216,7 +229,7 @@ graph TD
 
 ## 6. Verification Status & Test Suite Summary
 
-- **Backend Automated Tests:** 39 passed, 0 failures, 0 errors, 0 skipped
+- **Backend Automated Tests:** 42 passed, 0 failures, 0 errors, 0 skipped
 - **Backend Build:** Clean Maven compilation (`BUILD SUCCESS`)
 - **Frontend Build:** Clean Next.js 15 production build (`13/13 static pages generated successfully`, 0 TypeScript/Lint errors)
 - **Live Vercel Deployment:** [https://elanor-eta.vercel.app](https://elanor-eta.vercel.app)
