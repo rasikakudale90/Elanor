@@ -23,7 +23,8 @@ import {
   FileText,
   Sliders,
   LogOut,
-  ChevronRight
+  ChevronRight,
+  X
 } from 'lucide-react';
 import { PRODUCTS } from '@/data/products';
 
@@ -584,8 +585,17 @@ export default function AdminPortal() {
                 placeholder="Search orders, SKUs, guests..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 pr-4 py-2 bg-[#FFFDF9] border border-[#EADFCF] rounded-full text-xs text-[#1B1A17] focus:outline-none focus:border-[#C8A46A] shadow-sm w-44 sm:w-56"
+                className="pl-9 pr-8 py-2 bg-[#FFFDF9] border border-[#EADFCF] rounded-full text-xs text-[#1B1A17] focus:outline-none focus:border-[#C8A46A] shadow-sm w-48 sm:w-64"
               />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8E857A] hover:text-[#1B1A17] p-0.5 rounded-full cursor-pointer"
+                  title="Clear search"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
             <Link
               href="/"
@@ -883,7 +893,17 @@ export default function AdminPortal() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {PRODUCTS.map((prod) => (
+              {PRODUCTS
+                .filter((prod) => {
+                  if (!searchQuery.trim()) return true;
+                  const q = searchQuery.toLowerCase();
+                  return (
+                    prod.name.toLowerCase().includes(q) ||
+                    prod.category.toLowerCase().includes(q) ||
+                    prod.description.toLowerCase().includes(q)
+                  );
+                })
+                .map((prod) => (
                 <div
                   key={prod.id}
                   className="p-5 rounded-2xl bg-[#FAF7F2] border border-[#EADFCF] flex flex-col justify-between space-y-4 hover:shadow-card transition-all"
@@ -946,7 +966,17 @@ export default function AdminPortal() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#EADFCF]/60">
-                  {inventoryList.map((item) => (
+                  {inventoryList
+                    .filter((item) => {
+                      if (!searchQuery.trim()) return true;
+                      const q = searchQuery.toLowerCase();
+                      return (
+                        item.sku.toLowerCase().includes(q) ||
+                        item.name.toLowerCase().includes(q) ||
+                        item.category.toLowerCase().includes(q)
+                      );
+                    })
+                    .map((item) => (
                     <tr key={item.id} className="hover:bg-[#FAF7F2] transition-colors">
                       <td className="py-3.5 px-4 font-mono font-semibold text-[#1B1A17]">
                         {item.sku}
@@ -1005,7 +1035,19 @@ export default function AdminPortal() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#EADFCF]/60">
-                  {returns.map((ret) => (
+                  {returns
+                    .filter((ret) => {
+                      if (!searchQuery.trim()) return true;
+                      const q = searchQuery.toLowerCase();
+                      return (
+                        ret.id.toLowerCase().includes(q) ||
+                        ret.orderNumber.toLowerCase().includes(q) ||
+                        ret.customerName.toLowerCase().includes(q) ||
+                        ret.productName.toLowerCase().includes(q) ||
+                        ret.reason.toLowerCase().includes(q)
+                      );
+                    })
+                    .map((ret) => (
                     <tr key={ret.id} className="hover:bg-[#FAF7F2] transition-colors">
                       <td className="py-3.5 px-4 font-mono font-semibold text-[#1B1A17]">{ret.id}</td>
                       <td className="py-3.5 px-4 font-mono text-[#5E584F]">{ret.orderNumber}</td>
@@ -1064,7 +1106,18 @@ export default function AdminPortal() {
             </div>
 
             <div className="space-y-4">
-              {reviews.map((rev) => (
+              {reviews
+                .filter((rev) => {
+                  if (!searchQuery.trim()) return true;
+                  const q = searchQuery.toLowerCase();
+                  return (
+                    rev.customerName.toLowerCase().includes(q) ||
+                    rev.productName.toLowerCase().includes(q) ||
+                    rev.title.toLowerCase().includes(q) ||
+                    rev.comment.toLowerCase().includes(q)
+                  );
+                })
+                .map((rev) => (
                 <div
                   key={rev.id}
                   className="p-5 rounded-2xl bg-[#FAF7F2] border border-[#EADFCF] flex flex-col sm:flex-row sm:items-center justify-between gap-4"
@@ -1130,7 +1183,13 @@ export default function AdminPortal() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              {coupons.map((c) => (
+              {coupons
+                .filter((c) => {
+                  if (!searchQuery.trim()) return true;
+                  const q = searchQuery.toLowerCase();
+                  return c.code.toLowerCase().includes(q);
+                })
+                .map((c) => (
                 <div
                   key={c.id}
                   className="p-5 rounded-2xl bg-[#FAF7F2] border border-[#EADFCF] space-y-3"
@@ -1169,18 +1228,22 @@ export default function AdminPortal() {
               {activeTab === 'audit' ? 'System Audit Log Feed' : 'Carrier Webhook Tracking History'}
             </h3>
             <div className="space-y-3 font-mono text-xs text-[#5E584F]">
-              <div className="p-3.5 rounded-xl bg-[#FAF7F2] border border-[#EADFCF] flex justify-between items-center">
-                <span>[AUDIT-001] ADMIN_PAYMENT_COLLECTED: Order ELN-2026-8939 COD ₹12,800 received by carrier</span>
-                <span className="text-[10px] text-[#8E857A]">2026-10-02 13:45:10</span>
-              </div>
-              <div className="p-3.5 rounded-xl bg-[#FAF7F2] border border-[#EADFCF] flex justify-between items-center">
-                <span>[AUDIT-002] INVENTORY_RESTOCKED: Variant SERUM-50ML +50 units added by admin@elanor.com</span>
-                <span className="text-[10px] text-[#8E857A]">2026-10-02 13:40:02</span>
-              </div>
-              <div className="p-3.5 rounded-xl bg-[#FAF7F2] border border-[#EADFCF] flex justify-between items-center">
-                <span>[AUDIT-003] SHIPMENT_CREATED: AWB ELN-TRK-7782 BlueDart express dispatched to Mumbai Hub</span>
-                <span className="text-[10px] text-[#8E857A]">2026-10-02 11:20:15</span>
-              </div>
+              {[
+                { id: 'AUDIT-001', text: '[AUDIT-001] ADMIN_PAYMENT_COLLECTED: Order ELN-2026-8939 COD ₹12,800 received by carrier', time: '2026-10-02 13:45:10' },
+                { id: 'AUDIT-002', text: '[AUDIT-002] INVENTORY_RESTOCKED: Variant SERUM-50ML +50 units added by admin@elanor.com', time: '2026-10-02 13:40:02' },
+                { id: 'AUDIT-003', text: '[AUDIT-003] SHIPMENT_CREATED: AWB ELN-TRK-7782 BlueDart express dispatched to Mumbai Hub', time: '2026-10-02 11:20:15' }
+              ]
+                .filter((item) => {
+                  if (!searchQuery.trim()) return true;
+                  const q = searchQuery.toLowerCase();
+                  return item.text.toLowerCase().includes(q) || item.time.toLowerCase().includes(q);
+                })
+                .map((log) => (
+                <div key={log.id} className="p-3.5 rounded-xl bg-[#FAF7F2] border border-[#EADFCF] flex justify-between items-center">
+                  <span>{log.text}</span>
+                  <span className="text-[10px] text-[#8E857A]">{log.time}</span>
+                </div>
+              ))}
             </div>
           </div>
         )}
