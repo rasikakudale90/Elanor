@@ -170,6 +170,7 @@ export default function Footer() {
               <li><Link href="/compare" className="hover:text-[#C8A46A] transition-colors">Formula Comparator</Link></li>
               <li><Link href="/brands" className="hover:text-[#C8A46A] transition-colors">Maison Philosophy</Link></li>
               <li><Link href="/wishlist" className="hover:text-[#C8A46A] transition-colors">Sacred Wishlist</Link></li>
+              <li><Link href="/admin" className="text-[#C8A46A] font-semibold hover:underline">Maison Admin Portal</Link></li>
             </ul>
           </div>
         </div>
