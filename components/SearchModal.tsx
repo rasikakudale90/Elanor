@@ -8,7 +8,7 @@ import { PRODUCTS, CONCERNS } from '@/data/products';
 import { Search, X, ArrowRight, Sparkles } from 'lucide-react';
 
 export default function SearchModal() {
-  const { isSearchOpen, setIsSearchOpen } = useStore();
+  const { isSearchOpen, setIsSearchOpen, products } = useStore();
   const [query, setQuery] = useState('');
 
   // Close with Esc key
@@ -26,12 +26,13 @@ export default function SearchModal() {
 
   const filteredProducts = query.trim() === ''
     ? []
-    : PRODUCTS.filter((p) =>
+    : products.filter((p) =>
         p.name.toLowerCase().includes(query.toLowerCase()) ||
         p.category.toLowerCase().includes(query.toLowerCase()) ||
-        p.concern.toLowerCase().includes(query.toLowerCase()) ||
-        p.keyActives.some((k) => k.toLowerCase().includes(query.toLowerCase())) ||
-        p.tagline.toLowerCase().includes(query.toLowerCase())
+        (p.concern && p.concern.toLowerCase().includes(query.toLowerCase())) ||
+        (p.keyActives && p.keyActives.some((k) => k.toLowerCase().includes(query.toLowerCase()))) ||
+        (p.tagline && p.tagline.toLowerCase().includes(query.toLowerCase())) ||
+        (p.frenchSubtitle && p.frenchSubtitle.toLowerCase().includes(query.toLowerCase()))
       );
 
   const popularQueries = [

@@ -22,13 +22,13 @@ import {
 export default function ProductDetailPage() {
   const params = useParams();
   const id = typeof params?.id === 'string' ? params.id : Array.isArray(params?.id) ? params.id[0] : '';
-  const product = PRODUCTS.find((p) => p.id === id);
+  const { getProductById, products, addToCart, isInWishlist, toggleWishlist, addToCompare, compareList } = useStore();
+  const product = getProductById(id) || products.find((p) => p.id === id);
 
   if (!product) {
     notFound();
   }
 
-  const { addToCart, isInWishlist, toggleWishlist, addToCompare, compareList } = useStore();
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(product.image);
   const [activeTab, setActiveTab] = useState<'ritual' | 'clinical' | 'ingredients'>('ritual');

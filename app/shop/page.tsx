@@ -2,12 +2,14 @@
 
 import React, { useState, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { PRODUCTS, CONCERNS } from '@/data/products';
+import { useStore } from '@/context/StoreContext';
+import { CONCERNS } from '@/data/products';
 import ProductCard from '@/components/ProductCard';
 import { SlidersHorizontal, ArrowUpDown, Sparkles, X } from 'lucide-react';
 
 function ShopContent() {
   const searchParams = useSearchParams();
+  const { products } = useStore();
   const initialCategory = searchParams.get('category') || 'All';
   const initialConcern = searchParams.get('concern') || 'All';
 
@@ -29,10 +31,10 @@ function ShopContent() {
   ];
 
   const filteredProducts = useMemo(() => {
-    return PRODUCTS.filter((p) => {
+    return products.filter((p) => {
       const matchCategory = selectedCategory === 'All' || p.category === selectedCategory;
-      const matchConcern = selectedConcern === 'All' || p.concern.toLowerCase() === selectedConcern.toLowerCase();
-      const matchActive = selectedActive === 'All' || p.keyActives.includes(selectedActive);
+      const matchConcern = selectedConcern === 'All' || p.concern?.toLowerCase() === selectedConcern.toLowerCase();
+      const matchActive = selectedActive === 'All' || (p.keyActives && p.keyActives.includes(selectedActive));
       return matchCategory && matchConcern && matchActive;
     }).sort((a, b) => {
       if (sortBy === 'price-asc') return a.price - b.price;
@@ -40,7 +42,7 @@ function ShopContent() {
       if (sortBy === 'rating') return b.rating - a.rating;
       return 0; // featured
     });
-  }, [selectedCategory, selectedConcern, selectedActive, sortBy]);
+  }, [products, selectedCategory, selectedConcern, selectedActive, sortBy]);
 
   const clearAllFilters = () => {
     setSelectedCategory('All');
@@ -105,7 +107,7 @@ function ShopContent() {
                   <span>{cat === 'All' ? 'All Categories' : cat}</span>
                   {cat !== 'All' && (
                     <span className="text-[10px] opacity-60">
-                      ({PRODUCTS.filter((p) => p.category === cat).length})
+                      ({products.filter((p) => p.category === cat).length})
                     </span>
                   )}
                 </button>

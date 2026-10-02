@@ -3,12 +3,14 @@
 import React, { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { PRODUCTS, CONCERNS } from '@/data/products';
+import { useStore } from '@/context/StoreContext';
+import { CONCERNS } from '@/data/products';
 import ProductCard from '@/components/ProductCard';
 import { Sparkles, ArrowRight, ShieldCheck, Leaf, Award, CheckCircle2, ChevronRight, Droplets } from 'lucide-react';
 import gsap from 'gsap';
 
 export default function HomePage() {
+  const { products } = useStore();
   const heroRef = useRef<HTMLDivElement>(null);
   const heroBottleRef = useRef<HTMLDivElement>(null);
   const heroTextRef = useRef<HTMLDivElement>(null);
@@ -37,8 +39,10 @@ export default function HomePage() {
     }
   }, []);
 
-  const bestSellers = PRODUCTS.filter((p) => p.isBestSeller);
-  const heroProduct = PRODUCTS[0]; // Sérum Éclat Botanique
+  const bestSellers = products.filter((p) => p.isBestSeller).length > 0 
+    ? products.filter((p) => p.isBestSeller)
+    : products.slice(0, 3);
+  const heroProduct = products[0]; // Sérum Éclat Botanique or first formulation
 
   return (
     <div className="relative overflow-hidden">
@@ -179,7 +183,7 @@ export default function HomePage() {
             href="/shop"
             className="mt-6 md:mt-0 text-xs uppercase tracking-widest font-semibold text-[#1B1A17] hover:text-[#C8A46A] flex items-center space-x-1.5 group self-start md:self-end"
           >
-            <span>View All Formulations ({PRODUCTS.length})</span>
+            <span>View All Formulations ({products.length})</span>
             <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>

@@ -29,8 +29,11 @@ import {
   Mail,
   EyeOff,
   Key,
-  ShieldAlert
+  ShieldAlert,
+  Trash2,
+  Image as ImageIcon
 } from 'lucide-react';
+import { useStore, Product } from '@/context/StoreContext';
 import { PRODUCTS } from '@/data/products';
 
 type AdminTab =
@@ -91,9 +94,78 @@ interface CouponMock {
 }
 
 export default function AdminPortal() {
+  const { products, addProduct, deleteProduct } = useStore();
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
+
+  // New Formulation Modal & Form State
+  const [isNewProductModalOpen, setIsNewProductModalOpen] = useState(false);
+  const [productForm, setProductForm] = useState({
+    name: '',
+    frenchSubtitle: '',
+    category: 'Serums' as Product['category'],
+    concern: 'Radiance' as Product['concern'],
+    price: 185,
+    volume: '50 ml / 1.7 fl. oz.',
+    tagline: '',
+    description: '',
+    texture: 'Silken botanical elixir',
+    keyActives: 'French Saffron Stem Cells, Bio-Fermented Lipids',
+    benefits: 'Cellular radiance, Deep dermal replenishment, Instant barrier comfort',
+    stock: 45,
+    image: '/images/skin7.png',
+  });
+
+  const handleCreateProduct = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!productForm.name.trim()) return;
+
+    const newProd: Product = {
+      id: 'elanor-' + productForm.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Math.random().toString(36).substring(2, 6),
+      name: productForm.name.trim(),
+      frenchSubtitle: productForm.frenchSubtitle.trim() || 'Haute Botanique de Précision',
+      category: productForm.category,
+      concern: productForm.concern,
+      price: Number(productForm.price) || 150,
+      rating: 4.98,
+      reviewsCount: 1,
+      tagline: productForm.tagline.trim() || productForm.name.trim(),
+      description: productForm.description.trim() || productForm.name.trim(),
+      volume: productForm.volume.trim() || '50 ml / 1.7 fl. oz.',
+      texture: productForm.texture.trim() || 'Sublime botanical emulsion',
+      skinTypes: ['All Skin Types', 'Sensitive', 'Dehydrated'],
+      keyActives: productForm.keyActives.split(',').map((s) => s.trim()).filter(Boolean),
+      benefits: productForm.benefits.split(',').map((s) => s.trim()).filter(Boolean),
+      usageRitual: 'Dispense 3-4 drops onto clean palms and press gently into face, neck, and décolleté morning and evening.',
+      clinicalResults: [
+        { metric: '98%', description: 'reported visible cellular luminosity in 7 days' },
+        { metric: '95%', description: 'felt immediate soothing dermal barrier hydration' }
+      ],
+      image: productForm.image || '/images/skin7.png',
+      hoverImage: '/images/skin8.png',
+      isNew: true,
+      stock: Number(productForm.stock) || 50
+    };
+
+    addProduct(newProd);
+    setIsNewProductModalOpen(false);
+    setProductForm({
+      name: '',
+      frenchSubtitle: '',
+      category: 'Serums',
+      concern: 'Radiance',
+      price: 185,
+      volume: '50 ml / 1.7 fl. oz.',
+      tagline: '',
+      description: '',
+      texture: 'Silken botanical elixir',
+      keyActives: 'French Saffron Stem Cells, Bio-Fermented Lipids',
+      benefits: 'Cellular radiance, Deep dermal replenishment, Instant barrier comfort',
+      stock: 45,
+      image: '/images/skin7.png',
+    });
+  };
 
   const INITIAL_SEED_ORDERS: OrderMock[] = [
     {
@@ -1091,58 +1163,284 @@ export default function AdminPortal() {
         {/* TAB 3: FORMULATIONS & CATALOG */}
         {activeTab === 'products' && (
           <div className="bg-[#FFFDF9] rounded-3xl border border-[#EADFCF] p-6 shadow-card space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h3 className="font-serif-luxury text-xl font-semibold text-[#1B1A17]">
-                  Active Botanical Formulations
+                  Active Botanical Formulations ({products.length})
                 </h3>
                 <p className="text-xs text-[#8E857A]">
-                  All catalog items synchronized with Spring Boot `/api/v1/products`
+                  Dynamically synchronized with PostgreSQL & Spring Boot `/api/v1/products`
                 </p>
               </div>
-              <button className="px-4 py-2 bg-[#1B1A17] text-[#FFFDF9] rounded-full text-xs font-semibold tracking-wider flex items-center space-x-1.5 hover:bg-[#322F2A] transition-colors cursor-pointer">
-                <Plus className="w-3.5 h-3.5 text-[#C8A46A]" />
-                <span>New Formulation</span>
+              <button
+                type="button"
+                onClick={() => setIsNewProductModalOpen(true)}
+                className="px-5 py-2.5 bg-[#1B1A17] text-[#FFFDF9] rounded-full text-xs font-semibold tracking-wider flex items-center space-x-2 hover:bg-[#322F2A] transition-all shadow-sm cursor-pointer"
+              >
+                <Plus className="w-4 h-4 text-[#C8A46A]" />
+                <span>+ Add New Formulation</span>
               </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {PRODUCTS
+              {products
                 .filter((prod) => {
                   if (!searchQuery.trim()) return true;
                   const q = searchQuery.toLowerCase();
                   return (
                     prod.name.toLowerCase().includes(q) ||
                     prod.category.toLowerCase().includes(q) ||
-                    prod.description.toLowerCase().includes(q)
+                    prod.description.toLowerCase().includes(q) ||
+                    (prod.frenchSubtitle && prod.frenchSubtitle.toLowerCase().includes(q))
                   );
                 })
                 .map((prod) => (
                 <div
                   key={prod.id}
-                  className="p-5 rounded-2xl bg-[#FAF7F2] border border-[#EADFCF] flex flex-col justify-between space-y-4 hover:shadow-card transition-all"
+                  className="p-5 rounded-2xl bg-[#FAF7F2] border border-[#EADFCF] flex flex-col justify-between space-y-4 hover:shadow-card transition-all relative group"
                 >
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <div className="flex justify-between items-center text-[10px] uppercase font-bold tracking-wider text-[#8E857A]">
-                      <span>{prod.category}</span>
-                      <span className="px-2 py-0.5 rounded-full bg-[#7D9075]/20 text-[#4D6545]">
-                        ACTIVE
+                      <span className="px-2.5 py-0.5 rounded-full bg-[#C8A46A]/20 text-[#8C6B34]">
+                        {prod.category}
                       </span>
+                      <div className="flex items-center space-x-2">
+                        <span className="px-2 py-0.5 rounded-full bg-[#7D9075]/20 text-[#4D6545]">
+                          STOCK: {prod.stock || 30}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (confirm(`Remove formulation "${prod.name}" from catalog?`)) {
+                              deleteProduct(prod.id);
+                            }
+                          }}
+                          className="p-1 text-[#A59D90] hover:text-[#B84A4A] rounded-full transition-colors cursor-pointer"
+                          title="Delete Formulation"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
-                    <h4 className="font-serif-luxury text-lg font-semibold text-[#1B1A17]">
-                      {prod.name}
-                    </h4>
-                    <p className="text-xs text-[#5E584F] line-clamp-2">{prod.description}</p>
+
+                    <div className="flex space-x-3.5 items-start">
+                      <div className="w-14 h-14 rounded-xl overflow-hidden bg-[#EADFCF] shrink-0 border border-[#E0D3C1]">
+                        <img
+                          src={prod.image || '/images/skin7.png'}
+                          alt={prod.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-serif-luxury text-base font-semibold text-[#1B1A17] truncate">
+                          {prod.name}
+                        </h4>
+                        <p className="text-[11px] text-[#C8A46A] italic truncate">{prod.frenchSubtitle}</p>
+                        <p className="text-[11px] text-[#5E584F] line-clamp-2 mt-0.5">{prod.description}</p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="pt-3 border-t border-[#EADFCF] flex justify-between items-center">
+
+                  <div className="pt-3 border-t border-[#EADFCF] flex justify-between items-center text-xs">
                     <span className="font-serif-luxury text-base font-bold text-[#1B1A17]">
-                      ₹{prod.price.toLocaleString('en-IN')}
+                      ${prod.price} <span className="text-[10px] text-[#8E857A] font-sans font-normal">(₹{(prod.price * 83).toLocaleString('en-IN')})</span>
                     </span>
-                    <span className="text-[10px] text-[#8E857A]">Volume: {prod.volume}</span>
+                    <span className="text-[10px] text-[#8E857A] font-mono">{prod.volume}</span>
                   </div>
                 </div>
               ))}
             </div>
+
+            {/* NEW FORMULATION MODAL */}
+            {isNewProductModalOpen && (
+              <div className="fixed inset-0 z-50 overflow-y-auto bg-[#1B1A17]/60 backdrop-blur-sm flex items-center justify-center p-4">
+                <div className="bg-[#FFFDF9] w-full max-w-2xl rounded-3xl border border-[#EADFCF] shadow-2xl p-6 sm:p-8 relative space-y-6 max-h-[90vh] overflow-y-auto">
+                  <div className="flex items-center justify-between border-b border-[#EADFCF] pb-4">
+                    <div>
+                      <div className="inline-flex items-center space-x-1.5 text-[10px] uppercase font-bold tracking-widest text-[#C8A46A]">
+                        <Sparkles className="w-3.5 h-3.5" />
+                        <span>Apothecary Atelier</span>
+                      </div>
+                      <h2 className="font-serif-luxury text-2xl font-bold text-[#1B1A17]">
+                        Create New Botanical Formulation
+                      </h2>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsNewProductModalOpen(false)}
+                      className="p-2 text-[#8E857A] hover:text-[#1B1A17] rounded-full hover:bg-[#F2EBE2] transition-colors cursor-pointer"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleCreateProduct} className="space-y-4 text-xs">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="font-semibold text-[#1B1A17]">Formulation Name *</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="e.g., Élixir Sublime aux Pétales"
+                          value={productForm.name}
+                          onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF7F2] border border-[#EADFCF] text-xs text-[#1B1A17] focus:outline-none focus:border-[#C8A46A]"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="font-semibold text-[#1B1A17]">French Subtitle</label>
+                        <input
+                          type="text"
+                          placeholder="e.g., Huile Précieuse Régénérante"
+                          value={productForm.frenchSubtitle}
+                          onChange={(e) => setProductForm({ ...productForm, frenchSubtitle: e.target.value })}
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF7F2] border border-[#EADFCF] text-xs text-[#1B1A17] focus:outline-none focus:border-[#C8A46A]"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="space-y-1">
+                        <label className="font-semibold text-[#1B1A17]">Category *</label>
+                        <select
+                          value={productForm.category}
+                          onChange={(e) => setProductForm({ ...productForm, category: e.target.value as Product['category'] })}
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF7F2] border border-[#EADFCF] text-xs text-[#1B1A17] focus:outline-none focus:border-[#C8A46A]"
+                        >
+                          {['Serums', 'Creams', 'Elixirs', 'Cleansers', 'Masks', 'Eye Care'].map((cat) => (
+                            <option key={cat} value={cat}>{cat}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="font-semibold text-[#1B1A17]">Primary Concern *</label>
+                        <select
+                          value={productForm.concern}
+                          onChange={(e) => setProductForm({ ...productForm, concern: e.target.value as Product['concern'] })}
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF7F2] border border-[#EADFCF] text-xs text-[#1B1A17] focus:outline-none focus:border-[#C8A46A]"
+                        >
+                          {['Radiance', 'Anti-Aging', 'Hydration', 'Barrier Repair', 'Calming', 'Clarifying'].map((con) => (
+                            <option key={con} value={con}>{con}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="font-semibold text-[#1B1A17]">Price ($ USD) *</label>
+                        <input
+                          type="number"
+                          required
+                          min="1"
+                          placeholder="185"
+                          value={productForm.price}
+                          onChange={(e) => setProductForm({ ...productForm, price: Number(e.target.value) })}
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF7F2] border border-[#EADFCF] text-xs text-[#1B1A17] focus:outline-none focus:border-[#C8A46A]"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="font-semibold text-[#1B1A17]">Volume / Bottle Size</label>
+                        <input
+                          type="text"
+                          placeholder="50 ml / 1.7 fl. oz."
+                          value={productForm.volume}
+                          onChange={(e) => setProductForm({ ...productForm, volume: e.target.value })}
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF7F2] border border-[#EADFCF] text-xs text-[#1B1A17] focus:outline-none focus:border-[#C8A46A]"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="font-semibold text-[#1B1A17]">Initial Apothecary Stock</label>
+                        <input
+                          type="number"
+                          min="1"
+                          placeholder="50"
+                          value={productForm.stock}
+                          onChange={(e) => setProductForm({ ...productForm, stock: Number(e.target.value) })}
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF7F2] border border-[#EADFCF] text-xs text-[#1B1A17] focus:outline-none focus:border-[#C8A46A]"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="font-semibold text-[#1B1A17]">Formulation Description *</label>
+                      <textarea
+                        required
+                        rows={2}
+                        placeholder="A deeply restorative botanical elixir blending rare saffron stem cells with clinical lipids..."
+                        value={productForm.description}
+                        onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF7F2] border border-[#EADFCF] text-xs text-[#1B1A17] focus:outline-none focus:border-[#C8A46A]"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="font-semibold text-[#1B1A17]">Key Actives (comma separated)</label>
+                        <input
+                          type="text"
+                          placeholder="French Saffron, Retinal, Bio-Ceramides"
+                          value={productForm.keyActives}
+                          onChange={(e) => setProductForm({ ...productForm, keyActives: e.target.value })}
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF7F2] border border-[#EADFCF] text-xs text-[#1B1A17] focus:outline-none focus:border-[#C8A46A]"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="font-semibold text-[#1B1A17]">Key Benefits (comma separated)</label>
+                        <input
+                          type="text"
+                          placeholder="Cellular glow, Barrier strength, Anti-fatigue"
+                          value={productForm.benefits}
+                          onChange={(e) => setProductForm({ ...productForm, benefits: e.target.value })}
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF7F2] border border-[#EADFCF] text-xs text-[#1B1A17] focus:outline-none focus:border-[#C8A46A]"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Image Preset Picker */}
+                    <div className="space-y-2">
+                      <label className="font-semibold text-[#1B1A17] flex items-center justify-between">
+                        <span>Select Maison Visual Asset</span>
+                        <span className="text-[10px] text-[#8E857A] font-normal">{productForm.image}</span>
+                      </label>
+                      <div className="grid grid-cols-6 sm:grid-cols-9 gap-2">
+                        {['/images/skin7.png', '/images/skin8.png', '/images/skin9.png', '/images/skin.jfif', '/images/skin1.jfif', '/images/skin2.jfif', '/images/skin3.jfif', '/images/skin4.jfif', '/images/skin5.jfif'].map((img) => (
+                          <button
+                            type="button"
+                            key={img}
+                            onClick={() => setProductForm({ ...productForm, image: img })}
+                            className={`aspect-square rounded-xl overflow-hidden border-2 transition-all p-0.5 cursor-pointer ${
+                              productForm.image === img ? 'border-[#C8A46A] scale-105 shadow-md' : 'border-transparent opacity-70 hover:opacity-100'
+                            }`}
+                          >
+                            <img src={img} alt="preset" className="w-full h-full object-cover rounded-lg" />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="pt-4 border-t border-[#EADFCF] flex justify-end space-x-3">
+                      <button
+                        type="button"
+                        onClick={() => setIsNewProductModalOpen(false)}
+                        className="px-5 py-2.5 rounded-full border border-[#EADFCF] text-xs font-semibold text-[#5E584F] hover:bg-[#F2EBE2] transition-colors cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-6 py-2.5 rounded-full bg-[#1B1A17] text-[#FFFDF9] text-xs uppercase tracking-wider font-semibold hover:bg-[#322F2A] transition-all shadow-md cursor-pointer flex items-center space-x-1.5"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-[#C8A46A]" />
+                        <span>Publish Formulation Live</span>
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

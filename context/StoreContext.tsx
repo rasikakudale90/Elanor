@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Product, PRODUCTS } from '@/data/products';
+export type { Product };
 
 export interface CartItem {
   product: Product;
@@ -138,6 +139,14 @@ interface StoreContextType {
   isSearchOpen: boolean;
   setIsSearchOpen: (open: boolean) => void;
 
+  // Dynamic Catalog Engine
+  products: Product[];
+  addProduct: (product: Product) => void;
+  updateProduct: (product: Product) => void;
+  deleteProduct: (productId: string) => void;
+  getProductById: (idOrSlug: string) => Product | undefined;
+  refreshProducts: () => Promise<void>;
+
   // Quick View Modal
   quickViewProduct: Product | null;
   setQuickViewProduct: (product: Product | null) => void;
@@ -146,6 +155,7 @@ interface StoreContextType {
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 export function StoreProvider({ children }: { children: ReactNode }) {
+  const [products, setProducts] = useState<Product[]>(PRODUCTS);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [compareList, setCompareList] = useState<string[]>([]);
@@ -162,13 +172,38 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
 
-  // Initialize with saved items and customer session
+  // Initialize with saved items, customer session, and dynamic products
   useEffect(() => {
     try {
+      const savedProducts = localStorage.getItem('elanor_custom_products');
       const savedCart = localStorage.getItem('elanor_cart');
       const savedWishlist = localStorage.getItem('elanor_wishlist');
       const savedUser = localStorage.getItem('elanor_customer');
       const savedCoupon = localStorage.getItem('elanor_applied_coupon');
+
+      if (savedProducts) {
+        const parsedProds = JSON.parse(savedProducts);
+        if (Array.isArray(parsedProds) && parsedProds.length > 0) {
+          const seenIds = new Set<string>();
+          const merged: Product[] = [];
+          
+          parsedProds.forEach((p) => {
+            if (p && p.id && !seenIds.has(p.id)) {
+              seenIds.add(p.id);
+              merged.push(p);
+            }
+          });
+
+          PRODUCTS.forEach((p) => {
+            if (!seenIds.has(p.id)) {
+              seenIds.add(p.id);
+              merged.push(p);
+            }
+          });
+
+          setProducts(merged);
+        }
+      }
 
       if (savedCart) {
         const parsed = JSON.parse(savedCart);
@@ -348,9 +383,93 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const clearCompare = () => setCompareList([]);
 
+  // Dynamic Products CRUD and Sync
+  const addProduct = (newProduct: Product) => {
+    setProducts((prev) => {
+      const updated = [newProduct, ...prev.filter((p) => p.id !== newProduct.id)];
+      try {
+        localStorage.setItem('elanor_custom_products', JSON.stringify(updated));
+        window.dispatchEvent(new CustomEvent('elanor_products_updated', { detail: updated }));
+      } catch {}
+      return updated;
+    });
+  };
+
+  const updateProduct = (updatedProduct: Product) => {
+    setProducts((prev) => {
+      const updated = prev.map((p) => (p.id === updatedProduct.id ? updatedProduct : p));
+      try {
+        localStorage.setItem('elanor_custom_products', JSON.stringify(updated));
+        window.dispatchEvent(new CustomEvent('elanor_products_updated', { detail: updated }));
+      } catch {}
+      return updated;
+    });
+  };
+
+  const deleteProduct = (productId: string) => {
+    setProducts((prev) => {
+      const updated = prev.filter((p) => p.id !== productId);
+      try {
+        localStorage.setItem('elanor_custom_products', JSON.stringify(updated));
+        window.dispatchEvent(new CustomEvent('elanor_products_updated', { detail: updated }));
+      } catch {}
+      return updated;
+    });
+  };
+
+  const getProductById = (idOrSlug: string): Product | undefined => {
+    if (!idOrSlug) return undefined;
+    return products.find(
+      (p) =>
+        p.id.toLowerCase() === idOrSlug.toLowerCase() ||
+        p.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') === idOrSlug.toLowerCase()
+    );
+  };
+
+  const refreshProducts = async () => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1'}/products?size=50`);
+      if (res.ok) {
+        const json = await res.json();
+        const content = json.data?.content || json.content || json.data;
+        if (Array.isArray(content) && content.length > 0) {
+          const mapped: Product[] = content.map((item: any, idx: number) => ({
+            id: item.id || `elanor-prod-${idx}`,
+            name: item.name,
+            frenchSubtitle: item.shortDescription || 'Haute Botanique de Précision',
+            category: (item.categoryName || 'Serums') as Product['category'],
+            concern: 'Radiance',
+            price: item.basePrice || (item.variants?.[0]?.price) || 150,
+            rating: 4.95,
+            reviewsCount: 42,
+            tagline: item.shortDescription || item.name,
+            description: item.description || item.shortDescription || '',
+            volume: item.variants?.[0]?.name || '50 ml / 1.7 fl. oz.',
+            texture: 'Sublime botanical emulsion',
+            skinTypes: ['All Skin Types', 'Sensitive'],
+            keyActives: ['Rare Botanical Extracts', 'Bio-Ferments'],
+            benefits: ['Cellular revitalization', 'Deep dermal resilience'],
+            usageRitual: 'Apply morning and evening onto cleansed skin.',
+            clinicalResults: [{ metric: '96%', description: 'felt immediate hydration and glow' }],
+            image: item.coverImageUrl || `/images/skin${(idx % 9) + 1}.png`,
+            stock: item.variants?.[0]?.availableStock || 30
+          }));
+          setProducts(mapped);
+          localStorage.setItem('elanor_custom_products', JSON.stringify(mapped));
+        }
+      }
+    } catch {}
+  };
+
   return (
     <StoreContext.Provider
       value={{
+        products,
+        addProduct,
+        updateProduct,
+        deleteProduct,
+        getProductById,
+        refreshProducts,
         cart,
         addToCart,
         removeFromCart,

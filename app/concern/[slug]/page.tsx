@@ -4,12 +4,14 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound, useParams } from 'next/navigation';
-import { CONCERNS, PRODUCTS } from '@/data/products';
+import { useStore } from '@/context/StoreContext';
+import { CONCERNS } from '@/data/products';
 import ProductCard from '@/components/ProductCard';
 import { Sparkles, ShieldCheck, ArrowRight, ArrowLeft } from 'lucide-react';
 
 export default function ConcernDetailPage() {
   const params = useParams();
+  const { products } = useStore();
   const slug = typeof params?.slug === 'string' ? params.slug : Array.isArray(params?.slug) ? params.slug[0] : '';
   const concern = CONCERNS.find((c) => c.slug.toLowerCase() === slug.toLowerCase());
 
@@ -17,8 +19,8 @@ export default function ConcernDetailPage() {
     notFound();
   }
 
-  const matchingProducts = PRODUCTS.filter((p) =>
-    concern.productIds.includes(p.id) || p.concern.toLowerCase().includes(concern.slug.toLowerCase())
+  const matchingProducts = products.filter((p) =>
+    concern.productIds.includes(p.id) || (p.concern && p.concern.toLowerCase().includes(concern.slug.toLowerCase()))
   );
 
   return (
