@@ -206,10 +206,10 @@ export default function Navbar() {
               {customerUser ? (
                 <div className="flex items-center space-x-1.5 bg-[#F2EBE2] py-1 px-2.5 rounded-full border border-[#C8A46A]/40 group-hover:border-[#C8A46A] transition-all">
                   <div className="w-5 h-5 rounded-full bg-[#1B1A17] text-[#C8A46A] text-[10px] font-bold flex items-center justify-center">
-                    {customerUser.name.charAt(0)}
+                    {(customerUser.name || 'Patron').charAt(0)}
                   </div>
                   <span className="hidden xl:inline text-xs font-semibold text-[#1B1A17] max-w-[90px] truncate">
-                    {customerUser.name.split(' ')[0]}
+                    {(customerUser.name || 'Patron').split(' ')[0]}
                   </span>
                 </div>
               ) : (

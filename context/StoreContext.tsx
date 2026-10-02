@@ -171,7 +171,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const savedCoupon = localStorage.getItem('elanor_applied_coupon');
 
       if (savedCart) {
-        setCart(JSON.parse(savedCart));
+        const parsed = JSON.parse(savedCart);
+        if (Array.isArray(parsed)) {
+          const valid = parsed.filter((item) => item && item.product && item.product.id && typeof item.product.price === 'number');
+          setCart(valid.length > 0 ? valid : [
+            { product: PRODUCTS[0], quantity: 1 },
+            { product: PRODUCTS[1], quantity: 1 }
+          ]);
+        }
       } else {
         setCart([
           { product: PRODUCTS[0], quantity: 1 },
@@ -179,15 +186,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         ]);
       }
       if (savedWishlist) {
-        setWishlist(JSON.parse(savedWishlist));
+        const parsed = JSON.parse(savedWishlist);
+        if (Array.isArray(parsed)) setWishlist(parsed);
       } else {
         setWishlist(['elanor-nocturne-elixir', 'elanor-regard-sculptant']);
       }
       if (savedUser) {
-        setCustomerUser(JSON.parse(savedUser));
+        const parsed = JSON.parse(savedUser);
+        if (parsed && typeof parsed === 'object') setCustomerUser(parsed);
       }
       if (savedCoupon) {
-        setAppliedCoupon(JSON.parse(savedCoupon));
+        const parsed = JSON.parse(savedCoupon);
+        if (parsed && parsed.code) setAppliedCoupon(parsed);
       }
     } catch {
       // fallback
@@ -208,11 +218,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [wishlist]);
 
   const addToCart = (product: Product, quantity: number = 1) => {
+    if (!product || !product.id) return;
     setCart((prev) => {
-      const existing = prev.find((item) => item.product.id === product.id);
+      const existing = prev.find((item) => item?.product?.id === product.id);
       if (existing) {
         return prev.map((item) =>
-          item.product.id === product.id
+          item?.product?.id === product.id
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
@@ -223,15 +234,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   };
 
   const removeFromCart = (productId: string) => {
-    setCart((prev) => prev.filter((item) => item.product.id !== productId));
+    setCart((prev) => prev.filter((item) => item?.product?.id !== productId));
   };
 
   const updateQuantity = (productId: string, delta: number) => {
     setCart((prev) =>
       prev
         .map((item) => {
-          if (item.product.id === productId) {
-            const newQty = item.quantity + delta;
+          if (item?.product?.id === productId) {
+            const newQty = (item.quantity || 1) + delta;
             return newQty > 0 ? { ...item, quantity: newQty } : null;
           }
           return item;
@@ -242,12 +253,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const clearCart = () => setCart([]);
 
-  const cartSubtotal = cart.reduce(
-    (total, item) => total + item.product.price * item.quantity,
+  const cartSubtotal = (cart || []).reduce(
+    (total, item) => total + (item?.product?.price || 0) * (item?.quantity || 1),
     0
   );
 
-  const cartCount = cart.reduce((count, item) => count + item.quantity, 0);
+  const cartCount = (cart || []).reduce((count, item) => count + (item?.quantity || 0), 0);
 
   const freeShippingThreshold = 200;
   const freeShippingProgress = Math.min(
@@ -380,6 +391,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setQuickViewProduct,
       }}
     >
+      {children}
     </StoreContext.Provider>
   );
 }

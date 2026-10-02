@@ -53,7 +53,7 @@ export default function MobileBottomNav() {
         >
           {customerUser ? (
             <div className="w-5 h-5 rounded-full bg-[#1B1A17] text-[#C8A46A] text-[9px] font-bold flex items-center justify-center">
-              {customerUser.name.charAt(0)}
+              {(customerUser.name || 'P').charAt(0)}
             </div>
           ) : (
             <User className="w-5 h-5" strokeWidth={1.75} />

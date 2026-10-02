@@ -158,7 +158,7 @@ export default function AuthModal() {
           /* LOGGED IN PROFILE VIEW */
           <div className="space-y-6 text-center">
             <div className="w-16 h-16 rounded-full bg-[#1B1A17] text-[#C8A46A] border-2 border-[#C8A46A] mx-auto flex items-center justify-center text-xl font-serif-luxury font-bold shadow-md">
-              {customerUser.name.charAt(0)}
+              {(customerUser.name || 'Patron').charAt(0)}
             </div>
 
             <div className="space-y-1">
