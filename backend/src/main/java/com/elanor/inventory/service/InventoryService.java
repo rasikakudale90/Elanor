@@ -125,7 +125,8 @@ public class InventoryService {
             throw new BusinessException(ErrorCode.VALIDATION_ERROR, "Reservation quantity must be greater than zero.");
         }
 
-        Inventory inventory = getOrCreateInventory(variant);
+        Inventory inventory = inventoryRepository.findByVariantWithLock(variant)
+                .orElseGet(() -> getOrCreateInventory(variant));
 
         if (inventory.getAvailable() < quantity) {
             throw new BusinessException(ErrorCode.PRODUCT_OUT_OF_STOCK,

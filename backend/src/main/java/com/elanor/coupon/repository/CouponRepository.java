@@ -26,4 +26,8 @@ public interface CouponRepository extends JpaRepository<Coupon, UUID> {
 
     @Query("SELECT c FROM Coupon c WHERE (:search IS NULL OR LOWER(c.code) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(c.description) LIKE LOWER(CONCAT('%', :search, '%')))")
     Page<Coupon> findAllWithFilter(@Param("search") String search, Pageable pageable);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @Query("UPDATE Coupon c SET c.usageCount = c.usageCount + 1 WHERE UPPER(c.code) = UPPER(:code)")
+    int incrementUsageCount(@Param("code") String code);
 }

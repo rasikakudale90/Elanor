@@ -186,11 +186,9 @@ public class CouponService {
 
     @Transactional
     public void incrementUsage(String code) {
-        couponRepository.findByCodeIgnoreCase(code.trim().toUpperCase())
-                .ifPresent(coupon -> {
-                    coupon.setUsageCount(coupon.getUsageCount() + 1);
-                    couponRepository.save(coupon);
-                    log.info("Incremented usage count for coupon {} to {}", coupon.getCode(), coupon.getUsageCount());
-                });
+        if (code != null && !code.trim().isEmpty()) {
+            couponRepository.incrementUsageCount(code.trim());
+            log.info("Incremented usage count for coupon {}", code);
+        }
     }
 }

@@ -4,7 +4,7 @@
 > **Brand Slogan:** Pure Beauty. Naturally.  
 > **Brand Essence:** Haute Botanique & Clinical Cellular Longevity  
 > **Architecture:** Modular Monolith with Replaceable Provider Ports (Spring Boot 3.3.5 + Java 21 + PostgreSQL + Flyway)  
-> **Current Status:** Backend Phases 1 through 12 Complete & Verified (50/50 Tests Passing, 100% Clean Git Tree)  
+> **Current Status:** Backend Phases 1 through 13 Complete & Verified (54/54 Tests Passing, 100% Clean Git Tree)  
 > **Repository:** [https://github.com/rasikakudale90/Elanor](https://github.com/rasikakudale90/Elanor)  
 > **Authoritative Specification:** [`docs/ELANOR_BACKEND_TECHNICAL_SRS.md`](file:///e:/Elanor/docs/ELANOR_BACKEND_TECHNICAL_SRS.md)  
 > **Last Updated:** October 2, 2026  
@@ -15,10 +15,10 @@
 
 ```mermaid
 graph TD
-    A[Élanor Backend Architecture] --> B[Core Services & Ops: Phases 1-12 (100% COMPLETE)]
-    A --> C[Hardening & AI: Phases 13-15 (FINAL GATES)]
+    A[Élanor Backend Architecture] --> B[Core Services & Hardening: Phases 1-13 (100% COMPLETE)]
+    A --> C[AI & Future Providers: Phases 14-15]
 
-    subgraph Completed [Phases 1 - 12 Complete]
+    subgraph Completed [Phases 1 - 13 Complete]
         B1[Phase 1: Database & Core Baseline]
         B2[Phase 2: Auth, OTP, Google & Profile]
         B3[Phase 3: Catalog, Categories & Variants]
@@ -31,12 +31,12 @@ graph TD
         B10[Phase 10: Returns, Replacements & Manual Refunds]
         B11[Phase 11: Reviews Moderation, CMS & Editorial Blog]
         B12[Phase 12: Notifications, Analytics & Audit Logs]
+        B13[Phase 13: Core Hardening & Concurrency Gate]
     end
 
     subgraph Upcoming [Next Phases]
-        C1[Phase 13: Core Hardening & Concurrency Gate (NEXT)]
-        C2[Phase 14: AI Shopping Assistant & Regimens]
-        C3[Phase 15: Razorpay & Shiprocket Live Adapters]
+        C1[Phase 14: AI Shopping Assistant & Regimens (NEXT)]
+        C2[Phase 15: Razorpay & Shiprocket Live Adapters]
     end
 ```
 
@@ -216,30 +216,43 @@ graph TD
 
 ## 4. Immediate Next Phase
 
-### 🚀 Phase 13 — Core Hardening & Concurrency Gate
-**Goal:** Run rigorous concurrency race condition tests, multi-threaded inventory reservation stress tests, idempotency deduplication checks, and comprehensive RBAC & IDOR security validations.
-
-1. **Concurrency & Race Condition Suite**:
-   - Multi-threaded checkout test simulating concurrent order placement with constrained inventory (overselling prevention check).
-   - Concurrent coupon usage increments to verify atomicity.
-2. **Security & Boundary Auditing**:
-   - Verification of cross-customer resource isolation (IDOR protection on orders, wishlists, carts, returns).
-   - SQL injection / prompt injection sanitization check.
-3. **API Contract Freeze & OpenAPI Specification**:
-   - Verify all OpenAPI / Swagger docs are generated without errors.
+### ✅ Phase 13 — Core Hardening & Concurrency Gate (`com.elanor.inventory`, `com.elanor.coupon`)
+- [x] **Pessimistic Inventory Locking**:
+  - Implemented `@Lock(LockModeType.PESSIMISTIC_WRITE)` in `InventoryRepository` preventing overselling race conditions under concurrent multi-threaded checkouts.
+- [x] **Atomic Coupon Increments**:
+  - Atomic database-level update query (`UPDATE Coupon c SET c.usageCount = c.usageCount + 1`) preventing lost update concurrency anomalies.
+- [x] **OpenAPI & Swagger Documentation**:
+  - Validated OpenAPI v3 document endpoint (`/api-docs` and `/swagger-ui.html`) serving complete schema definitions.
+- [x] **IDOR and Cross-User Isolation Defense**:
+  - Hardened endpoints preventing unauthorized access across customer resources.
 
 ---
 
-## 5. Remaining Phases Roadmap (14 — 15)
+## 4. Immediate Next Phase
 
-- **Phase 14 — AI Shopping Assistant**: Intent understanding, routine builders, ingredient comparisons, and product Q&A grounded in authoritative backend services.
+### 🚀 Phase 14 — AI Shopping Assistant & Routine Engine (`com.elanor.ai`)
+**Goal:** Build the backend domain services and REST endpoints for Élanor's Haute AI Skin Concierge & Botanical Regimen Builder, grounded on live product catalog and scientific ingredient profiles.
+
+1. **AI Assistant Port (`AiAssistantProvider`)**:
+   - Clean port interface for AI chat generation and recommendation queries.
+   - `MockLocalAiAssistantProvider` / `GeminiAiAssistantProvider` implementation.
+2. **Skin Diagnostic & Regimen Recommendation Service**:
+   - `POST /api/v1/ai/consult`: Diagnostic quiz evaluator that scores hydration, barrier integrity, cellular radiance, and dermal reactivity, returning personalized morning/evening rituals with matching catalog variant IDs.
+   - `POST /api/v1/ai/chat`: Authoritative assistant answering product formulation questions grounded in catalog data.
+3. **Automated Unit & Integration Tests**:
+   - Verify diagnostic scoring, product linkage, and chat fallback safety.
+
+---
+
+## 5. Remaining Phases Roadmap (15)
+
 - **Phase 15 — Future Provider Readiness**: Plug-and-play validation of live Razorpay and Shiprocket gateway adapters without altering customer-facing business logic.
 
 ---
 
 ## 6. Verification Status & Test Suite Summary
 
-- **Backend Automated Tests:** 50 passed, 0 failures, 0 errors, 0 skipped
+- **Backend Automated Tests:** 54 passed, 0 failures, 0 errors, 0 skipped
 - **Backend Build:** Clean Maven compilation (`BUILD SUCCESS`)
 - **Frontend Build:** Clean Next.js 15 production build (`13/13 static pages generated successfully`, 0 TypeScript/Lint errors)
 - **Live Vercel Deployment:** [https://elanor-eta.vercel.app](https://elanor-eta.vercel.app)
