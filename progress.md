@@ -4,7 +4,7 @@
 > **Brand Slogan:** Pure Beauty. Naturally.  
 > **Brand Essence:** Haute Botanique & Clinical Cellular Longevity  
 > **Architecture:** Modular Monolith with Replaceable Provider Ports (Spring Boot 3.3.5 + Java 21 + PostgreSQL + Flyway)  
-> **Current Status:** Backend Phases 1 through 11 Complete & Verified (46/46 Tests Passing, 100% Clean Git Tree)  
+> **Current Status:** Backend Phases 1 through 12 Complete & Verified (50/50 Tests Passing, 100% Clean Git Tree)  
 > **Repository:** [https://github.com/rasikakudale90/Elanor](https://github.com/rasikakudale90/Elanor)  
 > **Authoritative Specification:** [`docs/ELANOR_BACKEND_TECHNICAL_SRS.md`](file:///e:/Elanor/docs/ELANOR_BACKEND_TECHNICAL_SRS.md)  
 > **Last Updated:** October 2, 2026  
@@ -15,11 +15,10 @@
 
 ```mermaid
 graph TD
-    A[Élanor Backend Architecture] --> B[Core Platform, Logistics & Content: Phases 1-11 (100% COMPLETE)]
-    A --> C[Telemetry & Observability: Phase 12 (NEXT SESSIONS)]
-    A --> D[Hardening & AI: Phases 13-15 (FINAL GATES)]
+    A[Élanor Backend Architecture] --> B[Core Services & Ops: Phases 1-12 (100% COMPLETE)]
+    A --> C[Hardening & AI: Phases 13-15 (FINAL GATES)]
 
-    subgraph Completed [Phases 1 - 11 Complete]
+    subgraph Completed [Phases 1 - 12 Complete]
         B1[Phase 1: Database & Core Baseline]
         B2[Phase 2: Auth, OTP, Google & Profile]
         B3[Phase 3: Catalog, Categories & Variants]
@@ -31,13 +30,13 @@ graph TD
         B9[Phase 9: Shipping, Tracking & Milestone Timeline]
         B10[Phase 10: Returns, Replacements & Manual Refunds]
         B11[Phase 11: Reviews Moderation, CMS & Editorial Blog]
+        B12[Phase 12: Notifications, Analytics & Audit Logs]
     end
 
     subgraph Upcoming [Next Phases]
-        C1[Phase 12: Notifications, Analytics & Audit Logs (NEXT)]
-        D1[Phase 13: Core Hardening & Concurrency Gate]
-        D2[Phase 14: AI Shopping Assistant & Regimens]
-        D3[Phase 15: Razorpay & Shiprocket Live Adapters]
+        C1[Phase 13: Core Hardening & Concurrency Gate (NEXT)]
+        C2[Phase 14: AI Shopping Assistant & Regimens]
+        C3[Phase 15: Razorpay & Shiprocket Live Adapters]
     end
 ```
 
@@ -178,6 +177,16 @@ graph TD
 
 ---
 
+### ✅ Phase 12 — Notifications, Analytics & Audit Logs (`com.elanor.notification`, `com.elanor.analytics`, `com.elanor.audit`)
+- [x] **Email Provider Port & Template Engine**:
+  - Pluggable `EmailProvider` port with `DevelopmentEmailProvider` implementing order confirmation, shipping dispatch, return approval, and refund notifications.
+- [x] **Audit Log Subsystem**:
+  - System-wide transactional audit log recorder (`AuditLogService.record`) and admin inspection API (`GET /api/v1/admin/audit-logs`).
+- [x] **Analytics & Operational Dashboard Telemetry**:
+  - Telemetry capture (`POST /api/v1/analytics/events`) and admin business analytics overview (`GET /api/v1/admin/analytics/overview`) aggregating revenue, order conversion, and active customers.
+
+---
+
 ---
 
 ## 3. Frontend Milestones & Experience Deliveries
@@ -207,29 +216,22 @@ graph TD
 
 ## 4. Immediate Next Phase
 
-### 🚀 Phase 12 — Notifications, Analytics & Audit Logs
-**Goal:** Implement transactional email provider abstraction with development template engine, event tracking telemetry, administrative analytics metrics, and immutable audit logs.
+### 🚀 Phase 13 — Core Hardening & Concurrency Gate
+**Goal:** Run rigorous concurrency race condition tests, multi-threaded inventory reservation stress tests, idempotency deduplication checks, and comprehensive RBAC & IDOR security validations.
 
-1. **Domain Models & Enums (`com.elanor.notification`, `com.elanor.analytics`, `com.elanor.audit`)**:
-   - `NotificationChannel`: `EMAIL`, `SMS`
-   - `AuditLog` entity (actor, action, entityType, entityId, detailsJson, ipAddress, createdAt)
-   - `AnalyticsEvent` entity (eventType, userId, guestToken, sessionId, metadataJson, createdAt)
-2. **Provider Abstraction**:
-   - `EmailProvider` interface (`sendEmail`, `sendTemplateEmail`)
-   - `DevelopmentEmailProvider` implementation (logging to console and test sink)
-3. **Services & Endpoints**:
-   - `AuditLogService` with automated transactional audit recording.
-   - `AnalyticsService` for event capture and aggregated dashboard metrics (`GET /api/v1/admin/analytics/overview` - revenue, order counts, top products, conversion).
-   - `GET /api/v1/admin/audit-logs` with pagination and entity filtering.
-   - Public event tracker: `POST /api/v1/analytics/events`.
-4. **Integration Testing**:
-   - Event logging, transactional audit trail verification, analytics aggregation, and security authorization.
+1. **Concurrency & Race Condition Suite**:
+   - Multi-threaded checkout test simulating concurrent order placement with constrained inventory (overselling prevention check).
+   - Concurrent coupon usage increments to verify atomicity.
+2. **Security & Boundary Auditing**:
+   - Verification of cross-customer resource isolation (IDOR protection on orders, wishlists, carts, returns).
+   - SQL injection / prompt injection sanitization check.
+3. **API Contract Freeze & OpenAPI Specification**:
+   - Verify all OpenAPI / Swagger docs are generated without errors.
 
 ---
 
-## 5. Remaining Phases Roadmap (13 — 15)
+## 5. Remaining Phases Roadmap (14 — 15)
 
-- **Phase 13 — Core Hardening**: Concurrency race condition tests, security review (IDOR & RBAC verification), API documentation freeze, and performance optimizations.
 - **Phase 14 — AI Shopping Assistant**: Intent understanding, routine builders, ingredient comparisons, and product Q&A grounded in authoritative backend services.
 - **Phase 15 — Future Provider Readiness**: Plug-and-play validation of live Razorpay and Shiprocket gateway adapters without altering customer-facing business logic.
 
@@ -237,7 +239,7 @@ graph TD
 
 ## 6. Verification Status & Test Suite Summary
 
-- **Backend Automated Tests:** 46 passed, 0 failures, 0 errors, 0 skipped
+- **Backend Automated Tests:** 50 passed, 0 failures, 0 errors, 0 skipped
 - **Backend Build:** Clean Maven compilation (`BUILD SUCCESS`)
 - **Frontend Build:** Clean Next.js 15 production build (`13/13 static pages generated successfully`, 0 TypeScript/Lint errors)
 - **Live Vercel Deployment:** [https://elanor-eta.vercel.app](https://elanor-eta.vercel.app)
