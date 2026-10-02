@@ -209,11 +209,11 @@ export default function AuthModal() {
 
             <div className="pt-2 flex flex-col space-y-2.5">
               <Link
-                href="/admin"
+                href="/orders"
                 onClick={() => setIsAuthOpen(false)}
-                className="w-full py-3 rounded-full bg-[#FAF7F2] border border-[#EADFCF] text-xs font-semibold text-[#1B1A17] hover:bg-[#EADFCF] transition-all"
+                className="w-full py-3 rounded-full bg-[#FAF7F2] border border-[#EADFCF] text-xs font-semibold text-[#1B1A17] hover:bg-[#EADFCF] transition-all text-center"
               >
-                Access Maison Admin Portal →
+                Track Orders & Shipments →
               </Link>
               <button
                 onClick={logoutCustomer}

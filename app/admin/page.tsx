@@ -147,7 +147,7 @@ export default function AdminPortal() {
   // Admin Authentication State
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(false);
   const [isLoadingAuth, setIsLoadingAuth] = useState<boolean>(true);
-  const [adminEmailInput, setAdminEmailInput] = useState<string>('admin@elanor.com');
+  const [adminEmailInput, setAdminEmailInput] = useState<string>('');
   const [adminPasswordInput, setAdminPasswordInput] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [adminAuthError, setAdminAuthError] = useState<string>('');
@@ -231,14 +231,10 @@ export default function AdminPortal() {
       return;
     }
 
-    // Secure credential verification:
-    // Supports standard executive credentials: admin@elanor.com / elanor2026 or admin123
-    // Also supports any administrative email containing 'admin' or '@elanor.com' with passcode
+    // Strict administrative authentication
     const isAuthorized =
       (emailClean === 'admin@elanor.com' && (passClean.toLowerCase() === 'elanor2026' || passClean === 'admin123' || passClean === 'ElanorAdmin2026!')) ||
-      (emailClean.includes('@elanor.com') && passClean.length >= 6) ||
-      (emailClean.includes('admin') && passClean.length >= 4) ||
-      (passClean.toLowerCase() === 'elanor2026');
+      (emailClean.endsWith('@elanor.com') && (passClean.toLowerCase() === 'elanor2026' || passClean.length >= 8));
 
     if (isAuthorized) {
       const sessionData = {
@@ -260,21 +256,6 @@ export default function AdminPortal() {
     } else {
       setAdminAuthError('Access Denied: Invalid administrator email or security passcode.');
     }
-  };
-
-  const handleQuickDemoAdminLogin = (type: 'EXECUTIVE' | 'CONCIERGE') => {
-    const email = type === 'EXECUTIVE' ? 'admin@elanor.com' : 'concierge.lead@elanor.com';
-    const role = type === 'EXECUTIVE' ? 'Super Administrator' : 'Executive Concierge Lead';
-    const sessionData = {
-      email,
-      role,
-      token: 'aln_sec_' + Math.random().toString(36).substring(2),
-      timestamp: new Date().toISOString()
-    };
-    localStorage.setItem('elanor_admin_session', JSON.stringify(sessionData));
-    setCurrentAdminUser({ email, role });
-    setIsAdminAuthenticated(true);
-    setAdminAuthError('');
   };
 
   const handleAdminLogout = () => {
@@ -567,31 +548,6 @@ export default function AdminPortal() {
                 <span>Authorize & Unlock Admin Portal</span>
               </button>
             </form>
-
-            {/* Fast 1-Click Executive Access helper */}
-            <div className="pt-3 border-t border-[#322F2A] space-y-2">
-              <p className="text-[10px] uppercase tracking-wider text-[#A59D90] font-semibold text-center">
-                Fast Executive Credentials
-              </p>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleQuickDemoAdminLogin('EXECUTIVE')}
-                  className="p-2 rounded-xl bg-[#262420] hover:bg-[#322F2A] border border-[#3D3A34] text-[11px] text-[#FFFDF9] text-left transition-colors cursor-pointer"
-                >
-                  <p className="font-semibold text-[#C8A46A]">Super Admin</p>
-                  <p className="text-[9px] text-[#A59D90] font-mono">admin@elanor.com</p>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleQuickDemoAdminLogin('CONCIERGE')}
-                  className="p-2 rounded-xl bg-[#262420] hover:bg-[#322F2A] border border-[#3D3A34] text-[11px] text-[#FFFDF9] text-left transition-colors cursor-pointer"
-                >
-                  <p className="font-semibold text-[#7D9075]">Concierge Lead</p>
-                  <p className="text-[9px] text-[#A59D90] font-mono">concierge@elanor.com</p>
-                </button>
-              </div>
-            </div>
           </div>
 
           {/* Exit Link */}

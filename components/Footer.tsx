@@ -169,8 +169,7 @@ export default function Footer() {
               <li><Link href="/ingredients" className="hover:text-[#C8A46A] transition-colors">Ingredient Explorer</Link></li>
               <li><Link href="/compare" className="hover:text-[#C8A46A] transition-colors">Formula Comparator</Link></li>
               <li><Link href="/brands" className="hover:text-[#C8A46A] transition-colors">Maison Philosophy</Link></li>
-              <li><Link href="/wishlist" className="hover:text-[#C8A46A] transition-colors">Sacred Wishlist</Link></li>
-              <li><Link href="/admin" className="text-[#C8A46A] font-semibold hover:underline">Maison Admin Portal</Link></li>
+              <li><Link href="/ai-skin-concierge" className="hover:text-[#C8A46A] transition-colors">Haute AI Skin Concierge</Link></li>
             </ul>
           </div>
         </div>
