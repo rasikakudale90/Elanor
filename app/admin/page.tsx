@@ -684,7 +684,18 @@ export default function AdminPortal() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#EADFCF]/60">
-                    {orders.map((order) => (
+                    {orders
+                      .filter((order) => {
+                        if (!searchQuery.trim()) return true;
+                        const q = searchQuery.toLowerCase();
+                        return (
+                          order.orderNumber.toLowerCase().includes(q) ||
+                          order.customerName.toLowerCase().includes(q) ||
+                          order.customerEmail.toLowerCase().includes(q) ||
+                          order.status.toLowerCase().includes(q)
+                        );
+                      })
+                      .map((order) => (
                       <tr key={order.id} className="hover:bg-[#FAF7F2] transition-colors">
                         <td className="py-3.5 px-4 font-mono font-semibold text-[#1B1A17]">
                           {order.orderNumber}
@@ -782,6 +793,17 @@ export default function AdminPortal() {
                 <tbody className="divide-y divide-[#EADFCF]/60">
                   {orders
                     .filter((o) => filterStatus === 'ALL' || o.status === filterStatus)
+                    .filter((order) => {
+                      if (!searchQuery.trim()) return true;
+                      const q = searchQuery.toLowerCase();
+                      return (
+                        order.orderNumber.toLowerCase().includes(q) ||
+                        order.customerName.toLowerCase().includes(q) ||
+                        order.customerEmail.toLowerCase().includes(q) ||
+                        (order.trackingNumber && order.trackingNumber.toLowerCase().includes(q)) ||
+                        order.paymentMethod.toLowerCase().includes(q)
+                      );
+                    })
                     .map((order) => (
                       <tr key={order.id} className="hover:bg-[#FAF7F2] transition-colors">
                         <td className="py-3.5 px-4 font-mono font-semibold text-[#1B1A17]">
