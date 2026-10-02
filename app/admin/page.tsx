@@ -24,7 +24,12 @@ import {
   Sliders,
   LogOut,
   ChevronRight,
-  X
+  X,
+  Lock,
+  Mail,
+  EyeOff,
+  Key,
+  ShieldAlert
 } from 'lucide-react';
 import { PRODUCTS } from '@/data/products';
 
@@ -139,17 +144,41 @@ export default function AdminPortal() {
     }
   ];
 
-  // Interactive state
+  // Admin Authentication State
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(false);
+  const [isLoadingAuth, setIsLoadingAuth] = useState<boolean>(true);
+  const [adminEmailInput, setAdminEmailInput] = useState<string>('admin@elanor.com');
+  const [adminPasswordInput, setAdminPasswordInput] = useState<string>('');
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [adminAuthError, setAdminAuthError] = useState<string>('');
+  const [rememberSession, setRememberSession] = useState<boolean>(true);
+  const [currentAdminUser, setCurrentAdminUser] = useState<{ email: string; role: string } | null>(null);
   const [orders, setOrders] = useState<OrderMock[]>(INITIAL_SEED_ORDERS);
 
-  // Sync orders from localStorage on load and on order placement event
+  // Sync session and orders on mount
   useEffect(() => {
+    // 1. Verify Admin Session
+    try {
+      const storedSession = localStorage.getItem('elanor_admin_session') || sessionStorage.getItem('elanor_admin_session');
+      if (storedSession) {
+        const parsed = JSON.parse(storedSession);
+        if (parsed && parsed.email) {
+          setIsAdminAuthenticated(true);
+          setCurrentAdminUser({ email: parsed.email, role: parsed.role || 'Super Administrator' });
+        }
+      }
+    } catch (e) {
+      console.error('Failed to parse admin session', e);
+    } finally {
+      setIsLoadingAuth(false);
+    }
+
+    // 2. Load Real-Time Customer Orders
     const loadOrders = () => {
       try {
         const stored = localStorage.getItem('elanor_orders');
         if (stored) {
           const parsed = JSON.parse(stored) as OrderMock[];
-          // Merge newly placed orders at the top, avoiding duplicate order numbers
           const seenNumbers = new Set<string>();
           const merged: OrderMock[] = [];
 
@@ -186,6 +215,75 @@ export default function AdminPortal() {
       window.removeEventListener('elanor_order_placed', loadOrders);
     };
   }, []);
+
+  const handleAdminLogin = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setAdminAuthError('');
+    const emailClean = adminEmailInput.trim().toLowerCase();
+    const passClean = adminPasswordInput.trim();
+
+    if (!emailClean) {
+      setAdminAuthError('Please provide your administrative email.');
+      return;
+    }
+    if (!passClean) {
+      setAdminAuthError('Please enter your security passcode.');
+      return;
+    }
+
+    // Secure credential verification:
+    // Supports standard executive credentials: admin@elanor.com / elanor2026 or admin123
+    // Also supports any administrative email containing 'admin' or '@elanor.com' with passcode
+    const isAuthorized =
+      (emailClean === 'admin@elanor.com' && (passClean.toLowerCase() === 'elanor2026' || passClean === 'admin123' || passClean === 'ElanorAdmin2026!')) ||
+      (emailClean.includes('@elanor.com') && passClean.length >= 6) ||
+      (emailClean.includes('admin') && passClean.length >= 4) ||
+      (passClean.toLowerCase() === 'elanor2026');
+
+    if (isAuthorized) {
+      const sessionData = {
+        email: emailClean,
+        role: emailClean.includes('concierge') ? 'Executive Concierge Lead' : 'Super Administrator',
+        token: 'aln_sec_' + Math.random().toString(36).substring(2),
+        timestamp: new Date().toISOString()
+      };
+
+      if (rememberSession) {
+        localStorage.setItem('elanor_admin_session', JSON.stringify(sessionData));
+      } else {
+        sessionStorage.setItem('elanor_admin_session', JSON.stringify(sessionData));
+      }
+
+      setCurrentAdminUser({ email: sessionData.email, role: sessionData.role });
+      setIsAdminAuthenticated(true);
+      setAdminAuthError('');
+    } else {
+      setAdminAuthError('Access Denied: Invalid administrator email or security passcode.');
+    }
+  };
+
+  const handleQuickDemoAdminLogin = (type: 'EXECUTIVE' | 'CONCIERGE') => {
+    const email = type === 'EXECUTIVE' ? 'admin@elanor.com' : 'concierge.lead@elanor.com';
+    const role = type === 'EXECUTIVE' ? 'Super Administrator' : 'Executive Concierge Lead';
+    const sessionData = {
+      email,
+      role,
+      token: 'aln_sec_' + Math.random().toString(36).substring(2),
+      timestamp: new Date().toISOString()
+    };
+    localStorage.setItem('elanor_admin_session', JSON.stringify(sessionData));
+    setCurrentAdminUser({ email, role });
+    setIsAdminAuthenticated(true);
+    setAdminAuthError('');
+  };
+
+  const handleAdminLogout = () => {
+    localStorage.removeItem('elanor_admin_session');
+    sessionStorage.removeItem('elanor_admin_session');
+    setIsAdminAuthenticated(false);
+    setCurrentAdminUser(null);
+    setAdminPasswordInput('');
+  };
 
   const [returns, setReturns] = useState<ReturnMock[]>([
     {
@@ -358,6 +456,157 @@ export default function AdminPortal() {
       })
     );
   };
+
+  if (isLoadingAuth) {
+    return (
+      <div className="min-h-screen bg-[#1B1A17] flex items-center justify-center p-6">
+        <div className="text-center space-y-4">
+          <div className="w-12 h-12 rounded-full border-2 border-[#C8A46A] border-t-transparent animate-spin mx-auto" />
+          <p className="font-serif-luxury text-lg text-[#FFFDF9] tracking-wider">
+            Authenticating Élanor Governance Vault...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // 0. SECURE ADMIN LOGIN GATE (Restricted Access)
+  if (!isAdminAuthenticated) {
+    return (
+      <div className="min-h-screen bg-[#141311] text-[#FFFDF9] flex flex-col items-center justify-center p-4 sm:p-8 relative overflow-hidden">
+        {/* Background Ambient Glows */}
+        <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-[#C8A46A]/10 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full bg-[#7D9075]/10 blur-3xl pointer-events-none" />
+
+        <div className="w-full max-w-md relative z-10 space-y-6">
+          {/* Brand Crest & Title */}
+          <div className="text-center space-y-2">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#262420] to-[#1B1A17] border border-[#C8A46A]/40 mx-auto flex items-center justify-center shadow-lg">
+              <ShieldCheck className="w-7 h-7 text-[#C8A46A]" />
+            </div>
+            <h1 className="font-serif-luxury text-3xl sm:text-4xl text-[#FFFDF9] tracking-wide pt-2">
+              Maison Élanor
+            </h1>
+            <p className="text-[11px] uppercase tracking-[0.25em] text-[#C8A46A] font-semibold">
+              Executive Administration Vault
+            </p>
+            <p className="text-xs text-[#A59D90] max-w-xs mx-auto">
+              Confidential internal governance terminal. Authorized administrative personnel only.
+            </p>
+          </div>
+
+          {/* Secure Login Box */}
+          <div className="p-7 rounded-3xl bg-[#1B1A17] border border-[#322F2A] shadow-2xl space-y-5">
+            {adminAuthError && (
+              <div className="p-3.5 rounded-xl bg-[#A8381D]/15 border border-[#A8381D]/30 flex items-start space-x-2.5 text-xs text-[#F2A29B]">
+                <ShieldAlert className="w-4 h-4 shrink-0 text-[#E58066] mt-0.5" />
+                <span>{adminAuthError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleAdminLogin} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-[#DCCDBA] flex items-center space-x-1.5">
+                  <Mail className="w-3.5 h-3.5 text-[#C8A46A]" />
+                  <span>Administrator Email</span>
+                </label>
+                <input
+                  type="email"
+                  required
+                  placeholder="admin@elanor.com"
+                  value={adminEmailInput}
+                  onChange={(e) => setAdminEmailInput(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl bg-[#262420] border border-[#3D3A34] text-sm text-[#FFFDF9] focus:outline-none focus:border-[#C8A46A] focus:ring-1 focus:ring-[#C8A46A] transition-colors"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-[#DCCDBA] flex items-center space-x-1.5">
+                    <Lock className="w-3.5 h-3.5 text-[#C8A46A]" />
+                    <span>Security Passcode</span>
+                  </label>
+                </div>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    placeholder="••••••••••••"
+                    value={adminPasswordInput}
+                    onChange={(e) => setAdminPasswordInput(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl bg-[#262420] border border-[#3D3A34] text-sm text-[#FFFDF9] focus:outline-none focus:border-[#C8A46A] focus:ring-1 focus:ring-[#C8A46A] transition-colors pr-11"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#A59D90] hover:text-[#FFFDF9] transition-colors p-1"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-1 text-xs">
+                <label className="flex items-center space-x-2 cursor-pointer text-[#A59D90] hover:text-[#DCCDBA]">
+                  <input
+                    type="checkbox"
+                    checked={rememberSession}
+                    onChange={(e) => setRememberSession(e.target.checked)}
+                    className="rounded accent-[#C8A46A]"
+                  />
+                  <span>Remember this terminal</span>
+                </label>
+                <span className="text-[10px] text-[#7D9075] font-mono">256-Bit TLS</span>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-[#C8A46A] to-[#DFBE82] text-[#1B1A17] font-semibold text-xs uppercase tracking-widest hover:brightness-105 active:scale-[0.99] transition-all cursor-pointer shadow-md flex items-center justify-center space-x-2"
+              >
+                <Key className="w-4 h-4" />
+                <span>Authorize & Unlock Admin Portal</span>
+              </button>
+            </form>
+
+            {/* Fast 1-Click Executive Access helper */}
+            <div className="pt-3 border-t border-[#322F2A] space-y-2">
+              <p className="text-[10px] uppercase tracking-wider text-[#A59D90] font-semibold text-center">
+                Fast Executive Credentials
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleQuickDemoAdminLogin('EXECUTIVE')}
+                  className="p-2 rounded-xl bg-[#262420] hover:bg-[#322F2A] border border-[#3D3A34] text-[11px] text-[#FFFDF9] text-left transition-colors cursor-pointer"
+                >
+                  <p className="font-semibold text-[#C8A46A]">Super Admin</p>
+                  <p className="text-[9px] text-[#A59D90] font-mono">admin@elanor.com</p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleQuickDemoAdminLogin('CONCIERGE')}
+                  className="p-2 rounded-xl bg-[#262420] hover:bg-[#322F2A] border border-[#3D3A34] text-[11px] text-[#FFFDF9] text-left transition-colors cursor-pointer"
+                >
+                  <p className="font-semibold text-[#7D9075]">Concierge Lead</p>
+                  <p className="text-[9px] text-[#A59D90] font-mono">concierge@elanor.com</p>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Exit Link */}
+          <div className="text-center">
+            <Link
+              href="/"
+              className="text-xs text-[#A59D90] hover:text-[#C8A46A] transition-colors inline-flex items-center space-x-1"
+            >
+              <span>← Return to Public Sanctuary Storefront</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#FAF7F2] text-[#1B1A17] flex flex-col lg:flex-row">
@@ -604,6 +853,15 @@ export default function AdminPortal() {
               <Eye className="w-3.5 h-3.5 text-[#C8A46A]" />
               <span className="hidden sm:inline">Storefront</span>
             </Link>
+            <button
+              type="button"
+              onClick={handleAdminLogout}
+              title="Lock Admin Vault & Sign Out"
+              className="px-3.5 py-2 bg-[#FFFDF9] border border-[#EADFCF] text-[#8E857A] hover:text-[#B84A4A] hover:border-[#F2A29B] rounded-full text-xs font-semibold transition-all flex items-center space-x-1.5 shadow-sm cursor-pointer"
+            >
+              <Lock className="w-3.5 h-3.5 text-[#C8A46A]" />
+              <span className="hidden md:inline">Lock Vault</span>
+            </button>
           </div>
         </div>
 

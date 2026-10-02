@@ -40,6 +40,54 @@ export const COMPLIMENTARY_SAMPLES: SampleItem[] = [
   }
 ];
 
+export interface CouponItem {
+  code: string;
+  type: 'PERCENTAGE' | 'FIXED';
+  value: number;
+  minOrder: number;
+  description: string;
+}
+
+export const AVAILABLE_COUPONS: CouponItem[] = [
+  {
+    code: 'HAUTE20',
+    type: 'PERCENTAGE',
+    value: 20,
+    minOrder: 100,
+    description: '20% Off Maison Haute Formulations',
+  },
+  {
+    code: 'CONCIERGE15',
+    type: 'PERCENTAGE',
+    value: 15,
+    minOrder: 120,
+    description: '15% Off AI Skin Concierge Routine',
+  },
+  {
+    code: 'GOLD10',
+    type: 'PERCENTAGE',
+    value: 10,
+    minOrder: 50,
+    description: '10% Off Complimentary Golden Gift',
+  },
+  {
+    code: 'WELCOME50',
+    type: 'FIXED',
+    value: 50,
+    minOrder: 200,
+    description: '$50 Off Orders Over $200',
+  },
+];
+
+export interface CustomerUser {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  tier: 'Bespoke Member' | 'Gold Atelier VIP' | 'First Sanctuary Guest';
+  token?: string;
+}
+
 interface StoreContextType {
   cart: CartItem[];
   addToCart: (product: Product, quantity?: number) => void;
@@ -57,6 +105,19 @@ interface StoreContextType {
   setIsGiftWrap: (val: boolean) => void;
   giftNote: string;
   setGiftNote: (val: string) => void;
+
+  // Coupon Engine
+  appliedCoupon: CouponItem | null;
+  couponDiscount: number;
+  applyCoupon: (code: string) => { success: boolean; message: string };
+  removeCoupon: () => void;
+
+  // Customer Auth
+  customerUser: CustomerUser | null;
+  isAuthOpen: boolean;
+  setIsAuthOpen: (open: boolean) => void;
+  loginCustomer: (user: CustomerUser) => void;
+  logoutCustomer: () => void;
 
   // Cart Drawer
   isCartOpen: boolean;
@@ -91,20 +152,27 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [selectedSample, setSelectedSample] = useState<string | null>('sample-saffron');
   const [isGiftWrap, setIsGiftWrap] = useState<boolean>(false);
   const [giftNote, setGiftNote] = useState<string>('');
+  const [appliedCoupon, setAppliedCoupon] = useState<CouponItem | null>(null);
+
+  // Customer Auth
+  const [customerUser, setCustomerUser] = useState<CustomerUser | null>(null);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
 
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
 
-  // Initialize with some default items for preview / prototype vitality
+  // Initialize with saved items and customer session
   useEffect(() => {
     try {
       const savedCart = localStorage.getItem('elanor_cart');
       const savedWishlist = localStorage.getItem('elanor_wishlist');
+      const savedUser = localStorage.getItem('elanor_customer');
+      const savedCoupon = localStorage.getItem('elanor_applied_coupon');
+
       if (savedCart) {
         setCart(JSON.parse(savedCart));
       } else {
-        // Starter luxury cart
         setCart([
           { product: PRODUCTS[0], quantity: 1 },
           { product: PRODUCTS[1], quantity: 1 }
@@ -114,6 +182,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setWishlist(JSON.parse(savedWishlist));
       } else {
         setWishlist(['elanor-nocturne-elixir', 'elanor-regard-sculptant']);
+      }
+      if (savedUser) {
+        setCustomerUser(JSON.parse(savedUser));
+      }
+      if (savedCoupon) {
+        setAppliedCoupon(JSON.parse(savedCoupon));
       }
     } catch {
       // fallback
@@ -182,6 +256,60 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   );
   const isFreeShipping = cartSubtotal >= freeShippingThreshold;
 
+  // Coupon calculations
+  const couponDiscount = appliedCoupon
+    ? appliedCoupon.type === 'PERCENTAGE'
+      ? Math.round((cartSubtotal * appliedCoupon.value) / 100)
+      : Math.min(cartSubtotal, appliedCoupon.value)
+    : 0;
+
+  const applyCoupon = (code: string) => {
+    const formatted = code.trim().toUpperCase();
+    const found = AVAILABLE_COUPONS.find((c) => c.code === formatted);
+
+    if (!found) {
+      return { success: false, message: `Invalid promotional code "${formatted}".` };
+    }
+
+    if (cartSubtotal < found.minOrder) {
+      return {
+        success: false,
+        message: `Code "${formatted}" requires a minimum bag order of $${found.minOrder}.`
+      };
+    }
+
+    setAppliedCoupon(found);
+    try {
+      localStorage.setItem('elanor_applied_coupon', JSON.stringify(found));
+    } catch {}
+    return {
+      success: true,
+      message: `Maison Code "${formatted}" applied successfully!`
+    };
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    try {
+      localStorage.removeItem('elanor_applied_coupon');
+    } catch {}
+  };
+
+  const loginCustomer = (user: CustomerUser) => {
+    setCustomerUser(user);
+    try {
+      localStorage.setItem('elanor_customer', JSON.stringify(user));
+    } catch {}
+  };
+
+  const logoutCustomer = () => {
+    setCustomerUser(null);
+    try {
+      localStorage.removeItem('elanor_customer');
+      localStorage.removeItem('elanor_access_token');
+    } catch {}
+  };
+
   const toggleWishlist = (productId: string) => {
     setWishlist((prev) =>
       prev.includes(productId)
@@ -228,6 +356,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setIsGiftWrap,
         giftNote,
         setGiftNote,
+        appliedCoupon,
+        couponDiscount,
+        applyCoupon,
+        removeCoupon,
+        customerUser,
+        isAuthOpen,
+        setIsAuthOpen,
+        loginCustomer,
+        logoutCustomer,
         isCartOpen,
         setIsCartOpen,
         wishlist,
@@ -243,7 +380,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setQuickViewProduct,
       }}
     >
-      {children}
     </StoreContext.Provider>
   );
 }

@@ -5,11 +5,11 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useStore } from '@/context/StoreContext';
 import { CONCERNS } from '@/data/products';
-import { Search, ShoppingBag, Heart, Sparkles, SlidersHorizontal, Menu, X } from 'lucide-react';
+import { Search, ShoppingBag, Heart, Sparkles, SlidersHorizontal, Menu, X, User } from 'lucide-react';
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { cartCount, wishlist, setIsCartOpen, setIsSearchOpen, compareList } = useStore();
+  const { cartCount, wishlist, setIsCartOpen, setIsSearchOpen, compareList, customerUser, setIsAuthOpen } = useStore();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [shopDropdownOpen, setShopDropdownOpen] = useState(false);
@@ -197,6 +197,29 @@ export default function Navbar() {
               <span className="hidden xl:inline text-xs text-[#8E857A] tracking-wider">Search</span>
             </button>
 
+            {/* Customer Account / Sign In Trigger */}
+            <button
+              onClick={() => setIsAuthOpen(true)}
+              aria-label="Customer Account Sanctuary"
+              className="p-1.5 hover:text-[#C8A46A] transition-colors duration-200 flex items-center space-x-1.5 cursor-pointer group"
+            >
+              {customerUser ? (
+                <div className="flex items-center space-x-1.5 bg-[#F2EBE2] py-1 px-2.5 rounded-full border border-[#C8A46A]/40 group-hover:border-[#C8A46A] transition-all">
+                  <div className="w-5 h-5 rounded-full bg-[#1B1A17] text-[#C8A46A] text-[10px] font-bold flex items-center justify-center">
+                    {customerUser.name.charAt(0)}
+                  </div>
+                  <span className="hidden xl:inline text-xs font-semibold text-[#1B1A17] max-w-[90px] truncate">
+                    {customerUser.name.split(' ')[0]}
+                  </span>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-1.5">
+                  <User className="w-5 h-5" strokeWidth={1.75} />
+                  <span className="hidden xl:inline text-xs text-[#8E857A] tracking-wider">Sign In</span>
+                </div>
+              )}
+            </button>
+
             {/* Wishlist Link */}
             <Link
               href="/wishlist"
@@ -218,7 +241,7 @@ export default function Navbar() {
             <button
               onClick={() => setIsCartOpen(true)}
               aria-label="View Shopping Bag"
-              className="p-2 bg-[#1B1A17] text-[#FFFDF9] rounded-full hover:bg-[#322F2A] transition-all duration-200 flex items-center space-x-2 pl-3.5 pr-4 shadow-sm group"
+              className="p-2 bg-[#1B1A17] text-[#FFFDF9] rounded-full hover:bg-[#322F2A] transition-all duration-200 flex items-center space-x-2 pl-3.5 pr-4 shadow-sm group cursor-pointer"
             >
               <ShoppingBag className="w-4 h-4 group-hover:scale-110 transition-transform" strokeWidth={2} />
               <span className="text-xs font-medium tracking-wide">
@@ -229,7 +252,7 @@ export default function Navbar() {
             {/* Mobile Menu Toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-1.5 text-[#1B1A17]"
+              className="lg:hidden p-1.5 text-[#1B1A17] cursor-pointer"
               aria-label="Toggle Navigation Menu"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}

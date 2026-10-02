@@ -4,11 +4,11 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useStore } from '@/context/StoreContext';
-import { Home, Sparkles, Heart, ShoppingBag, Search } from 'lucide-react';
+import { Home, Sparkles, Heart, ShoppingBag, Search, User } from 'lucide-react';
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
-  const { cartCount, wishlist, setIsCartOpen, setIsSearchOpen } = useStore();
+  const { cartCount, wishlist, setIsCartOpen, setIsSearchOpen, customerUser, setIsAuthOpen } = useStore();
 
   return (
     <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-[#FFFDF9]/95 backdrop-blur-xl border-t border-[#EADFCF] py-2 px-4 shadow-floating">
@@ -43,16 +43,24 @@ export default function MobileBottomNav() {
           }`}
         >
           <Sparkles className="w-5 h-5 text-[#C8A46A]" strokeWidth={2} />
-          <span className="text-[10px] font-medium mt-0.5 tracking-tight">AI Concierge</span>
+          <span className="text-[10px] font-medium mt-0.5 tracking-tight">Concierge</span>
         </Link>
 
-        {/* Search */}
+        {/* Account / Sign In */}
         <button
-          onClick={() => setIsSearchOpen(true)}
-          className="flex flex-col items-center justify-center p-1.5 text-[#5E584F] hover:text-[#1B1A17]"
+          onClick={() => setIsAuthOpen(true)}
+          className="flex flex-col items-center justify-center p-1.5 text-[#5E584F] hover:text-[#1B1A17] cursor-pointer"
         >
-          <Search className="w-5 h-5" strokeWidth={1.75} />
-          <span className="text-[10px] font-medium mt-0.5 tracking-tight">Search</span>
+          {customerUser ? (
+            <div className="w-5 h-5 rounded-full bg-[#1B1A17] text-[#C8A46A] text-[9px] font-bold flex items-center justify-center">
+              {customerUser.name.charAt(0)}
+            </div>
+          ) : (
+            <User className="w-5 h-5" strokeWidth={1.75} />
+          )}
+          <span className="text-[10px] font-medium mt-0.5 tracking-tight">
+            {customerUser ? 'Account' : 'Sign In'}
+          </span>
         </button>
 
         {/* Wishlist */}

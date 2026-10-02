@@ -3,8 +3,8 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useStore, COMPLIMENTARY_SAMPLES } from '@/context/StoreContext';
-import { X, Plus, Minus, Trash2, Gift, Sparkles, ArrowRight, ShieldCheck } from 'lucide-react';
+import { useStore, COMPLIMENTARY_SAMPLES, AVAILABLE_COUPONS } from '@/context/StoreContext';
+import { X, Plus, Minus, Trash2, Gift, Sparkles, ArrowRight, ShieldCheck, Tag } from 'lucide-react';
 
 export default function CartDrawer() {
   const {
@@ -22,13 +22,31 @@ export default function CartDrawer() {
     isGiftWrap,
     setIsGiftWrap,
     giftNote,
-    setGiftNote
+    setGiftNote,
+    appliedCoupon,
+    couponDiscount,
+    applyCoupon,
+    removeCoupon
   } = useStore();
+
+  const [couponInput, setCouponInput] = React.useState('');
+  const [couponFeedback, setCouponFeedback] = React.useState<{ success: boolean; message: string } | null>(null);
 
   if (!isCartOpen) return null;
 
   const giftWrapFee = isGiftWrap ? 15 : 0;
-  const grandTotal = cartSubtotal + giftWrapFee;
+  const discountedSubtotal = Math.max(0, cartSubtotal - couponDiscount);
+  const grandTotal = discountedSubtotal + giftWrapFee;
+
+  const handleApplyCoupon = (codeToApply?: string) => {
+    const code = codeToApply || couponInput;
+    if (!code.trim()) return;
+    const res = applyCoupon(code);
+    setCouponFeedback(res);
+    if (res.success) {
+      setCouponInput('');
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
@@ -212,6 +230,66 @@ export default function CartDrawer() {
                     />
                   )}
                 </div>
+
+                {/* Promotional Coupon Section */}
+                <div className="p-4 rounded-2xl bg-[#FFFDF9] border border-[#EADFCF] space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-[#1B1A17] flex items-center space-x-1.5">
+                      <Tag className="w-3.5 h-3.5 text-[#C8A46A]" />
+                      <span>Promotional Privilege Code</span>
+                    </span>
+                    {appliedCoupon && (
+                      <span className="text-[10px] font-bold text-[#7D9075] uppercase tracking-wider bg-[#EEF2E8] px-2 py-0.5 rounded-full">
+                        Active
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex space-x-2">
+                    <input
+                      type="text"
+                      placeholder="e.g. HAUTE20"
+                      value={couponInput}
+                      onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                      className="flex-1 text-xs px-3 py-2 rounded-xl border border-[#DCCDBA] bg-[#FDFBF8] focus:outline-none focus:ring-1 focus:ring-[#C8A46A] font-mono uppercase text-[#1B1A17]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleApplyCoupon()}
+                      className="px-3.5 py-2 bg-[#1B1A17] text-[#FFFDF9] rounded-xl text-xs font-semibold hover:bg-[#322F2A] transition-colors cursor-pointer"
+                    >
+                      Apply
+                    </button>
+                  </div>
+
+                  {couponFeedback && (
+                    <p
+                      className={`text-[11px] ${
+                        couponFeedback.success ? 'text-[#7D9075] font-semibold' : 'text-[#A8381D]'
+                      }`}
+                    >
+                      {couponFeedback.message}
+                    </p>
+                  )}
+
+                  {/* Available Clickable Promo Badges */}
+                  <div className="pt-1 flex flex-wrap gap-1.5">
+                    {AVAILABLE_COUPONS.slice(0, 3).map((cp) => (
+                      <button
+                        key={cp.code}
+                        type="button"
+                        onClick={() => handleApplyCoupon(cp.code)}
+                        className={`px-2 py-0.5 rounded-lg text-[10px] font-mono font-semibold transition-all cursor-pointer border ${
+                          appliedCoupon?.code === cp.code
+                            ? 'bg-[#C8A46A] text-[#1B1A17] border-[#C8A46A] shadow-xs'
+                            : 'bg-[#F8F3EB] text-[#5E584F] border-[#EADFCF] hover:bg-[#F2EBE2] hover:text-[#1B1A17]'
+                        }`}
+                      >
+                        {cp.code} ({cp.type === 'PERCENTAGE' ? `${cp.value}%` : `$${cp.value}`})
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </>
             )}
           </div>
@@ -224,6 +302,28 @@ export default function CartDrawer() {
                   <span>Bag Subtotal</span>
                   <span className="font-medium text-[#1B1A17]">${cartSubtotal.toFixed(2)}</span>
                 </div>
+
+                {/* Applied Discount Line */}
+                {appliedCoupon && couponDiscount > 0 && (
+                  <div className="flex justify-between text-[#7D9075] font-semibold">
+                    <span className="flex items-center space-x-1">
+                      <Tag className="w-3.5 h-3.5 text-[#C8A46A]" />
+                      <span>Privilege ({appliedCoupon.code})</span>
+                    </span>
+                    <div className="flex items-center space-x-1.5">
+                      <span>-${couponDiscount.toFixed(2)}</span>
+                      <button
+                        type="button"
+                        onClick={removeCoupon}
+                        title="Remove coupon"
+                        className="text-[#8E857A] hover:text-[#A8381D] p-0.5 cursor-pointer"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 {isGiftWrap && (
                   <div className="flex justify-between text-[#C8A46A]">
                     <span>Signature Gift Packaging</span>

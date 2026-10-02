@@ -7,6 +7,7 @@ import Navbar from '@/components/Navbar';
 import CartDrawer from '@/components/CartDrawer';
 import SearchModal from '@/components/SearchModal';
 import QuickViewModal from '@/components/QuickViewModal';
+import AuthModal from '@/components/AuthModal';
 import MobileBottomNav from '@/components/MobileBottomNav';
 import Footer from '@/components/Footer';
 
@@ -60,6 +61,7 @@ export default function RootLayout({
             <CartDrawer />
             <SearchModal />
             <QuickViewModal />
+            <AuthModal />
           </SmoothScroll>
         </StoreProvider>
       </body>
