@@ -253,8 +253,25 @@ graph TD
 
 ## 4. Verification Status & Test Suite Summary
 
-- **Backend Automated Tests:** 60 passed, 0 failures, 0 errors, 0 skipped across all 15 implementation phases
+- **Backend Unit & Integration Tests (JUnit 5 / Mockito):** 60 passed, 0 failures, 0 errors, 0 skipped across all 15 implementation phases (`mvn test` -> `BUILD SUCCESS`)
+- **Backend End-to-End Postman / Newman Test Suite:** 41/41 requests executed, 68/68 assertions passed (0 failed, 0 errored) across all 15 phases against live Spring Boot local server
+  - Phase 01: Baseline & OpenAPI Docs (Health check, OpenAPI schema title)
+  - Phase 02: Auth & Accounts (Customer registration, Admin login, Profile, Saved addresses)
+  - Phase 03: Catalog & Variants (Admin category creation, Product creation, Variant creation, Stock restock, Public catalog)
+  - Phase 04: Search & Multi-Facet Filtering (Keyword search, Dynamic category & price range filtering)
+  - Phase 05: Wishlist & Cart (Add wishlist item, Retrieve wishlist, Add cart item with subtotal calculation)
+  - Phase 06: Coupon Promotional Engine (Admin 20% coupon creation, Apply coupon with 20% cart discount calculation)
+  - Phase 07: Checkout & Shipping Quotes (Calculate shipping quote with free shipping threshold, Place customer order)
+  - Phase 08: Payments & State Machine (Initiate payment, Complete sandbox demo payment, Assert order transitioned to CONFIRMED)
+  - Phase 09: Shipping & Tracking (Admin create BlueDart shipment, Public tracking timeline lookup, Add DELIVERED milestone event)
+  - Phase 10: Returns & Refunds (Customer return request within 7-day window, Admin inspect & approve return, Process financial refund)
+  - Phase 11: Reviews, CMS & Blog (Customer review submission with PENDING status, Admin approve review, Create CMS hero banner, Create editorial blog post)
+  - Phase 12: Notifications, Analytics & Audit (Send telemetry analytics event, Admin analytics overview revenue calculations, View audit logs)
+  - Phase 13: Hardening & IDOR Defense (Verify unauthorized access to admin endpoints blocked with 401/403)
+  - Phase 14: AI Shopping Concierge (Haute skin diagnostic quiz consultation with 15% bundled benefit, Beauty advisor interactive chat)
+  - Phase 15: Live Webhook Ingestion (Razorpay payment.captured webhook, Shiprocket carrier milestone webhook)
 - **Backend Build:** Clean Maven compilation (`BUILD SUCCESS`)
 - **Frontend Build:** Clean Next.js 15 production build (`13/13 static pages generated successfully`, 0 TypeScript/Lint errors)
 - **Live Vercel Deployment:** [https://elanor-eta.vercel.app](https://elanor-eta.vercel.app)
 - **Git Tree:** 100% Clean on `main`
+

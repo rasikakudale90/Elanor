@@ -1,0 +1,1145 @@
+{
+  "info": {
+    "_postman_id": "elanor-backend-e2e-all-15-phases-perfect",
+    "name": "Élanor Luxury Skincare — Complete Backend E2E Test Suite (All 15 Phases)",
+    "description": "Comprehensive End-to-End Postman Collection validating all 15 implementation phases of the Élanor B2C E-Commerce Backend.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01. Baseline & Docs",
+      "item": [
+        {
+          "name": "01.1 Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/health"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Platform status is UP', function () { pm.expect(jsonData.data.status).to.eql('UP'); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "01.2 OpenAPI Specification Docs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api-docs"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('OpenAPI Title exists', function () { pm.expect(jsonData.info.title).to.include('Élanor'); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02. Auth & Accounts",
+      "item": [
+        {
+          "name": "02.1 Register New Customer",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Genevieve\",\n  \"lastName\": \"Moreau\",\n  \"email\": \"customer_{{$randomUUID}}@elanor.com\",\n  \"phone\": \"98{{$randomInt}}99\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/register"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 or 201', function () { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Access token returned', function () { pm.expect(jsonData.data.accessToken).to.not.be.empty; });",
+                  "pm.environment.set('customerToken', jsonData.data.accessToken);",
+                  "pm.environment.set('customerUserId', jsonData.data.userId);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "02.2 Admin Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@elanor.com\",\n  \"password\": \"AdminPass123!\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/login"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Admin token returned', function () { pm.expect(jsonData.data.accessToken).to.not.be.empty; });",
+                  "pm.environment.set('adminToken', jsonData.data.accessToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "02.3 Get Customer Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/customers/me"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Profile name is Genevieve', function () { pm.expect(jsonData.data.firstName).to.eql('Genevieve'); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "02.4 Add Delivery Address",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Genevieve Moreau\",\n  \"phone\": \"9876543210\",\n  \"addressLine1\": \"Villa 42, Haute Botanique Avenue\",\n  \"addressLine2\": \"Suite 101\",\n  \"city\": \"Mumbai\",\n  \"state\": \"Maharashtra\",\n  \"postalCode\": \"400001\",\n  \"country\": \"India\",\n  \"isDefault\": true\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/customers/me/addresses"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 or 201', function () { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.environment.set('addressId', jsonData.data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03. Catalog & Variants",
+      "item": [
+        {
+          "name": "03.1 Admin Create Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Cellular Elixirs {{$randomInt}}\",\n  \"slug\": \"cellular-elixirs-{{$randomUUID}}\",\n  \"description\": \"Precious bio-active longevity serums\",\n  \"displayOrder\": 1,\n  \"isActive\": true\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/admin/categories"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 or 201', function () { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.environment.set('categoryId', jsonData.data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "03.2 Admin Create Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Cellular Youth Serum\",\n  \"shortDescription\": \"Concentré Botanique Régénérant\",\n  \"description\": \"High potency alpine stem cell serum for mitochondrial longevity.\",\n  \"slug\": \"cellular-youth-serum-{{$randomUUID}}\",\n  \"basePrice\": 4500.00,\n  \"categoryId\": \"{{categoryId}}\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/admin/products"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 or 201', function () { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.environment.set('productId', jsonData.data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "03.3 Admin Create Product Variant",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sku\": \"SERUM-50ML-{{$randomInt}}\",\n  \"name\": \"50ml Luxury Flacon\",\n  \"price\": 4500.00,\n  \"compareAtPrice\": 5200.00,\n  \"attributesJson\": \"{\\\"volume\\\": \\\"50ml\\\"}\",\n  \"active\": true\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/admin/products/{{productId}}/variants"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 or 201', function () { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.environment.set('variantId', jsonData.data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "03.4 Admin Restock Variant Inventory",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"movementType\": \"RESTOCK\",\n  \"quantity\": 100,\n  \"reason\": \"Initial warehouse restocking\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/admin/inventory/{{variantId}}/adjust"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Available stock is 100', function () { pm.expect(jsonData.data.available).to.eql(100); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "03.5 Public Get Products Catalog",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/products"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Products array returned', function () { pm.expect(jsonData.data.content).to.be.an('array'); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04. Search & Multi-Facet Filtering",
+      "item": [
+        {
+          "name": "04.1 Search by Keyword",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/search?q=Cellular"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Search results present', function () { pm.expect(jsonData.data.content).to.not.be.empty; });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "04.2 Filter by Category & Price Range",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/search?categoryId={{categoryId}}&minPrice=1000&maxPrice=10000"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.expect([200, 201]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05. Wishlist & Cart",
+      "item": [
+        {
+          "name": "05.1 Add Item to Wishlist",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"variantId\": \"{{variantId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/wishlist/items"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.expect([200, 201]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "05.2 Get Customer Wishlist",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/wishlist"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Wishlist contains items', function () { pm.expect(jsonData.data.items).to.not.be.empty; });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "05.3 Add Item to Cart",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"variantId\": \"{{variantId}}\",\n  \"quantity\": 2\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/cart/items"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Subtotal is 9000', function () { pm.expect(jsonData.data.subtotal).to.eql(9000.00); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "06. Coupon Promotional Engine",
+      "item": [
+        {
+          "name": "06.1 Admin Create 20% Coupon",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"HAUTE20-{{$randomInt}}\",\n  \"description\": \"20% Off Haute Botanical Rituals\",\n  \"discountType\": \"PERCENTAGE\",\n  \"discountValue\": 20.00,\n  \"minOrderAmount\": 2000.00,\n  \"maxDiscountAmount\": 3000.00,\n  \"startDate\": \"2026-01-01T00:00:00Z\",\n  \"endDate\": \"2026-12-31T23:59:59Z\",\n  \"usageLimit\": 500,\n  \"isActive\": true\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/admin/coupons"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 or 201', function () { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.environment.set('couponCode', jsonData.data.code);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "06.2 Apply Coupon to Cart",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"couponCode\": \"{{couponCode}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/cart/coupon"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Discount is 1800 (20% of 9000)', function () { pm.expect(jsonData.data.discount).to.eql(1800.00); });",
+                  "pm.test('Total is 7200', function () { pm.expect(jsonData.data.total).to.eql(7200.00); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "07. Checkout & Shipping Quotes",
+      "item": [
+        {
+          "name": "07.1 Calculate Shipping Quote",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"addressId\": \"{{addressId}}\",\n  \"postalCode\": \"400001\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/checkout/quote"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Free shipping unlocked above threshold', function () { pm.expect(jsonData.data.eligibleForFreeShipping).to.eql(true); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "07.2 Place Customer Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"addressId\": \"{{addressId}}\",\n  \"notes\": \"Leave at doorstep in velvet packaging\",\n  \"paymentMethod\": \"DEMO_ONLINE\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/checkout/order"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 or 201', function () { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.environment.set('orderId', jsonData.data.order.id);",
+                  "pm.environment.set('orderNumber', jsonData.data.order.orderNumber);",
+                  "if (jsonData.data.order.items && jsonData.data.order.items.length > 0) { pm.environment.set('orderItemId', jsonData.data.order.items[0].id); }",
+                  "pm.test('Order status is CREATED', function () { pm.expect(jsonData.data.order.status).to.eql('CREATED'); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "08. Payments & State Transitions",
+      "item": [
+        {
+          "name": "08.1 Initiate Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"{{orderId}}\",\n  \"paymentMethod\": \"DEMO_ONLINE\",\n  \"provider\": \"DEMO\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/payments/initiate"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.environment.set('paymentId', jsonData.data.id);",
+                  "pm.environment.set('transactionRef', jsonData.data.transactionRef);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "08.2 Complete Demo Payment (Simulate Success)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"success\": true\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/payments/{{paymentId}}/demo-result"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Payment status SUCCESSFUL', function () { pm.expect(jsonData.data.status).to.eql('SUCCESSFUL'); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "08.3 Get Order (Assert CONFIRMED)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/orders/{{orderId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Order transitioned to CONFIRMED', function () { pm.expect(jsonData.data.status).to.eql('CONFIRMED'); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "09. Shipping & Tracking",
+      "item": [
+        {
+          "name": "09.1 Admin Create Shipment",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"{{orderId}}\",\n  \"provider\": \"MANUAL\",\n  \"carrierName\": \"BlueDart Express\",\n  \"trackingNumber\": \"ELN-TRK-{{$randomInt}}\",\n  \"initialLocation\": \"Central Apothecary Fulfilment Hub\",\n  \"initialDescription\": \"Handcrafted elixir packaged and dispatched\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/admin/shipments"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 or 201', function () { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.environment.set('shipmentId', jsonData.data.id);",
+                  "pm.environment.set('trackingNumber', jsonData.data.trackingNumber);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "09.2 Public Milestone Tracking Lookup",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/shipments/track/{{trackingNumber}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Tracking timeline returned', function () { pm.expect(jsonData.data.events).to.be.an('array'); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "09.3 Add DELIVERED Milestone Event",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"DELIVERED\",\n  \"location\": \"Customer Residence, Mumbai\",\n  \"description\": \"Package personally delivered and signed\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/admin/shipments/{{shipmentId}}/events"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.expect([200, 201]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "10. Returns & Refunds",
+      "item": [
+        {
+          "name": "10.1 Customer Request Return (Within 7-Day Window)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"{{orderId}}\",\n  \"reason\": \"Defective seal on dropper\",\n  \"comments\": \"Cap seal was slightly loose on delivery\",\n  \"isReplacement\": false,\n  \"items\": [\n    {\n      \"orderItemId\": \"{{orderItemId}}\",\n      \"quantity\": 1,\n      \"conditionNote\": \"Unused with defect\"\n    }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/returns"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 or 201', function () { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.environment.set('returnId', jsonData.data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "10.2 Admin Inspect & Approve Return",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"APPROVED\",\n  \"adminNotes\": \"Approved for refund. Product verified in laboratory.\",\n  \"restock\": true\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/admin/returns/{{returnId}}/status"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.expect([200, 201]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "10.3 Admin Process Refund",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"{{orderId}}\",\n  \"amount\": 3600.00,\n  \"reason\": \"Refund for approved return #{{returnId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/admin/refunds"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 or 201', function () { pm.expect([200, 201]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "11. Reviews, CMS & Blog",
+      "item": [
+        {
+          "name": "11.1 Customer Submit Product Review",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{customerToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerName\": \"Genevieve Moreau\",\n  \"rating\": 5,\n  \"title\": \"Miraculous Cellular Longevity\",\n  \"comment\": \"Skin density visibly improved within 7 days of ritual use.\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/products/{{productId}}/reviews"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 or 201', function () { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.environment.set('reviewId', jsonData.data.id);",
+                  "pm.test('Initial status is PENDING', function () { pm.expect(jsonData.data.status).to.eql('PENDING'); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "11.2 Admin Moderate & Approve Review",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"APPROVED\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/admin/reviews/{{reviewId}}/status"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.expect([200, 201]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "11.3 Admin Create CMS Hero Banner",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Pure Beauty. Naturally.\",\n  \"subtitle\": \"Haute Botanique Formulations\",\n  \"imageUrl\": \"/images/hero/skin9.png\",\n  \"linkUrl\": \"/ai-skin-concierge\",\n  \"buttonText\": \"Consult AI Concierge\",\n  \"placement\": \"HOME_HERO\",\n  \"displayOrder\": 1,\n  \"isActive\": true\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/admin/cms/banners"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 or 201', function () { pm.expect([200, 201]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "11.4 Admin Create Editorial Blog Post",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"The Science of Alpine Stem Cells\",\n  \"slug\": \"science-alpine-stem-cells-{{$randomUUID}}\",\n  \"excerpt\": \"How cellular longevity research is transforming clean skincare.\",\n  \"content\": \"# Cellular Longevity\\nRare alpine edelweiss stem cells exhibit unparalleled mitochondrial resilience...\",\n  \"authorName\": \"Dr. Marianne Laurent\",\n  \"coverImageUrl\": \"/images/blog/alpine.jpg\",\n  \"status\": \"PUBLISHED\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/admin/blog/posts"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 or 201', function () { pm.expect([200, 201]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "12. Notifications, Analytics & Audit",
+      "item": [
+        {
+          "name": "12.1 Send Telemetry Analytics Event",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventType\": \"VIEW_PRODUCT\",\n  \"category\": \"CATALOG\",\n  \"action\": \"PRODUCT_CLICK\",\n  \"entityId\": \"{{productId}}\",\n  \"entityType\": \"PRODUCT\",\n  \"sessionId\": \"sess-{{$randomUUID}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/analytics/events"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.expect([200, 201]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "12.2 Admin Analytics Overview",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/admin/analytics/overview"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Total revenue calculated', function () { pm.expect(jsonData.data.totalRevenue).to.exist; });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "12.3 Admin View Audit Logs",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/v1/admin/audit-logs"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Audit logs array returned', function () { pm.expect(jsonData.data.content).to.be.an('array'); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "13. Hardening & IDOR Defense",
+      "item": [
+        {
+          "name": "13.1 Verify Unauthorized Access Blocked",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/admin/analytics/overview"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 401 or 403', function () { pm.expect([401, 403]).to.include(pm.response.code); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "14. AI Shopping Concierge",
+      "item": [
+        {
+          "name": "14.1 Haute Skin Diagnostic Quiz Consultation",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"skinType\": \"COMBINATION\",\n  \"primaryConcerns\": [\"HYDRATION\", \"FINE_LINES\"],\n  \"climate\": \"URBAN_POLLUTED\",\n  \"ritualDepth\": \"COMPLETE_CELLULAR_RITUAL\",\n  \"preferredTexture\": \"SILK_EMULSION\",\n  \"ageGroup\": 34\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/ai/consult"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Vitality scores calculated', function () { pm.expect(jsonData.data.vitalityScores.hydration).to.be.a('number'); });",
+                  "pm.test('Morning ritual steps returned', function () { pm.expect(jsonData.data.morningRitual).to.be.an('array'); });",
+                  "pm.test('15% bundled concierge benefit applied', function () { pm.expect(jsonData.data.bundledDiscountPercentage).to.eql(15.00); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "14.2 AI Concierge Beauty Advisor Chat",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"What formulation is recommended for deep hydration and barrier renewal?\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/ai/chat"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Formulation advice reply present', function () { pm.expect(jsonData.data.reply).to.not.be.empty; });",
+                  "pm.test('Suggested catalog products returned', function () { pm.expect(jsonData.data.suggestedProducts).to.be.an('array'); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "15. Live Webhook Ingestion",
+      "item": [
+        {
+          "name": "15.1 Razorpay Webhook Ingestion",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"entity\": \"event\",\n  \"event\": \"payment.captured\",\n  \"payload\": {\n    \"payment\": {\n      \"entity\": {\n        \"id\": \"pay_test_998877\",\n        \"order_id\": \"order_test_998877\",\n        \"amount\": 450000,\n        \"currency\": \"INR\",\n        \"status\": \"captured\"\n      }\n    }\n  }\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/webhooks/razorpay"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Webhook received', function () { pm.expect(jsonData.data.received).to.eql(true); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "15.2 Shiprocket Webhook Ingestion",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"awb\": \"{{trackingNumber}}\",\n  \"current_status\": \"DELIVERED\",\n  \"location\": \"Mumbai Residence\",\n  \"activity\": \"Delivered by BlueDart partner\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/webhooks/shiprocket"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', function () { pm.expect([200, 201]).to.include(pm.response.code); });",
+                  "var jsonData = pm.response.json();",
+                  "pm.test('Webhook processed', function () { pm.expect(jsonData.data.received).to.eql(true); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
