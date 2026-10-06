@@ -333,8 +333,23 @@ graph TD
 - [x] **Zero-Error Production Build**:
   - All 14 static and dynamic routes compiled cleanly (`14/14 static pages generated successfully`).
 - [x] **Live Vercel Deployment**: [https://elanor-spendora2.vercel.app](https://elanor-spendora2.vercel.app)
-- [x] **Git Repository**: Clean, synchronized branch `main` (commit `ba29409`) on [https://github.com/rasikakudale90/Elanor](https://github.com/rasikakudale90/Elanor)
+- [x] **Git Repository**: Clean, synchronized branch `main` on [https://github.com/rasikakudale90/Elanor](https://github.com/rasikakudale90/Elanor)
 
+---
 
-
-
+### ✅ Razorpay Free-Tier Sandbox Payment Gateway (`app/checkout/page.tsx`)
+- [x] **SDK Loading & Dynamic Initialization**:
+  - Embedded `https://checkout.razorpay.com/v1/checkout.js` with Next.js Script strategy.
+  - Dynamically initializes Razorpay standard modal with custom Obsidian `#1B1A17` aesthetic and Élanor brand imagery.
+- [x] **Multi-Mode Payment Selector**:
+  - **Razorpay Live Sandbox**: Full checkout with Card, UPI (`success@razorpay`), Netbanking, and Wallets.
+  - **Maison Vault Instant Demo**: One-click internal testing authorization.
+  - **Cash on Delivery (COD)**: Physical payment upon delivery.
+- [x] **Free-Tier Test Instrument Assistant**:
+  - One-click copy buttons for test card numbers (`4111 1111 1111 1111`) and auto-approved test UPI ID (`success@razorpay`).
+  - Real-time USD to INR subunit currency calculation for gateway compliance.
+- [x] **End-to-End Verification & Order Settlement**:
+  - Captures `razorpay_payment_id` and signatures upon successful customer authorization.
+  - Transitions order to `CONFIRMED` with exact gateway reference ID displayed on the luxury confirmation screen.
+  - Generates `.env.example` documenting public and server sandbox keys.
+- [x] **Zero Build Errors**: 14/14 static pages generated cleanly (`npm run build` -> Exit code 0).
