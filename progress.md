@@ -352,4 +352,16 @@ graph TD
   - Captures `razorpay_payment_id` and signatures upon successful customer authorization.
   - Transitions order to `CONFIRMED` with exact gateway reference ID displayed on the luxury confirmation screen.
   - Generates `.env.example` documenting public and server sandbox keys.
-- [x] **Zero Build Errors**: 14/14 static pages generated cleanly (`npm run build` -> Exit code 0).
+- [x] **Zero Build Errors**: 16/16 static pages generated cleanly (`npm run build` -> Exit code 0).
+
+---
+
+### ✅ Free-Tier Logistics & Live Tracking Portal (`app/track/page.tsx`, `app/orders/page.tsx`)
+- [x] **Universal Sacred Dispatch Tracker**:
+  - Searchable by Order ID (`ELN-2026-XXXX`) or Shiprocket / BlueDart AWB (`SR-BD-XXXXXX`).
+  - Interactive 5-stage milestone timeline (*Wax Sealed → Dispatched from Atelier → Regional Transit Terminal → Dedicated Courier Concierge → Signed & Delivered*).
+  - Built-in BlueDart Express via Shiprocket partner badges, copyable AWB, and package contents breakdown.
+- [x] **Customer Sanctuary & Checkout Integration**:
+  - Direct 1-click **"Track Sacred Dispatch"** button on Order Confirmation screen.
+  - Linked to Customer Sanctuary Modal and global Footer navigation.
+

@@ -170,6 +170,7 @@ export default function Footer() {
               <li><Link href="/compare" className="hover:text-[#C8A46A] transition-colors">Formula Comparator</Link></li>
               <li><Link href="/brands" className="hover:text-[#C8A46A] transition-colors">Maison Philosophy</Link></li>
               <li><Link href="/ai-skin-concierge" className="hover:text-[#C8A46A] transition-colors">Haute AI Skin Concierge</Link></li>
+              <li><Link href="/track" className="hover:text-[#C8A46A] transition-colors">Track Ritual Dispatch</Link></li>
             </ul>
           </div>
         </div>

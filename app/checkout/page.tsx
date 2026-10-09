@@ -279,10 +279,17 @@ export default function CheckoutPage() {
               )}
             </div>
 
-            <div className="pt-2">
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Link
+                href={`/track?number=${orderId}`}
+                className="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-8 py-4 bg-[#C8A46A] text-[#1B1A17] rounded-full text-xs uppercase tracking-widest font-semibold hover:bg-[#E4C894] transition-all shadow-md cursor-pointer"
+              >
+                <Truck className="w-4 h-4" />
+                <span>Track Sacred Dispatch</span>
+              </Link>
               <Link
                 href="/shop"
-                className="inline-flex items-center space-x-2 px-8 py-4 bg-[#1B1A17] text-[#FFFDF9] rounded-full text-xs uppercase tracking-widest font-semibold hover:bg-[#322F2A] transition-all shadow-md"
+                className="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-8 py-4 bg-[#1B1A17] text-[#FFFDF9] rounded-full text-xs uppercase tracking-widest font-semibold hover:bg-[#322F2A] transition-all shadow-md cursor-pointer"
               >
                 <span>Return To Maison Élanor</span>
                 <ArrowRight className="w-4 h-4" />
