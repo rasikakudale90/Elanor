@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useStore } from '@/context/StoreContext';
 import { CONCERNS } from '@/data/products';
-import { Search, ShoppingBag, Heart, Sparkles, SlidersHorizontal, Menu, X, User } from 'lucide-react';
+import { Search, ShoppingBag, Heart, Sparkles, SlidersHorizontal, Menu, X, User, Truck } from 'lucide-react';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -33,7 +33,12 @@ export default function Navbar() {
       {/* Top Banner */}
       <div className="bg-[#1B1A17] text-[#FDFBF8] text-xs tracking-widest uppercase py-2 px-4 text-center font-medium flex items-center justify-center space-x-3 z-50 relative">
         <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#C8A46A] animate-pulse"></span>
-        <span>Complimentary Bespoke Discovery Sample & Gold Gift Packaging on Orders Over $200</span>
+        <span>Complimentary Discovery Sample on Orders Over $200</span>
+        <span className="hidden sm:inline">•</span>
+        <Link href="/track" className="hidden sm:inline-flex items-center space-x-1 text-[#C8A46A] hover:text-[#E4C894] transition-colors font-semibold">
+          <Truck className="w-3.5 h-3.5" />
+          <span>Track Order</span>
+        </Link>
         <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#C8A46A] animate-pulse"></span>
       </div>
 
@@ -220,6 +225,16 @@ export default function Navbar() {
               )}
             </button>
 
+            {/* Track Order Trigger (For Guests & Patrons) */}
+            <Link
+              href="/track"
+              aria-label="Track Order"
+              className="p-1.5 hover:text-[#C8A46A] transition-colors duration-200 flex items-center space-x-1 text-[#1B1A17]"
+            >
+              <Truck className="w-4 h-4 text-[#C8A46A]" strokeWidth={1.75} />
+              <span className="hidden xl:inline text-xs text-[#5E584F] hover:text-[#1B1A17] font-medium tracking-wide">Track Order</span>
+            </Link>
+
             {/* Wishlist Link */}
             <Link
               href="/wishlist"
@@ -263,6 +278,18 @@ export default function Navbar() {
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
           <div className="lg:hidden bg-[#F8F3EB] border-b border-[#E2D4C3] px-6 py-6 space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
+            {/* Direct Mobile Guest Track Button */}
+            <Link
+              href="/track"
+              className="p-3.5 rounded-2xl bg-[#1B1A17] text-[#FFFDF9] flex items-center justify-between shadow-sm"
+            >
+              <div className="flex items-center space-x-2.5">
+                <Truck className="w-4 h-4 text-[#C8A46A]" />
+                <span className="text-xs font-semibold tracking-wide">Track Order & Dispatch (Guest / VIP)</span>
+              </div>
+              <span className="text-[10px] text-[#C8A46A] uppercase font-bold tracking-wider">Live</span>
+            </Link>
+
             <Link
               href="/shop"
               className="block text-base font-medium text-[#1B1A17] py-2 border-b border-[#EAE1D3]"

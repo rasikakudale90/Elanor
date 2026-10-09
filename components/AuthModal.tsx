@@ -450,6 +450,27 @@ export default function AuthModal() {
                 </button>
               </div>
             </div>
+
+            {/* Dedicated Guest Tracking Gateway */}
+            <div className="p-3.5 rounded-2xl bg-[#F8F3EB] border border-[#E4C894]/60 flex items-center justify-between text-xs">
+              <div className="space-y-0.5 pr-2">
+                <p className="font-semibold text-[#1B1A17] flex items-center space-x-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#C8A46A]" />
+                  <span>Track Guest Order</span>
+                </p>
+                <p className="text-[11px] text-[#8E857A]">
+                  No login required. View live BlueDart shipment telemetry.
+                </p>
+              </div>
+              <Link
+                href="/track"
+                onClick={() => setIsAuthOpen(false)}
+                className="px-3 py-1.5 bg-[#1B1A17] text-[#FFFDF9] text-[11px] font-semibold rounded-full hover:bg-[#322F2A] transition-colors shrink-0 flex items-center space-x-1"
+              >
+                <span>Track Now</span>
+                <ArrowRight className="w-3 h-3" />
+              </Link>
+            </div>
           </div>
         )}
       </div>

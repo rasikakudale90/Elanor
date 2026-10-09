@@ -2,9 +2,28 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
-import { Truck, Search, CheckCircle2, Clock, MapPin, Package, ShieldCheck, Sparkles, ArrowLeft, ArrowRight, ExternalLink, Copy, Check, RefreshCw, X } from 'lucide-react';
+import {
+  Truck,
+  Search,
+  CheckCircle2,
+  Clock,
+  MapPin,
+  Package,
+  ShieldCheck,
+  Sparkles,
+  ArrowLeft,
+  ArrowRight,
+  Copy,
+  Check,
+  RefreshCw,
+  X,
+  Mail,
+  Phone,
+  HelpCircle,
+  RotateCcw,
+  CheckCheck
+} from 'lucide-react';
 
 interface TrackingMilestone {
   stage: string;
@@ -34,12 +53,33 @@ function TrackingContent() {
   const searchParams = useSearchParams();
   const urlParam = searchParams.get('number') || searchParams.get('tracking') || searchParams.get('id') || '';
 
+  const [searchTab, setSearchTab] = useState<'ID' | 'CONTACT'>('ID');
   const [query, setQuery] = useState(urlParam || 'ELN-2026-7842');
+  const [contactQuery, setContactQuery] = useState('');
   const [currentTrackingId, setCurrentTrackingId] = useState(urlParam || 'ELN-2026-7842');
   const [isScanning, setIsScanning] = useState(false);
   const [copied, setCopied] = useState(false);
   const [orderData, setOrderData] = useState<OrderRecord | null>(null);
+  const [recentGuestOrders, setRecentGuestOrders] = useState<OrderRecord[]>([]);
   const [feedbackMsg, setFeedbackMsg] = useState<string | null>(null);
+  const [activePolicyTab, setActivePolicyTab] = useState<'SHIPPING' | 'PACKAGING' | 'TIMELINE' | 'RETURNS'>('SHIPPING');
+
+  // Load all local guest orders on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const raw = localStorage.getItem('elanor_orders');
+        if (raw) {
+          const orders: OrderRecord[] = JSON.parse(raw);
+          if (Array.isArray(orders)) {
+            setRecentGuestOrders(orders);
+          }
+        }
+      } catch (err) {
+        console.warn('Could not read guest orders from localStorage', err);
+      }
+    }
+  }, []);
 
   // Core lookup logic
   const performLookup = (idToSearch: string) => {
@@ -58,12 +98,13 @@ function TrackingContent() {
           if (raw) {
             const orders: OrderRecord[] = JSON.parse(raw);
             if (Array.isArray(orders)) {
-              matchedOrder = orders.find(
-                (o) =>
-                  o.orderNumber?.toLowerCase() === cleanId.toLowerCase() ||
-                  o.id?.toLowerCase() === cleanId.toLowerCase() ||
-                  (o.transactionRef && o.transactionRef.toLowerCase() === cleanId.toLowerCase())
-              ) || null;
+              matchedOrder =
+                orders.find(
+                  (o) =>
+                    o.orderNumber?.toLowerCase() === cleanId.toLowerCase() ||
+                    o.id?.toLowerCase() === cleanId.toLowerCase() ||
+                    (o.transactionRef && o.transactionRef.toLowerCase() === cleanId.toLowerCase())
+                ) || null;
             }
           }
         } catch (err) {
@@ -73,17 +114,17 @@ function TrackingContent() {
 
       if (matchedOrder) {
         setOrderData(matchedOrder);
-        setFeedbackMsg(`✓ Verified order #${matchedOrder.orderNumber} in Atelier records`);
+        setFeedbackMsg(`✓ Verified order #${matchedOrder.orderNumber} for ${matchedOrder.customerName}`);
       } else {
         // Dynamic simulated manifest for searched identifier
         const isBlueDart = cleanId.toUpperCase().includes('BD') || cleanId.toUpperCase().includes('SR');
         setOrderData({
           id: `ord-${cleanId.toLowerCase()}`,
           orderNumber: cleanId.toUpperCase(),
-          customerName: 'Valued VIP Patron',
-          customerEmail: 'patron.sanctuary@elanor.com',
+          customerName: 'Valued Guest Patron',
+          customerEmail: 'patron.guest@maison-elanor.com',
           date: 'Today, 09:30 AM',
-          total: 395.00,
+          total: 395.0,
           status: 'IN_TRANSIT',
           paymentMethod: 'RAZORPAY',
           transactionRef: `pay_${cleanId.replace(/[^a-zA-Z0-9]/g, '').slice(0, 10) || 'live98421'}`,
@@ -97,6 +138,61 @@ function TrackingContent() {
         setFeedbackMsg(`✓ Active BlueDart/Shiprocket airfreight manifest connected`);
       }
 
+      setIsScanning(false);
+      setTimeout(() => setFeedbackMsg(null), 4000);
+    }, 400);
+  };
+
+  const handleContactLookup = (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanContact = contactQuery.trim().toLowerCase();
+    if (!cleanContact) return;
+
+    setIsScanning(true);
+    setTimeout(() => {
+      let matchedOrder: OrderRecord | null = null;
+      if (typeof window !== 'undefined') {
+        try {
+          const raw = localStorage.getItem('elanor_orders');
+          if (raw) {
+            const orders: OrderRecord[] = JSON.parse(raw);
+            if (Array.isArray(orders)) {
+              matchedOrder =
+                orders.find(
+                  (o) =>
+                    o.customerEmail?.toLowerCase().includes(cleanContact) ||
+                    o.customerName?.toLowerCase().includes(cleanContact)
+                ) || null;
+            }
+          }
+        } catch (err) {
+          console.warn('Could not parse orders storage', err);
+        }
+      }
+
+      if (matchedOrder) {
+        setOrderData(matchedOrder);
+        setCurrentTrackingId(matchedOrder.orderNumber);
+        setFeedbackMsg(`✓ Found guest order #${matchedOrder.orderNumber} linked to ${contactQuery}`);
+      } else {
+        const demoNumber = `ELN-GST-${Math.floor(1000 + Math.random() * 9000)}`;
+        setCurrentTrackingId(demoNumber);
+        setOrderData({
+          id: `ord-${demoNumber.toLowerCase()}`,
+          orderNumber: demoNumber,
+          customerName: contactQuery.includes('@') ? contactQuery.split('@')[0] : 'Guest Patron',
+          customerEmail: contactQuery.includes('@') ? contactQuery : `${contactQuery}@guest.maison-elanor.com`,
+          date: 'Yesterday, 04:15 PM',
+          total: 285.0,
+          status: 'IN_TRANSIT',
+          paymentMethod: 'RAZORPAY',
+          transactionRef: `pay_gst_${Date.now().toString().slice(-6)}`,
+          itemsCount: 1,
+          items: [{ name: 'Élixir Nocturne Régénérant aux 18 Rameaux', quantity: 1, price: 285 }],
+          address: 'Sanctuary Destination, Registered Guest Address',
+        });
+        setFeedbackMsg(`✓ Linked guest parcel retrieved for ${contactQuery}`);
+      }
       setIsScanning(false);
       setTimeout(() => setFeedbackMsg(null), 4000);
     }, 450);
@@ -130,9 +226,10 @@ function TrackingContent() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const awbNumber = currentTrackingId.toUpperCase().startsWith('SR-') || currentTrackingId.toUpperCase().startsWith('BD-')
-    ? currentTrackingId.toUpperCase()
-    : `SR-BD-${currentTrackingId.replace(/[^0-9]/g, '') || '948201'}`;
+  const awbNumber =
+    currentTrackingId.toUpperCase().startsWith('SR-') || currentTrackingId.toUpperCase().startsWith('BD-')
+      ? currentTrackingId.toUpperCase()
+      : `SR-BD-${currentTrackingId.replace(/[^0-9]/g, '') || '948201'}`;
 
   const milestones: TrackingMilestone[] = [
     {
@@ -141,7 +238,7 @@ function TrackingContent() {
       timestamp: 'Today, 09:30 AM',
       completed: true,
       active: false,
-      description: 'Formulations bottled in Miron violet glass, sealed with signature gold wax crest.'
+      description: 'Formulations bottled in Miron violet glass, sealed with signature gold wax crest.',
     },
     {
       stage: '2. Dispatched via BlueDart Express (Shiprocket Partner)',
@@ -149,7 +246,7 @@ function TrackingContent() {
       timestamp: 'Today, 01:15 PM',
       completed: true,
       active: false,
-      description: 'Handed over to carrier. Carbon-neutral express airfreight manifest assigned.'
+      description: 'Handed over to carrier. Carbon-neutral express airfreight manifest assigned.',
     },
     {
       stage: '3. Regional Dermal Logistics Terminal',
@@ -157,7 +254,7 @@ function TrackingContent() {
       timestamp: 'In Transit • On Schedule',
       completed: false,
       active: true,
-      description: 'Temperature-monitored luxury parcel routing underway.'
+      description: 'Temperature-monitored luxury parcel routing underway.',
     },
     {
       stage: '4. Dedicated Courier Concierge',
@@ -165,7 +262,7 @@ function TrackingContent() {
       timestamp: 'Expected in 1-2 Days',
       completed: false,
       active: false,
-      description: 'Out for morning delivery with white-glove courier.'
+      description: 'Out for morning delivery with white-glove courier.',
     },
     {
       stage: '5. Signed & Delivered to Sanctuary',
@@ -173,8 +270,8 @@ function TrackingContent() {
       timestamp: 'Estimated Delivery: 2-3 Business Days',
       completed: false,
       active: false,
-      description: 'Delivered in pristine biophotonic presentation box.'
-    }
+      description: 'Delivered in pristine biophotonic presentation box.',
+    },
   ];
 
   return (
@@ -188,7 +285,7 @@ function TrackingContent() {
           </Link>
           <span className="uppercase tracking-widest text-[10px] text-[#C8A46A] font-semibold flex items-center space-x-1">
             <Sparkles className="w-3 h-3" />
-            <span>Carrier Logistics & Real-Time Telemetry</span>
+            <span>Guest Patron & Member Live Telemetry</span>
           </span>
         </div>
 
@@ -200,57 +297,121 @@ function TrackingContent() {
 
           <div className="space-y-2 max-w-xl mx-auto">
             <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8A46A] font-semibold">
-              Live Dispatch Status
+              Guest & Member Order Tracking
             </span>
             <h1 className="font-serif-luxury text-3xl sm:text-4xl text-[#1B1A17]">
-              Track Your Botanical Ritual
+              Track Your Sacred Dispatch
             </h1>
             <p className="text-xs text-[#5E584F] leading-relaxed">
-              Enter your Élanor Order Number (e.g. <code>ELN-2026-XXXX</code>) or Shiprocket / BlueDart AWB tracking number.
+              No login required. Track guest orders using your Order Number (<code>ELN-2026-XXXX</code>), BlueDart AWB code, or checkout contact details.
             </p>
           </div>
 
-          {/* Search Form */}
-          <form
-            onSubmit={handleSubmit}
-            className="max-w-lg mx-auto flex bg-[#FDFBF8] border border-[#DCCDBA] rounded-full p-1.5 focus-within:border-[#C8A46A] shadow-xs transition-all"
-          >
-            <div className="flex-1 flex items-center pl-4">
-              <input
-                type="text"
-                placeholder="Enter Order # (e.g. ELN-2026-7842) or AWB..."
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                className="w-full bg-transparent text-xs font-mono uppercase text-[#1B1A17] placeholder-[#8E857A] focus:outline-none"
-              />
-              {query && (
-                <button
-                  type="button"
-                  onClick={() => setQuery('')}
-                  className="p-1 text-[#8E857A] hover:text-[#1B1A17] mr-1"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
+          {/* Search Type Selector Tabs */}
+          <div className="inline-flex rounded-full bg-[#F2EBE2] p-1 text-xs font-medium max-w-xs mx-auto">
             <button
-              type="submit"
-              disabled={isScanning}
-              className="px-6 py-3 bg-[#1B1A17] text-[#FFFDF9] text-xs uppercase tracking-widest font-semibold rounded-full hover:bg-[#322F2A] transition-all flex items-center space-x-2 cursor-pointer disabled:opacity-60 shrink-0"
+              onClick={() => setSearchTab('ID')}
+              className={`px-5 py-1.5 rounded-full transition-all cursor-pointer ${
+                searchTab === 'ID' ? 'bg-[#1B1A17] text-[#FFFDF9] font-semibold shadow-xs' : 'text-[#5E584F]'
+              }`}
             >
-              {isScanning ? (
-                <>
-                  <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#C8A46A]" />
-                  <span>Scanning...</span>
-                </>
-              ) : (
-                <>
-                  <Search className="w-3.5 h-3.5" />
-                  <span>Track</span>
-                </>
-              )}
+              By Order # / AWB
             </button>
-          </form>
+            <button
+              onClick={() => setSearchTab('CONTACT')}
+              className={`px-5 py-1.5 rounded-full transition-all cursor-pointer ${
+                searchTab === 'CONTACT' ? 'bg-[#1B1A17] text-[#FFFDF9] font-semibold shadow-xs' : 'text-[#5E584F]'
+              }`}
+            >
+              By Guest Email / Phone
+            </button>
+          </div>
+
+          {/* Search Forms */}
+          {searchTab === 'ID' ? (
+            <form
+              onSubmit={handleSubmit}
+              className="max-w-lg mx-auto flex bg-[#FDFBF8] border border-[#DCCDBA] rounded-full p-1.5 focus-within:border-[#C8A46A] shadow-xs transition-all"
+            >
+              <div className="flex-1 flex items-center pl-4">
+                <input
+                  type="text"
+                  placeholder="Enter Order # (e.g. ELN-2026-7842) or AWB..."
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  className="w-full bg-transparent text-xs font-mono uppercase text-[#1B1A17] placeholder-[#8E857A] focus:outline-none"
+                />
+                {query && (
+                  <button
+                    type="button"
+                    onClick={() => setQuery('')}
+                    className="p-1 text-[#8E857A] hover:text-[#1B1A17] mr-1 cursor-pointer"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+              <button
+                type="submit"
+                disabled={isScanning}
+                className="px-6 py-3 bg-[#1B1A17] text-[#FFFDF9] text-xs uppercase tracking-widest font-semibold rounded-full hover:bg-[#322F2A] transition-all flex items-center space-x-2 cursor-pointer disabled:opacity-60 shrink-0"
+              >
+                {isScanning ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#C8A46A]" />
+                    <span>Scanning...</span>
+                  </>
+                ) : (
+                  <>
+                    <Search className="w-3.5 h-3.5" />
+                    <span>Track</span>
+                  </>
+                )}
+              </button>
+            </form>
+          ) : (
+            <form
+              onSubmit={handleContactLookup}
+              className="max-w-lg mx-auto flex bg-[#FDFBF8] border border-[#DCCDBA] rounded-full p-1.5 focus-within:border-[#C8A46A] shadow-xs transition-all"
+            >
+              <div className="flex-1 flex items-center pl-4">
+                <Mail className="w-4 h-4 text-[#8E857A] mr-2 shrink-0" />
+                <input
+                  type="text"
+                  placeholder="Enter guest email (e.g. patron@domain.com)..."
+                  value={contactQuery}
+                  onChange={(e) => setContactQuery(e.target.value)}
+                  className="w-full bg-transparent text-xs text-[#1B1A17] placeholder-[#8E857A] focus:outline-none"
+                />
+                {contactQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setContactQuery('')}
+                    className="p-1 text-[#8E857A] hover:text-[#1B1A17] mr-1 cursor-pointer"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+              <button
+                type="submit"
+                disabled={isScanning}
+                className="px-6 py-3 bg-[#1B1A17] text-[#FFFDF9] text-xs uppercase tracking-widest font-semibold rounded-full hover:bg-[#322F2A] transition-all flex items-center space-x-2 cursor-pointer disabled:opacity-60 shrink-0"
+              >
+                {isScanning ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#C8A46A]" />
+                    <span>Finding...</span>
+                  </>
+                ) : (
+                  <>
+                    <Search className="w-3.5 h-3.5" />
+                    <span>Find Order</span>
+                  </>
+                )}
+              </button>
+            </form>
+          )}
 
           {/* Feedback Toast */}
           {feedbackMsg && (
@@ -261,7 +422,7 @@ function TrackingContent() {
 
           {/* Quick Demo Fill Pills */}
           <div className="flex flex-wrap items-center justify-center gap-2 pt-1 text-[10px] text-[#8E857A]">
-            <span>Click Quick Track Demo:</span>
+            <span>Quick Sample Tracks:</span>
             <button
               type="button"
               onClick={() => handleQuickSelect('ELN-2026-7842')}
@@ -297,6 +458,64 @@ function TrackingContent() {
             </button>
           </div>
         </div>
+
+        {/* RECENT GUEST ORDERS DISCOVERED ON THIS DEVICE */}
+        {recentGuestOrders.length > 0 && (
+          <div className="bg-[#FFFDF9] rounded-3xl p-6 sm:p-8 border border-[#EFE3D3] shadow-card space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="space-y-0.5">
+                <span className="text-[10px] uppercase tracking-wider text-[#C8A46A] font-semibold">
+                  Saved on this Device
+                </span>
+                <h3 className="font-serif-luxury text-xl text-[#1B1A17]">
+                  Your Recent Guest Orders
+                </h3>
+              </div>
+              <p className="text-xs text-[#8E857A]">
+                {recentGuestOrders.length} order{recentGuestOrders.length > 1 ? 's' : ''} stored in local browser history
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
+              {recentGuestOrders.map((ord, idx) => (
+                <div
+                  key={idx}
+                  onClick={() => handleQuickSelect(ord.orderNumber)}
+                  className={`p-4 rounded-2xl border transition-all cursor-pointer space-y-3 hover:shadow-md ${
+                    currentTrackingId.toLowerCase() === ord.orderNumber.toLowerCase()
+                      ? 'bg-[#FAF5EC] border-[#C8A46A] ring-1 ring-[#C8A46A]'
+                      : 'bg-[#F8F3EB] border-[#EADFCF] hover:border-[#C8A46A]'
+                  }`}
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <span className="font-mono text-xs font-bold text-[#1B1A17]">#{ord.orderNumber}</span>
+                      <p className="text-[11px] text-[#8E857A]">{ord.date}</p>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-[#EEF2E8] text-[#55624E] border border-[#7D9075]/30">
+                      In Transit
+                    </span>
+                  </div>
+
+                  <div className="text-xs space-y-1">
+                    <p className="font-semibold text-[#1B1A17] truncate">{ord.customerName}</p>
+                    <p className="text-[#5E584F] text-[11px] truncate">
+                      {ord.items && ord.items.length > 0 ? `${ord.items[0].name} ${ord.items.length > 1 ? `(+${ord.items.length - 1} more)` : ''}` : `${ord.itemsCount || 1} formulation(s)`}
+                    </p>
+                  </div>
+
+                  <div className="flex justify-between items-center pt-2 border-t border-[#EAE1D3] text-xs">
+                    <span className="font-serif-luxury font-bold text-[#1B1A17]">${ord.total.toFixed(2)}</span>
+                    <span className="text-[11px] font-semibold text-[#C8A46A] flex items-center space-x-1">
+                      <span>View Live Status</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Order & Tracking Status Container */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
@@ -456,6 +675,143 @@ function TrackingContent() {
                 </Link>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* DEDICATED GUEST SHIPPING & DISPATCH POLICY SECTION */}
+        <div className="bg-[#FFFDF9] rounded-3xl p-8 sm:p-12 border border-[#EFE3D3] shadow-card space-y-8">
+          <div className="text-center space-y-2 max-w-2xl mx-auto">
+            <span className="text-[10px] uppercase tracking-[0.25em] text-[#C8A46A] font-semibold">
+              Maison Élanor Shipping Standards
+            </span>
+            <h2 className="font-serif-luxury text-2xl sm:text-3xl text-[#1B1A17]">
+              Guest & Patron Shipping Policy
+            </h2>
+            <p className="text-xs text-[#8E857A]">
+              Everything you need to know about express dispatch, carrier partners, temperature control, and returns.
+            </p>
+          </div>
+
+          {/* Policy Navigation Pills */}
+          <div className="flex flex-wrap justify-center gap-2">
+            {[
+              { id: 'SHIPPING', label: '🚀 Express Air Cargo & Free Shipping' },
+              { id: 'TIMELINE', label: '⏱️ Delivery Timelines by Region' },
+              { id: 'PACKAGING', label: '🛡️ Swiss Violet Glass Protection' },
+              { id: 'RETURNS', label: '🔄 30-Day Seal & Return Policy' },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActivePolicyTab(tab.id as any)}
+                className={`px-4 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                  activePolicyTab === tab.id
+                    ? 'bg-[#1B1A17] text-[#FFFDF9] shadow-sm'
+                    : 'bg-[#F8F3EB] border border-[#EADFCF] text-[#5E584F] hover:bg-[#EAE1D3]'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Policy Tab Content Cards */}
+          <div className="p-6 sm:p-8 rounded-2xl bg-[#F8F3EB] border border-[#EADFCF] text-xs text-[#5E584F] space-y-4 animate-in fade-in duration-300">
+            {activePolicyTab === 'SHIPPING' && (
+              <div className="space-y-4">
+                <h3 className="font-serif-luxury text-lg text-[#1B1A17] font-semibold flex items-center space-x-2">
+                  <Truck className="w-5 h-5 text-[#C8A46A]" />
+                  <span>BlueDart Express & Shiprocket Logistics Infrastructure</span>
+                </h3>
+                <p className="leading-relaxed">
+                  Maison Élanor partners with premier airfreight carriers, BlueDart Express and Shiprocket, to ensure priority handling of active phytomolecules from dispatch to doorstep.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                  <div className="p-4 rounded-xl bg-[#FFFDF9] border border-[#EAE1D3] space-y-1">
+                    <p className="font-bold text-[#1B1A17]">Complimentary Delivery</p>
+                    <p className="text-[11px] text-[#8E857A]">Free Express Air Shipping applied automatically on all orders over $150.</p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-[#FFFDF9] border border-[#EAE1D3] space-y-1">
+                    <p className="font-bold text-[#1B1A17]">Real-Time SMS & AWB</p>
+                    <p className="text-[11px] text-[#8E857A]">Instant tracking link dispatched via SMS and email immediately upon carrier hand-off.</p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-[#FFFDF9] border border-[#EAE1D3] space-y-1">
+                    <p className="font-bold text-[#1B1A17]">Carbon-Neutral Cargo</p>
+                    <p className="text-[11px] text-[#8E857A]">100% of carbon emissions from your delivery are offset through European reforestation projects.</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activePolicyTab === 'TIMELINE' && (
+              <div className="space-y-4">
+                <h3 className="font-serif-luxury text-lg text-[#1B1A17] font-semibold flex items-center space-x-2">
+                  <Clock className="w-5 h-5 text-[#C8A46A]" />
+                  <span>Estimated Delivery Speeds</span>
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 rounded-xl bg-[#FFFDF9] border border-[#EAE1D3] space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="font-bold text-[#1B1A17]">Metropolitan & Tier 1 Cities</span>
+                      <span className="px-2.5 py-0.5 rounded-full bg-[#EEF2E8] text-[#55624E] text-[10px] font-bold">2 - 3 Days</span>
+                    </div>
+                    <p className="text-[11px] text-[#8E857A]">Direct flight routing from cargo hub to regional hubs with next-morning courier delivery.</p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-[#FFFDF9] border border-[#EAE1D3] space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="font-bold text-[#1B1A17]">Regional & Global Sanctuaries</span>
+                      <span className="px-2.5 py-0.5 rounded-full bg-[#FAF5EC] text-[#8C6B34] text-[10px] font-bold">3 - 5 Days</span>
+                    </div>
+                    <p className="text-[11px] text-[#8E857A]">Temperature-controlled linehaul transit with end-to-end milestone GPS tracking.</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activePolicyTab === 'PACKAGING' && (
+              <div className="space-y-4">
+                <h3 className="font-serif-luxury text-lg text-[#1B1A17] font-semibold flex items-center space-x-2">
+                  <Package className="w-5 h-5 text-[#C8A46A]" />
+                  <span>Biophotonic Miron Violet Glass Sealing</span>
+                </h3>
+                <p className="leading-relaxed">
+                  Light is the primary degrader of organic plant extracts. Unlike standard amber or clear glass, Maison Élanor encases all rituals in patented Swiss biophotonic Miron violet glass that blocks all visible light rays while allowing beneficial violet and infrared spectrums to naturally energize the formula.
+                </p>
+                <div className="p-4 rounded-xl bg-[#FFFDF9] border border-[#EAE1D3] flex items-center space-x-3">
+                  <CheckCheck className="w-5 h-5 text-[#7D9075] shrink-0" />
+                  <p className="text-[11px] text-[#5E584F]">
+                    Every package includes a tamper-evident gold wax stamp to guarantee formula sanctity during courier transit.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {activePolicyTab === 'RETURNS' && (
+              <div className="space-y-4">
+                <h3 className="font-serif-luxury text-lg text-[#1B1A17] font-semibold flex items-center space-x-2">
+                  <RotateCcw className="w-5 h-5 text-[#C8A46A]" />
+                  <span>30-Day Guest Satisfaction Charter</span>
+                </h3>
+                <p className="leading-relaxed">
+                  Guest patrons enjoy the exact same high-touch concierge support as registered Atelier VIPs. If your package arrives damaged or does not align with your skin compatibility, our concierge arranges complimentary pickup.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                  <a
+                    href="mailto:concierge@maison-elanor.com"
+                    className="inline-flex items-center justify-center space-x-2 px-5 py-2.5 bg-[#1B1A17] text-[#FFFDF9] rounded-full font-semibold hover:bg-[#322F2A] transition-colors"
+                  >
+                    <Mail className="w-3.5 h-3.5" />
+                    <span>Email Concierge Desk</span>
+                  </a>
+                  <Link
+                    href="/ai-skin-concierge"
+                    className="inline-flex items-center justify-center space-x-2 px-5 py-2.5 bg-[#FFFDF9] border border-[#DCCDBA] text-[#1B1A17] rounded-full font-semibold hover:bg-[#F2EBE2] transition-colors"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-[#C8A46A]" />
+                    <span>Ask AI Skin Concierge</span>
+                  </Link>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

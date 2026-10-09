@@ -162,15 +162,15 @@ export default function Footer() {
           {/* Col 3: Diagnostics & Maison */}
           <div className="space-y-3">
             <p className="font-serif-luxury text-sm font-semibold text-[#FFFDF9] tracking-wider uppercase">
-              Innovations
+              Sanctuary Care & Logistics
             </p>
             <ul className="space-y-2 text-[#8E857A]">
+              <li><Link href="/track" className="hover:text-[#C8A46A] transition-colors font-medium text-[#E4C894]">📦 Track Guest Order</Link></li>
+              <li><Link href="/track" className="hover:text-[#C8A46A] transition-colors">Shipping & Delivery Policy</Link></li>
               <li><Link href="/routine-builder" className="hover:text-[#C8A46A] transition-colors">AI Routine Diagnostic</Link></li>
-              <li><Link href="/ingredients" className="hover:text-[#C8A46A] transition-colors">Ingredient Explorer</Link></li>
-              <li><Link href="/compare" className="hover:text-[#C8A46A] transition-colors">Formula Comparator</Link></li>
-              <li><Link href="/brands" className="hover:text-[#C8A46A] transition-colors">Maison Philosophy</Link></li>
               <li><Link href="/ai-skin-concierge" className="hover:text-[#C8A46A] transition-colors">Haute AI Skin Concierge</Link></li>
-              <li><Link href="/track" className="hover:text-[#C8A46A] transition-colors">Track Ritual Dispatch</Link></li>
+              <li><Link href="/ingredients" className="hover:text-[#C8A46A] transition-colors">Ingredient Explorer</Link></li>
+              <li><Link href="/brands" className="hover:text-[#C8A46A] transition-colors">Maison Philosophy</Link></li>
             </ul>
           </div>
         </div>
