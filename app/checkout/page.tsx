@@ -121,6 +121,25 @@ export default function CheckoutPage() {
         localStorage.setItem('elanor_orders', JSON.stringify(updatedOrders));
         window.dispatchEvent(new Event('elanor_order_placed'));
       }
+
+      // Automatically dispatch to Shiprocket Serverless API using environment credentials
+      fetch('/api/shiprocket/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          order: newOrder,
+          customer: formData,
+          items: newOrder.items,
+          paymentMethod: paymentMethodType,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log('[SHIPROCKET SYNC RESULT]:', data);
+        })
+        .catch((err) => {
+          console.warn('[SHIPROCKET SYNC BACKGROUND NOTICE]:', err);
+        });
     } catch (err) {
       console.error('Failed to sync order locally', err);
     }
