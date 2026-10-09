@@ -465,6 +465,17 @@ export default function CheckoutPage() {
                     </div>
                   </div>
 
+                  {/* Shiprocket & BlueDart Fulfillment Callout */}
+                  <div className="p-4 rounded-2xl bg-[#F8F3EB] border border-[#EADFCF] flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs text-[#5E584F] gap-2">
+                    <div className="flex items-center space-x-2.5">
+                      <Truck className="w-4 h-4 text-[#C8A46A] shrink-0" />
+                      <span>Fulfillment & Airfreight: <strong>Shiprocket Logistics</strong> (Partnered with <strong>BlueDart Express</strong>)</span>
+                    </div>
+                    <span className="text-[10px] text-[#7D9075] font-semibold bg-[#EEF2E8] px-2.5 py-0.5 rounded-full shrink-0">
+                      2-3 Days Carbon-Neutral
+                    </span>
+                  </div>
+
                   <div className="flex space-x-4">
                     <button
                       onClick={() => setStep(1)}

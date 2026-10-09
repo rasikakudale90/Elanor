@@ -1733,17 +1733,131 @@ export default function AdminPortal() {
           </div>
         )}
 
-        {/* TAB 8: AUDIT & SHIPMENTS */}
-        {(activeTab === 'audit' || activeTab === 'shipments') && (
+        {/* TAB 8: SHIPROCKET & BLUEDART LOGISTICS */}
+        {activeTab === 'shipments' && (
+          <div className="space-y-6">
+            {/* Shiprocket Gateway Status Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+              <div className="p-5 rounded-3xl bg-[#FFFDF9] border border-[#EADFCF] shadow-card space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] uppercase tracking-wider text-[#8E857A] font-semibold">Logistics Gateway</span>
+                  <span className="px-2.5 py-0.5 rounded-full bg-[#7D9075]/20 text-[#4D6545] text-[10px] font-bold uppercase tracking-wider">
+                    Connected
+                  </span>
+                </div>
+                <h4 className="font-serif-luxury text-xl font-bold text-[#1B1A17]">Shiprocket API Port</h4>
+                <p className="text-xs text-[#5E584F]">Free Developer Tier active with automated AWB generation & Webhooks.</p>
+              </div>
+
+              <div className="p-5 rounded-3xl bg-[#FFFDF9] border border-[#EADFCF] shadow-card space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] uppercase tracking-wider text-[#8E857A] font-semibold">Preferred Air Carrier</span>
+                  <span className="px-2.5 py-0.5 rounded-full bg-[#C8A46A]/20 text-[#8C6B34] text-[10px] font-bold uppercase tracking-wider">
+                    Priority Air
+                  </span>
+                </div>
+                <h4 className="font-serif-luxury text-xl font-bold text-[#1B1A17]">BlueDart Express</h4>
+                <p className="text-xs text-[#5E584F]">2-3 Business Days express carbon-neutral dispatch across India & International.</p>
+              </div>
+
+              <div className="p-5 rounded-3xl bg-[#FFFDF9] border border-[#EADFCF] shadow-card space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] uppercase tracking-wider text-[#8E857A] font-semibold">Live Webhook Sync</span>
+                  <span className="px-2.5 py-0.5 rounded-full bg-[#EEF2E8] text-[#55624E] text-[10px] font-bold uppercase tracking-wider">
+                    Listening
+                  </span>
+                </div>
+                <h4 className="font-serif-luxury text-xl font-bold text-[#1B1A17]">/webhooks/shiprocket</h4>
+                <p className="text-xs text-[#5E584F]">Real-time milestone synchronization (`IN_TRANSIT` → `DELIVERED`).</p>
+              </div>
+            </div>
+
+            {/* Active Shiprocket Shipments Table */}
+            <div className="bg-[#FFFDF9] rounded-3xl border border-[#EADFCF] p-6 shadow-card space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h3 className="font-serif-luxury text-xl font-semibold text-[#1B1A17]">
+                    Shiprocket & BlueDart Dispatch Manifests
+                  </h3>
+                  <p className="text-xs text-[#8E857A]">
+                    Live carrier tracking telemetry synchronized with Maison Élanor Public Tracking Portal
+                  </p>
+                </div>
+                <Link
+                  href="/track"
+                  target="_blank"
+                  className="px-4 py-2 bg-[#1B1A17] text-[#FFFDF9] rounded-full text-xs font-semibold tracking-wider flex items-center space-x-1.5 hover:bg-[#322F2A] transition-colors cursor-pointer self-start sm:self-auto"
+                >
+                  <Truck className="w-3.5 h-3.5 text-[#C8A46A]" />
+                  <span>Open Public Tracker</span>
+                </Link>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="border-b border-[#EADFCF] text-[#8E857A] uppercase tracking-wider">
+                    <tr>
+                      <th className="py-3 px-4">Order Ref</th>
+                      <th className="py-3 px-4">Customer</th>
+                      <th className="py-3 px-4">Logistics Partner</th>
+                      <th className="py-3 px-4">AWB Tracking Code</th>
+                      <th className="py-3 px-4">Status</th>
+                      <th className="py-3 px-4 text-right">Telemetry Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#EADFCF]/60">
+                    {orders.map((ord) => {
+                      const awb = ord.trackingNumber || `SR-BD-${ord.orderNumber.replace(/[^0-9]/g, '') || '948201'}`;
+                      return (
+                        <tr key={ord.id} className="hover:bg-[#FAF7F2] transition-colors">
+                          <td className="py-3.5 px-4 font-mono font-semibold text-[#1B1A17]">{ord.orderNumber}</td>
+                          <td className="py-3.5 px-4 font-semibold text-[#1B1A17]">{ord.customerName}</td>
+                          <td className="py-3.5 px-4">
+                            <span className="font-semibold text-[#1B1A17]">BlueDart Express</span>
+                            <span className="text-[10px] text-[#8E857A] block">(Shiprocket Gateway)</span>
+                          </td>
+                          <td className="py-3.5 px-4 font-mono text-[#1B1A17] font-medium">
+                            {awb}
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
+                              ord.status === 'DELIVERED' ? 'bg-[#7D9075]/20 text-[#4D6545]' : 'bg-[#C8A46A]/20 text-[#8C6B34]'
+                            }`}>
+                              {ord.status === 'DELIVERED' ? 'DELIVERED' : 'IN_TRANSIT'}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 text-right">
+                            <Link
+                              href={`/track?number=${ord.orderNumber}`}
+                              target="_blank"
+                              className="px-3 py-1.5 bg-[#FAF7F2] border border-[#EADFCF] rounded-full text-[10px] font-semibold hover:bg-[#EADFCF] transition-colors inline-flex items-center space-x-1 text-[#1B1A17]"
+                            >
+                              <span>View Telemetry</span>
+                              <ChevronRight className="w-3 h-3" />
+                            </Link>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 9: AUDIT LOGS */}
+        {activeTab === 'audit' && (
           <div className="bg-[#FFFDF9] rounded-3xl border border-[#EADFCF] p-6 shadow-card space-y-6">
             <h3 className="font-serif-luxury text-xl font-semibold text-[#1B1A17]">
-              {activeTab === 'audit' ? 'System Audit Log Feed' : 'Carrier Webhook Tracking History'}
+              System Audit Log Feed
             </h3>
             <div className="space-y-3 font-mono text-xs text-[#5E584F]">
               {[
-                { id: 'AUDIT-001', text: '[AUDIT-001] ADMIN_PAYMENT_COLLECTED: Order ELN-2026-8939 COD ₹12,800 received by carrier', time: '2026-10-02 13:45:10' },
-                { id: 'AUDIT-002', text: '[AUDIT-002] INVENTORY_RESTOCKED: Variant SERUM-50ML +50 units added by admin@elanor.com', time: '2026-10-02 13:40:02' },
-                { id: 'AUDIT-003', text: '[AUDIT-003] SHIPMENT_CREATED: AWB ELN-TRK-7782 BlueDart express dispatched to Mumbai Hub', time: '2026-10-02 11:20:15' }
+                { id: 'AUDIT-001', text: '[AUDIT-001] SHIPROCKET_AWB_GENERATED: Order ELN-2026-8939 assigned BlueDart AWB SR-BD-8939', time: '2026-10-09 13:15:10' },
+                { id: 'AUDIT-002', text: '[AUDIT-002] ADMIN_PAYMENT_COLLECTED: Order ELN-2026-8939 COD ₹12,800 received by carrier', time: '2026-10-02 13:45:10' },
+                { id: 'AUDIT-003', text: '[AUDIT-003] INVENTORY_RESTOCKED: Variant SERUM-50ML +50 units added by admin@elanor.com', time: '2026-10-02 13:40:02' },
+                { id: 'AUDIT-004', text: '[AUDIT-004] SHIPMENT_CREATED: AWB ELN-TRK-7782 BlueDart express dispatched to Mumbai Hub', time: '2026-10-02 11:20:15' }
               ]
                 .filter((item) => {
                   if (!searchQuery.trim()) return true;

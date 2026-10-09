@@ -376,11 +376,15 @@ export default function CartPage() {
                 <div className="pt-4 border-t border-[#EAE1D3] space-y-2 text-[11px] text-[#8E857A]">
                   <div className="flex items-center space-x-2">
                     <ShieldCheck className="w-4 h-4 text-[#7D9075]" />
-                    <span>256-Bit Encrypted Secure Checkout</span>
+                    <span>256-Bit Encrypted Secure Checkout (Razorpay)</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Sparkles className="w-4 h-4 text-[#C8A46A]" />
                     <span>Complimentary Deluxe Sample Included</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#7D9075] animate-pulse" />
+                    <span>Fulfilled via <strong>Shiprocket</strong> & <strong>BlueDart Express</strong></span>
                   </div>
                 </div>
               </div>
