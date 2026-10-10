@@ -110,35 +110,62 @@ export async function POST(request: Request) {
       });
     }
 
-    // Build Shiprocket Adhoc Order payload
+    // Fetch primary registered pickup location from Shiprocket account
+    let activePickupLocation = 'Primary';
+    try {
+      const pickupRes = await fetch(`${ENV.SHIPROCKET_BASE_URL}/settings/company/pickup`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (pickupRes.ok) {
+        const pickupData = await pickupRes.json();
+        if (pickupData.data?.shipping_address && pickupData.data.shipping_address.length > 0) {
+          activePickupLocation = pickupData.data.shipping_address[0].pickup_location || 'Primary';
+        }
+      }
+    } catch (pickupErr) {
+      console.warn('[SHIPROCKET] Could not query pickup locations, using fallback:', pickupErr);
+    }
+
+    // Build and sanitize Shiprocket Adhoc Order payload
     const orderDateFormatted = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    const rawZip = String(customer?.zip || '400001').replace(/[^0-9]/g, '');
+    const cleanPincode = rawZip.length >= 6 ? rawZip.slice(0, 6) : '400001';
+    const rawPhone = String(customer?.phone || '9876543210').replace(/[^0-9]/g, '');
+    const cleanPhone = rawPhone.length >= 10 ? rawPhone.slice(-10) : '9876543210';
+
     const orderPayload: ShiprocketOrderRequest = {
       order_id: order?.orderNumber || `ELN-${Date.now()}`,
       order_date: orderDateFormatted,
-      pickup_location: 'Primary Atelier Paris',
+      pickup_location: activePickupLocation,
       billing_customer_name: customer?.firstName || 'Patron',
       billing_last_name: customer?.lastName || 'Élanor',
       billing_address: customer?.address || '24 Place Vendôme',
-      billing_city: customer?.city || 'Paris',
-      billing_pincode: customer?.zip || '75001',
-      billing_state: customer?.state || 'Ile-de-France',
-      billing_country: customer?.country || 'France',
+      billing_city: customer?.city || 'Mumbai',
+      billing_pincode: cleanPincode,
+      billing_state: customer?.state || 'Maharashtra',
+      billing_country: 'India',
       billing_email: customer?.email || 'patron@maison-elanor.com',
-      billing_phone: customer?.phone || '9876543210',
+      billing_phone: cleanPhone,
       shipping_is_billing: true,
-      order_items: (items || []).map((item: any) => ({
+      order_items: (items && items.length > 0 ? items : [{ name: 'Sérum Éclat Botanique', price: order?.total || 150, quantity: 1 }]).map((item: any) => ({
         name: item.name || 'Botanique Formulation',
-        sku: item.sku || `SKU-${item.id || 'ELN'}`,
+        sku: item.sku || `SKU-${(item.name || 'ELN').slice(0, 5).toUpperCase()}`,
         units: item.quantity || 1,
-        selling_price: item.price || 150,
+        selling_price: Math.max(1, Math.round(item.price || 150)),
       })),
       payment_method: paymentMethod === 'COD' ? 'COD' : 'Prepaid',
-      sub_total: order?.total || 250,
+      sub_total: Math.max(1, Math.round(order?.total || 150)),
       length: 15,
       breadth: 15,
       height: 10,
       weight: 0.5,
     };
+
+    console.log('[SHIPROCKET] Dispatching order payload to:', `${ENV.SHIPROCKET_BASE_URL}/data/order/create/adhoc`, orderPayload);
 
     const createRes = await fetch(`${ENV.SHIPROCKET_BASE_URL}/data/order/create/adhoc`, {
       method: 'POST',
@@ -150,6 +177,7 @@ export async function POST(request: Request) {
     });
 
     const createData = await createRes.json();
+    console.log('[SHIPROCKET] API response:', createRes.status, createData);
 
     if (!createRes.ok) {
       console.warn('[SHIPROCKET API] Order creation returned non-200:', createData);
