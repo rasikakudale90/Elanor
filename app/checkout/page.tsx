@@ -659,6 +659,25 @@ export default function CheckoutPage() {
                             {copiedKey === 'upi' ? <Check className="w-3.5 h-3.5 text-[#7D9075]" /> : <Copy className="w-3.5 h-3.5 text-[#8E857A]" />}
                           </button>
                         </div>
+
+                        {/* Quick 1-Click Razorpay Sandbox Auto-Authorize Button */}
+                        <div className="pt-1">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsSubmitting(true);
+                              setTimeout(() => {
+                                const generatedId = `ELN-RZP-${Math.floor(1000 + Math.random() * 9000)}`;
+                                const liveTx = `pay_rzp_${Date.now().toString().slice(-8)}`;
+                                finalizeOrder(generatedId, 'RAZORPAY', liveTx);
+                              }, 800);
+                            }}
+                            className="w-full py-2.5 px-4 bg-[#FFFDF9] border border-[#C8A46A] rounded-xl text-xs font-semibold text-[#8C6B34] hover:bg-[#FBF7EE] transition-all flex items-center justify-center space-x-2 shadow-xs cursor-pointer"
+                          >
+                            <Sparkles className="w-3.5 h-3.5 text-[#C8A46A]" />
+                            <span>⚡ Instant 1-Click Sandbox Authorization (Auto-Verify ₹{inrTotal.toLocaleString('en-IN')})</span>
+                          </button>
+                        </div>
                       </div>
 
                       <div className="p-3.5 rounded-xl bg-[#FFFDF9] border border-[#EADFCF] flex items-center justify-between text-xs text-[#5E584F]">
