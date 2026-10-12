@@ -8,6 +8,7 @@ export const ENV = {
   RAZORPAY_KEY_ID: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_51a0Hk6b62D7X9',
   API_BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1',
   SITE_URL: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+  GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
 
   // Server-Side Only Secrets (Never exposed to the browser)
   RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET || '',

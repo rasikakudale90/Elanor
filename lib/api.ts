@@ -195,6 +195,8 @@ export const elanorApi = {
       request<AuthTokens>('/auth/register', { method: 'POST', body: JSON.stringify(payload) }),
     login: (payload: { email: string; password: string }) =>
       request<AuthTokens>('/auth/login', { method: 'POST', body: JSON.stringify(payload) }),
+    loginWithGoogle: (idToken: string) =>
+      request<AuthTokens>('/auth/google', { method: 'POST', body: JSON.stringify({ idToken }) }),
     getProfile: () => request<CustomerProfileDto>('/customers/me'),
     getAddresses: () => request<AddressDto[]>('/customers/me/addresses'),
     addAddress: (payload: Omit<AddressDto, 'id'>) =>
