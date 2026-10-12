@@ -13,10 +13,10 @@ export const ENV = {
   RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET || '',
   RAZORPAY_WEBHOOK_SECRET: process.env.RAZORPAY_WEBHOOK_SECRET || '',
 
-  // Shiprocket Logistics Credentials
+  // Shiprocket Logistics Credentials (Official Public API v1/external)
   SHIPROCKET_EMAIL: process.env.SHIPROCKET_EMAIL || '',
   SHIPROCKET_PASSWORD: process.env.SHIPROCKET_PASSWORD || '',
-  SHIPROCKET_BASE_URL: process.env.SHIPROCKET_BASE_URL || 'https://apiv2.shiprocket.in/v2/console',
+  SHIPROCKET_BASE_URL: process.env.SHIPROCKET_BASE_URL || 'https://apiv2.shiprocket.in/v1/external',
   SHIPROCKET_WEBHOOK_TOKEN: process.env.SHIPROCKET_WEBHOOK_TOKEN || 'sr_webhook_secret_elanor',
 
   // Helpers
