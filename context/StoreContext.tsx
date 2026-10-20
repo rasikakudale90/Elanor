@@ -428,7 +428,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const refreshProducts = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1'}/products?size=50`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://elanor-uzia.onrender.com/api/v1'}/products?size=50`);
       if (res.ok) {
         const json = await res.json();
         const content = json.data?.content || json.content || json.data;

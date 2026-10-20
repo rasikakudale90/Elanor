@@ -3,7 +3,7 @@
  * Seamlessly connects Next.js frontend with Spring Boot 3.3 backend
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://elanor-uzia.onrender.com/api/v1';
 
 export interface ApiResponse<T> {
   success: boolean;

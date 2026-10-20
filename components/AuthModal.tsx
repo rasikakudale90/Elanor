@@ -128,21 +128,8 @@ export default function AuthModal() {
           setFeedback(null);
         }, 1000);
       } catch (err: any) {
-        console.warn('[LOGIN NOTICE]: Backend unavailable, continuing in client auth mode:', err);
-        const namePart = email.split('@')[0].replace(/[._-]/g, ' ');
-        const formattedName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
-        loginCustomer({
-          id: `usr-${Date.now()}`,
-          name: formattedName || 'Maison Patron',
-          email: email,
-          tier: 'Bespoke Member',
-          token: `jwt-${Date.now()}`
-        });
-        setFeedback({ type: 'success', text: 'Authentication successful. Welcome to Maison Élanor.' });
-        setTimeout(() => {
-          setIsAuthOpen(false);
-          setFeedback(null);
-        }, 1000);
+        console.error('[LOGIN ERROR]:', err);
+        setFeedback({ type: 'error', text: err.message || 'Invalid email or password.' });
       } finally {
         setLoading(false);
       }
@@ -175,19 +162,8 @@ export default function AuthModal() {
           setFeedback(null);
         }, 1200);
       } catch (err: any) {
-        console.warn('[REGISTER NOTICE]: Backend unavailable, continuing in client auth mode:', err);
-        loginCustomer({
-          id: `usr-${Date.now()}`,
-          name: `${firstName} ${lastName}`.trim(),
-          email: email,
-          tier: 'First Sanctuary Guest',
-          token: `jwt-${Date.now()}`
-        });
-        setFeedback({ type: 'success', text: 'Account registered. Your 10% welcome gift code is GOLD10!' });
-        setTimeout(() => {
-          setIsAuthOpen(false);
-          setFeedback(null);
-        }, 1200);
+        console.error('[REGISTER ERROR]:', err);
+        setFeedback({ type: 'error', text: err.message || 'Registration failed. Please check your details.' });
       } finally {
         setLoading(false);
       }
