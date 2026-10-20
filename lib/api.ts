@@ -3,7 +3,17 @@
  * Seamlessly connects Next.js frontend with Spring Boot 3.3 backend
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://elanor-uzia.onrender.com/api/v1';
+const getApiBaseUrl = (): string => {
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  // In the browser, use relative path to leverage Next.js rewrite proxy (zero CORS preflight delays)
+  if (typeof window !== 'undefined') {
+    return '/api/v1';
+  }
+  // On server, call Render directly
+  return 'https://elanor-uzia.onrender.com/api/v1';
+};
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -162,30 +172,76 @@ export const tokenStorage = {
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const token = tokenStorage.getAuthToken();
   const guestToken = tokenStorage.getGuestToken();
+  const baseUrl = getApiBaseUrl();
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    'X-Guest-Token': guestToken,
     ...(options.headers as Record<string, string>),
   };
+
+  // Only attach X-Guest-Token if unauthenticated and not calling auth endpoints
+  if (!token && !endpoint.startsWith('/auth/')) {
+    headers['X-Guest-Token'] = guestToken;
+  }
 
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    ...options,
-    headers,
-  });
+  // 30s timeout so requests never buffer infinitely
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-  const body = await response.json().catch(() => null);
+  try {
+    const response = await fetch(`${baseUrl}${endpoint}`, {
+      ...options,
+      headers,
+      signal: controller.signal,
+    });
 
-  if (!response.ok) {
-    const message = body?.message || `HTTP error! status: ${response.status}`;
-    throw new Error(message);
+    const body = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      let message = body?.message;
+      if (body?.details && typeof body.details === 'object') {
+        const detailValues = Object.values(body.details).filter(Boolean);
+        if (detailValues.length > 0) {
+          message = detailValues.join(', ');
+        }
+      }
+      throw new Error(message || `Request failed (${response.status})`);
+    }
+
+    return body?.data !== undefined ? body.data : body;
+  } catch (err: any) {
+    if (err.name === 'AbortError') {
+      throw new Error('Connection timed out while contacting Atelier. Please try once more.');
+    }
+    // If relative path failed or network error occurred, fallback once directly to Render
+    if (baseUrl.startsWith('/') && typeof window !== 'undefined') {
+      try {
+        const directRes = await fetch(`https://elanor-uzia.onrender.com/api/v1${endpoint}`, {
+          ...options,
+          headers,
+        });
+        const directBody = await directRes.json().catch(() => null);
+        if (!directRes.ok) {
+          let directMsg = directBody?.message;
+          if (directBody?.details && typeof directBody.details === 'object') {
+            const detailValues = Object.values(directBody.details).filter(Boolean);
+            if (detailValues.length > 0) directMsg = detailValues.join(', ');
+          }
+          throw new Error(directMsg || `Request failed (${directRes.status})`);
+        }
+        return directBody?.data !== undefined ? directBody.data : directBody;
+      } catch (fallbackErr: any) {
+        throw new Error(fallbackErr.message || err.message);
+      }
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeoutId);
   }
-
-  return body?.data !== undefined ? body.data : body;
 }
 
 export const elanorApi = {

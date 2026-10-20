@@ -139,6 +139,11 @@ export default function AuthModal() {
         setLoading(false);
         return;
       }
+      if (password.length < 8) {
+        setFeedback({ type: 'error', text: 'Password must be at least 8 characters.' });
+        setLoading(false);
+        return;
+      }
       try {
         const regData = await elanorApi.auth.register({
           firstName,

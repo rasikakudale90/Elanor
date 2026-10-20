@@ -20,9 +20,19 @@ public class CorsConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOriginPatterns(Arrays.asList("*"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin", "Idempotency-Key"));
-        configuration.setExposedHeaders(Arrays.asList("Authorization", "Idempotency-Key"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"));
+        configuration.setAllowedHeaders(Arrays.asList(
+                "Authorization",
+                "Content-Type",
+                "X-Requested-With",
+                "Accept",
+                "Origin",
+                "Idempotency-Key",
+                "X-Guest-Token",
+                "x-guest-token",
+                "*"
+        ));
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "Idempotency-Key", "X-Guest-Token"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
