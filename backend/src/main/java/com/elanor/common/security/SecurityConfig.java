@@ -46,7 +46,9 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                "/health",
                                 "/api/v1/health",
+                                "/auth/**",
                                 "/api/v1/auth/**",
                                 "/api/v1/products/**",
                                 "/api/v1/categories/**",

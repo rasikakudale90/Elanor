@@ -4,8 +4,13 @@
  */
 
 const getApiBaseUrl = (): string => {
-  if (process.env.NEXT_PUBLIC_API_URL) {
-    return process.env.NEXT_PUBLIC_API_URL;
+  let url = process.env.NEXT_PUBLIC_API_URL;
+  if (url) {
+    url = url.trim().replace(/\/+$/, '');
+    if (!url.endsWith('/api/v1')) {
+      url = `${url}/api/v1`;
+    }
+    return url;
   }
   // In the browser, use relative path to leverage Next.js rewrite proxy (zero CORS preflight delays)
   if (typeof window !== 'undefined') {
@@ -174,17 +179,20 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
   const guestToken = tokenStorage.getGuestToken();
   const baseUrl = getApiBaseUrl();
 
+  const isAuthRoute = endpoint.includes('/auth/');
+
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(options.headers as Record<string, string>),
   };
 
   // Only attach X-Guest-Token if unauthenticated and not calling auth endpoints
-  if (!token && !endpoint.startsWith('/auth/')) {
+  if (!token && !isAuthRoute) {
     headers['X-Guest-Token'] = guestToken;
   }
 
-  if (token) {
+  // Only attach Authorization header if not calling an auth endpoint (prevent stale token 403s)
+  if (token && !isAuthRoute) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
@@ -202,9 +210,10 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     const body = await response.json().catch(() => null);
 
     if (!response.ok) {
-      let message = body?.message;
-      if (body?.details && typeof body.details === 'object') {
-        const detailValues = Object.values(body.details).filter(Boolean);
+      let message = body?.error?.message || body?.message;
+      const details = body?.error?.details || body?.details;
+      if (details && typeof details === 'object') {
+        const detailValues = Object.values(details).filter(Boolean);
         if (detailValues.length > 0) {
           message = detailValues.join(', ');
         }
@@ -226,9 +235,10 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
         });
         const directBody = await directRes.json().catch(() => null);
         if (!directRes.ok) {
-          let directMsg = directBody?.message;
-          if (directBody?.details && typeof directBody.details === 'object') {
-            const detailValues = Object.values(directBody.details).filter(Boolean);
+          let directMsg = directBody?.error?.message || directBody?.message;
+          const directDetails = directBody?.error?.details || directBody?.details;
+          if (directDetails && typeof directDetails === 'object') {
+            const detailValues = Object.values(directDetails).filter(Boolean);
             if (detailValues.length > 0) directMsg = detailValues.join(', ');
           }
           throw new Error(directMsg || `Request failed (${directRes.status})`);
