@@ -257,7 +257,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 export const elanorApi = {
   // 1. Auth & Profiles
   auth: {
-    register: (payload: { firstName: string; lastName?: string; email: string; password: string; phone?: string }) =>
+    register: (payload: { firstName: string; lastName?: string; email: string; password: string; phone?: string; marketingConsent?: boolean }) =>
       request<AuthTokens>('/auth/register', { method: 'POST', body: JSON.stringify(payload) }),
     login: (payload: { email: string; password: string }) =>
       request<AuthTokens>('/auth/login', { method: 'POST', body: JSON.stringify(payload) }),

@@ -40,6 +40,15 @@ public class User {
     @Column(name = "is_two_factor_enabled", nullable = false)
     private boolean twoFactorEnabled = false;
 
+    @Column(name = "marketing_consent", nullable = false)
+    private boolean marketingConsent = false;
+
+    @Column(name = "marketing_consent_updated_at")
+    private Instant marketingConsentUpdatedAt;
+
+    @Column(name = "unsubscribe_status", nullable = false)
+    private boolean unsubscribeStatus = false;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_roles",
@@ -128,6 +137,30 @@ public class User {
 
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
+    }
+
+    public boolean isMarketingConsent() {
+        return marketingConsent;
+    }
+
+    public void setMarketingConsent(boolean marketingConsent) {
+        this.marketingConsent = marketingConsent;
+    }
+
+    public Instant getMarketingConsentUpdatedAt() {
+        return marketingConsentUpdatedAt;
+    }
+
+    public void setMarketingConsentUpdatedAt(Instant marketingConsentUpdatedAt) {
+        this.marketingConsentUpdatedAt = marketingConsentUpdatedAt;
+    }
+
+    public boolean isUnsubscribeStatus() {
+        return unsubscribeStatus;
+    }
+
+    public void setUnsubscribeStatus(boolean unsubscribeStatus) {
+        this.unsubscribeStatus = unsubscribeStatus;
     }
 
     public Instant getCreatedAt() {

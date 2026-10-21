@@ -21,6 +21,8 @@ public class RegisterRequest {
     @Size(min = 8, message = "Password must be at least 8 characters")
     private String password;
 
+    private Boolean marketingConsent = false;
+
     public RegisterRequest() {}
 
     public RegisterRequest(String firstName, String lastName, String email, String phone, String password) {
@@ -69,5 +71,13 @@ public class RegisterRequest {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Boolean getMarketingConsent() {
+        return marketingConsent;
+    }
+
+    public void setMarketingConsent(Boolean marketingConsent) {
+        this.marketingConsent = marketingConsent;
     }
 }

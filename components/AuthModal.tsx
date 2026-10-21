@@ -32,6 +32,7 @@ export default function AuthModal() {
   const [otpPhone, setOtpPhone] = useState('');
   const [otpCode, setOtpCode] = useState('');
   const [otpSent, setOtpSent] = useState(false);
+  const [marketingConsent, setMarketingConsent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
 
@@ -149,7 +150,8 @@ export default function AuthModal() {
           firstName,
           lastName,
           email,
-          password
+          password,
+          marketingConsent
         });
         if (regData?.accessToken) {
           tokenStorage.setAuthToken(regData.accessToken);
@@ -730,6 +732,20 @@ export default function AuthModal() {
                     />
                   </div>
                 </div>
+
+                {mode === 'REGISTER' && (
+                  <label className="flex items-start space-x-2.5 cursor-pointer pt-1 group">
+                    <input
+                      type="checkbox"
+                      checked={marketingConsent}
+                      onChange={(e) => setMarketingConsent(e.target.checked)}
+                      className="mt-0.5 w-4 h-4 rounded border-[#DCCDBA] text-[#1B1A17] focus:ring-[#C8A46A] cursor-pointer"
+                    />
+                    <span className="text-[11px] leading-tight text-[#7D766C] group-hover:text-[#1B1A17] transition-colors">
+                      Receive confidential formulations, rare harvest bulletins, and private atelier invitations.
+                    </span>
+                  </label>
+                )}
 
                 <button
                   type="submit"

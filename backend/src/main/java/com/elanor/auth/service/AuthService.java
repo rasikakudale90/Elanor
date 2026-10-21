@@ -78,6 +78,12 @@ public class AuthService {
         user.setPhone(request.getPhone());
         user.setActive(true);
         user.setEmailVerified(false);
+        boolean consent = Boolean.TRUE.equals(request.getMarketingConsent());
+        user.setMarketingConsent(consent);
+        if (consent) {
+            user.setMarketingConsentUpdatedAt(Instant.now());
+        }
+        user.setUnsubscribeStatus(false);
         user.getRoles().add(customerRole);
         user = userRepository.save(user);
 
