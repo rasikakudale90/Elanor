@@ -365,3 +365,72 @@ graph TD
   - Direct 1-click **"Track Sacred Dispatch"** button on Order Confirmation screen.
   - Linked to Customer Sanctuary Modal and global Footer navigation.
 
+---
+
+### ✅ Production Backend Deployment & Cloud Architecture (Render & Supabase)
+- [x] **Render Web Service Deployment**:
+  - **Live Backend URL**: `https://elanor-uzia.onrender.com`
+  - Running Spring Boot 3.3.5 on Java 21 within high-performance Docker runtime.
+  - Resolved Maven root directory alignment (`backend/`) and eliminated Lombok dependency issues in Docker build.
+- [x] **Supabase Database Pooler & Hibernate Stability**:
+  - Configured `hikari.data-source-properties.prepareThreshold: 0` and `hibernate.ddl-auto: none` in `application-prod.yml` to prevent PgBouncer pooler metadata lockups.
+  - Applied Flyway migrations V1 (core e-commerce schema), V2 (analytics events), and V3 (marketing consent).
+  - Initialized administrative account (`admin@elanor.com`) with encrypted credentials.
+- [x] **CORS Preflight & Header Rejection Resolution**:
+  - Updated `backend/src/main/java/com/elanor/common/config/CorsConfig.java` to allow wildcard headers (`*`) and explicitly permit `X-Guest-Token`, `x-guest-token`, `Authorization`, `Content-Type`, and `Idempotency-Key`.
+  - Exposed headers `Authorization`, `Idempotency-Key`, and `X-Guest-Token`.
+- [x] **Dual-Route Authentication Mapping (Zero 403 Errors)**:
+  - Configured both `/api/v1/auth/**` and `/auth/**` in `SecurityConfig.java` and `AuthController.java` to guarantee compatibility across direct calls, rewrites, and legacy clients.
+  - Stripped stale `Authorization` token headers on authentication routes in `lib/api.ts` to prevent false 403 Forbidden rejections.
+- [x] **Next.js Server-to-Server Proxy Rewrite (`next.config.mjs`)**:
+  - Configured edge proxy rewrite `/api/v1/:path*` -> `https://elanor-uzia.onrender.com/api/v1/:path*`.
+  - Enables zero-CORS preflight latency and same-origin reliability on Vercel deployment.
+- [x] **Resilient Frontend API Client (`lib/api.ts`)**:
+  - Smart base URL normalizer (auto-appends `/api/v1` if omitted in environment variables).
+  - 30-second `AbortController` timeout with automated direct Render failover fallback.
+  - Detailed validation error extraction from `body.error.message` and `body.error.details`.
+  - Client-side password length guard (>= 8 characters) in `components/AuthModal.tsx`.
+
+---
+
+### ✅ Marketing Consent & n8n Email Automation Integration
+- [x] **Compliance Schema Migration (`V3__add_marketing_consent_and_unsubscribe.sql`)**:
+  - Added `marketing_consent` (BOOLEAN NOT NULL DEFAULT FALSE) to `public.users`.
+  - Added `marketing_consent_updated_at` (TIMESTAMP WITH TIME ZONE) to track precise timestamp of consent.
+  - Added `unsubscribe_status` (BOOLEAN NOT NULL DEFAULT FALSE) to manage customer opt-outs.
+  - Added composite index `idx_users_marketing_consent` on `(marketing_consent, unsubscribe_status)` for fast query execution in n8n.
+- [x] **Backend Entities & API DTOs**:
+  - Updated `User.java`, `RegisterRequest.java`, and `AuthService.java` to persist and manage marketing consent and unsubscribe status on user registration.
+- [x] **Luxury Opt-In Storefront Checkbox (`components/AuthModal.tsx`)**:
+  - Integrated custom luxury opt-in checkbox during customer registration:
+    *"Receive confidential formulations, rare harvest bulletins, and private atelier invitations."*
+  - Synchronized state with `elanorApi.auth.register`.
+- [x] **n8n Automation Configuration (Promotional Emails for Formulations)**:
+  - **Filter Configuration**:
+    - Mode: `Build manually`
+    - Condition 1: `is_active` EQUALS `true`
+    - Condition 2: `marketing_consent` EQUALS `true`
+    - Condition 3: `unsubscribe_status` EQUALS `false`
+  - **SQL Query for Postgres Node**:
+    ```sql
+    SELECT 
+        u.id AS user_id,
+        u.email,
+        COALESCE(cp.first_name, 'Cher Patron') AS first_name,
+        COALESCE(cp.last_name, '') AS last_name,
+        u.marketing_consent,
+        u.marketing_consent_updated_at,
+        u.unsubscribe_status
+    FROM users u
+    LEFT JOIN customer_profiles cp ON u.id = cp.user_id
+    WHERE u.is_active = true 
+      AND u.marketing_consent = true 
+      AND u.unsubscribe_status = false
+    ORDER BY u.created_at DESC;
+    ```
+- [x] **Zero Build Errors & Production Synchronization**:
+  - Frontend: 18/18 routes compiled cleanly (`npm run build` -> Exit code 0).
+  - Backend: 288 source files compiled with Maven on Java 21 (`mvn test-compile` & `mvn clean package` -> Exit code 0).
+  - GitHub synchronization: Clean branch `main` at commit `60b55b9`.
+
+
