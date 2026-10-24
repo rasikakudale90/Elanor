@@ -22,29 +22,68 @@ public class MockLocalAiAssistantProvider implements AiAssistantProvider {
 
     @Override
     public AiChatResponse generateChatResponse(AiChatRequest request, List<CatalogContextDto> catalogContext) {
+        return generateChatResponse(request, catalogContext, List.of());
+    }
+
+    @Override
+    public AiChatResponse generateChatResponse(AiChatRequest request, List<CatalogContextDto> catalogContext, List<RetrievedChunkDto> retrievedEvidence) {
         String msg = request.getMessage() != null ? request.getMessage().toLowerCase(Locale.ROOT) : "";
         List<ProductRecommendationDto> recommendations = new ArrayList<>();
         List<String> followUps = new ArrayList<>();
+        List<KnowledgeCitationDto> citations = new ArrayList<>();
+        boolean needsHumanSupport = false;
+        String intent = "GENERAL_CHAT";
         String reply;
 
-        if (msg.contains("serum") || msg.contains("aging") || msg.contains("wrinkle") || msg.contains("cellular")) {
-            reply = "Our flagship Cellular Youth Serum harnesses rare alpine edelweiss stem cells and multi-molecular hyaluronic acid to visibly re-densify cellular skin matrix and enhance dermal elasticity.";
-            CatalogContextDto found = findCatalogItem(catalogContext, "serum", "cellular");
-            if (found != null) {
-                recommendations.add(new ProductRecommendationDto(
-                        found.getProductId(),
-                        found.getVariantId(),
-                        found.getName(),
-                        found.getSubtitle(),
-                        found.getPrice(),
-                        found.getImageUrl(),
-                        "Award-winning cellular regeneration with 94% bio-available peptides."
+        // Map citations from retrieved evidence
+        if (retrievedEvidence != null) {
+            for (RetrievedChunkDto chunk : retrievedEvidence) {
+                String urlOrRef = "/";
+                if ("PRODUCT".equalsIgnoreCase(chunk.getSourceType())) {
+                    urlOrRef = "/product/" + chunk.getSourceId();
+                } else if ("POLICY".equalsIgnoreCase(chunk.getSourceType())) {
+                    urlOrRef = "shipping-policy".equals(chunk.getSourceId()) ? "/track" : "/policies/returns";
+                }
+                String excerpt = chunk.getContent().length() > 140
+                        ? chunk.getContent().substring(0, 140) + "..."
+                        : chunk.getContent();
+                citations.add(new KnowledgeCitationDto(
+                        chunk.getSourceType() + ":" + chunk.getSourceId(),
+                        chunk.getTitle(),
+                        urlOrRef,
+                        excerpt.replace("\n", " ")
                 ));
             }
-            followUps.add("How do I incorporate the Cellular Youth Serum into my PM ritual?");
-            followUps.add("Is this formula suitable for sensitive barrier types?");
-        } else if (msg.contains("balm") || msg.contains("barrier") || msg.contains("dry") || msg.contains("soothing")) {
+        }
+
+        // 1. Skincare Medical / Cure Safety Guardrail
+        if (msg.contains("cure") || msg.contains("psoriasis") || msg.contains("dermatitis") || msg.contains("treat disease") || msg.contains("infection")) {
+            reply = "While Maison Élanor formulations are crafted with rare, clinical-grade botanicals to support barrier resilience and cellular longevity, our formulations are cosmetic and not formulated to diagnose, cure, or treat dermatological diseases. We respectfully advise consulting a board-certified dermatologist for medical conditions.";
+            needsHumanSupport = true;
+            intent = "SAFETY_ABSTENTION";
+            followUps.add("Would you like to explore gentle, non-stripping soothing balms?");
+            followUps.add("How do I conduct a 24-hour patch test?");
+            return new AiChatResponse(reply, recommendations, followUps, citations, needsHumanSupport, intent);
+        }
+
+        // 2. Returns & Refunds Policy
+        if (msg.contains("return") || msg.contains("refund") || msg.contains("exchange") || msg.contains("replace")) {
+            reply = "Under Maison Élanor's 7-Day Sacred Return Policy, patrons may request returns or replacements within 7 calendar days of verified delivery. Formulations must remain in pristine original packaging with at least 90% uncompromised volume. Following a 48-hour atelier inspection, approved refunds are credited within 3-5 business days.";
+            intent = "POLICY_FAQ";
+            followUps.add("How do I initiate a return for my order?");
+            followUps.add("Can I cancel my order before it ships?");
+        }
+        // 3. Shipping & Logistics Policy
+        else if (msg.contains("shipping") || msg.contains("delivery") || msg.contains("dispatch") || msg.contains("courier") || msg.contains("cost")) {
+            reply = "Maison Élanor provides complimentary white-glove express delivery on all orders exceeding ₹1,500 ($150 USD). Standard delivery is ₹150. Dispatches are handled via BlueDart Express and our Shiprocket logistics network, delivering within 3 to 5 business days with live 5-stage milestone tracking.";
+            intent = "POLICY_FAQ";
+            followUps.add("Track my recent order dispatch");
+            followUps.add("What countries do you deliver to?");
+        }
+        // 4. Formulation & Product Inquiries (Balm / Barrier / Soothing)
+        else if (msg.contains("balm") || msg.contains("barrier") || msg.contains("dry") || msg.contains("soothing") || msg.contains("baume")) {
             reply = "For barrier reinforcement, our Baume Apaisant Réparateur is infused with blue tansy, centella asiatica, and botanical squalane to immediately calm inflammation and seal in essential hydration.";
+            intent = "PRODUCT_INQUIRY";
             CatalogContextDto found = findCatalogItem(catalogContext, "balm", "soothing");
             if (found != null) {
                 recommendations.add(new ProductRecommendationDto(
@@ -59,8 +98,33 @@ public class MockLocalAiAssistantProvider implements AiAssistantProvider {
             }
             followUps.add("Can I layer the Soothing Balm over retinol treatments?");
             followUps.add("What is the difference between the balm and the elixir?");
+        }
+        // 5. Sensitive Skin & Patch Testing Protocol
+        else if (msg.contains("patch test") || msg.contains("allergy") || msg.contains("react") || msg.contains("sensitive")) {
+            reply = "For sensitized or reactive skin types, we recommend a 24-hour patch test on the inner forearm or behind the ear prior to full facial ritual application. If any irritation arises, gently cleanse with cool water and discontinue use.";
+            intent = "ROUTINE_ADVICE";
+            followUps.add("Which Élanor products are best for compromised barriers?");
+            followUps.add("Tell me more about Baume Apaisant Réparateur.");
+        } else if (msg.contains("serum") || msg.contains("aging") || msg.contains("wrinkle") || msg.contains("cellular")) {
+            reply = "Our flagship Cellular Youth Serum harnesses rare alpine edelweiss stem cells and multi-molecular hyaluronic acid to visibly re-densify cellular skin matrix and enhance dermal elasticity.";
+            intent = "PRODUCT_INQUIRY";
+            CatalogContextDto found = findCatalogItem(catalogContext, "serum", "cellular");
+            if (found != null) {
+                recommendations.add(new ProductRecommendationDto(
+                        found.getProductId(),
+                        found.getVariantId(),
+                        found.getName(),
+                        found.getSubtitle(),
+                        found.getPrice(),
+                        found.getImageUrl(),
+                        "Award-winning cellular regeneration with 94% bio-available peptides."
+                ));
+            }
+            followUps.add("How do I incorporate the Cellular Youth Serum into my PM ritual?");
+            followUps.add("Is this formula suitable for sensitive barrier types?");
         } else if (msg.contains("elixir") || msg.contains("glow") || msg.contains("radiance") || msg.contains("oil")) {
             reply = "The Botanical Longevity Elixir combines cold-pressed camellia seed and rosehip oils with botanical retinol alternative Bakuchiol to deliver instantaneous luminosity without greasy residue.";
+            intent = "PRODUCT_INQUIRY";
             CatalogContextDto found = findCatalogItem(catalogContext, "elixir", "oil");
             if (found != null) {
                 recommendations.add(new ProductRecommendationDto(
@@ -93,7 +157,7 @@ public class MockLocalAiAssistantProvider implements AiAssistantProvider {
             followUps.add("Which formulation is recommended for dehydration?");
         }
 
-        return new AiChatResponse(reply, recommendations, followUps);
+        return new AiChatResponse(reply, recommendations, followUps, citations, needsHumanSupport, intent);
     }
 
     @Override

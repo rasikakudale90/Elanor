@@ -41,6 +41,11 @@ elanor:
     key-id: ${RAZORPAY_KEY_ID:rzp_test_51a0Hk6b62D7X9}
     key-secret: ${RAZORPAY_KEY_SECRET:}
     webhook-secret: ${RAZORPAY_WEBHOOK_SECRET:}
+  ai:
+    provider: ${AI_PROVIDER_TYPE:gemini}
+    gemini:
+      api-key: ${GEMINI_API_KEY:}
+      model: ${GEMINI_MODEL:gemini-1.5-flash}
 
 springdoc:
   api-docs:

@@ -1,18 +1,19 @@
 package com.elanor.ai.provider;
 
-import com.elanor.ai.dto.AiChatRequest;
-import com.elanor.ai.dto.AiChatResponse;
-import com.elanor.ai.dto.AiConsultationRequest;
-import com.elanor.ai.dto.AiConsultationResponse;
-import com.elanor.ai.dto.CatalogContextDto;
+import com.elanor.ai.dto.*;
 
+import java.util.Collections;
 import java.util.List;
 
 public interface AiAssistantProvider {
 
     String getProviderName();
 
-    AiChatResponse generateChatResponse(AiChatRequest request, List<CatalogContextDto> catalogContext);
+    default AiChatResponse generateChatResponse(AiChatRequest request, List<CatalogContextDto> catalogContext) {
+        return generateChatResponse(request, catalogContext, Collections.emptyList());
+    }
+
+    AiChatResponse generateChatResponse(AiChatRequest request, List<CatalogContextDto> catalogContext, List<RetrievedChunkDto> retrievedEvidence);
 
     AiConsultationResponse generateConsultation(AiConsultationRequest request, List<CatalogContextDto> catalogContext);
 }

@@ -7,13 +7,23 @@ import com.elanor.catalog.entity.ProductStatus;
 import com.elanor.catalog.entity.ProductVariant;
 import com.elanor.catalog.repository.ProductRepository;
 import com.elanor.catalog.repository.ProductVariantRepository;
+import com.elanor.common.security.UserPrincipal;
+import com.elanor.customer.entity.CustomerProfile;
+import com.elanor.customer.repository.CustomerProfileRepository;
+import com.elanor.order.entity.Order;
+import com.elanor.order.repository.OrderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class AiAssistantService {
@@ -23,21 +33,80 @@ public class AiAssistantService {
     private final AiAssistantProvider aiAssistantProvider;
     private final ProductRepository productRepository;
     private final ProductVariantRepository productVariantRepository;
+    private final KnowledgeRetrievalService knowledgeRetrievalService;
+    private final OrderRepository orderRepository;
+    private final CustomerProfileRepository customerProfileRepository;
 
     public AiAssistantService(
             AiAssistantProvider aiAssistantProvider,
             ProductRepository productRepository,
-            ProductVariantRepository productVariantRepository) {
+            ProductVariantRepository productVariantRepository,
+            KnowledgeRetrievalService knowledgeRetrievalService,
+            OrderRepository orderRepository,
+            CustomerProfileRepository customerProfileRepository) {
         this.aiAssistantProvider = aiAssistantProvider;
         this.productRepository = productRepository;
         this.productVariantRepository = productVariantRepository;
+        this.knowledgeRetrievalService = knowledgeRetrievalService;
+        this.orderRepository = orderRepository;
+        this.customerProfileRepository = customerProfileRepository;
     }
 
     @Transactional(readOnly = true)
     public AiChatResponse chat(AiChatRequest request) {
+        String msgLower = request.getMessage() != null ? request.getMessage().toLowerCase(Locale.ROOT) : "";
+
+        // 1. Live Order Tracking Security Guardrail & Tool
+        if (msgLower.contains("order") || msgLower.contains("track") || msgLower.contains("dispatch status") || msgLower.contains("eln-")) {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.getPrincipal() instanceof UserPrincipal principal) {
+                CustomerProfile customer = customerProfileRepository.findByUserId(principal.getId()).orElse(null);
+                if (customer != null) {
+                    Page<Order> orders = orderRepository.findByCustomerOrderByCreatedAtDesc(customer, Pageable.ofSize(3));
+                    if (!orders.isEmpty()) {
+                        Order latest = orders.getContent().get(0);
+                        String reply = String.format("Cher Patron, your sacred order [%s] is currently in status: %s. Total order value: ₹%s. Tracking is actively synchronized via BlueDart Express.",
+                                latest.getOrderNumber(), latest.getStatus(), latest.getTotalAmount());
+                        return new AiChatResponse(
+                                reply,
+                                List.of(),
+                                List.of("View complete tracking timeline", "Browse restorative botanical balms"),
+                                List.of(new KnowledgeCitationDto("ORDER:" + latest.getOrderNumber(), "Order " + latest.getOrderNumber(), "/track", "Milestone Status: " + latest.getStatus())),
+                                false,
+                                "ORDER_TRACKING"
+                        );
+                    } else {
+                        return new AiChatResponse(
+                                "Cher Patron, we found no active orders placed under your account yet. When you place a sacred order, you can monitor its 5-stage dispatch right here.",
+                                List.of(),
+                                List.of("Discover The Iconic Formulations", "Take the Haute Skin Diagnostic"),
+                                List.of(),
+                                false,
+                                "ORDER_TRACKING"
+                        );
+                    }
+                }
+            } else {
+                // Anonymous guest: Zero IDOR enforcement
+                return new AiChatResponse(
+                        "To protect your privacy and view confidential order milestones, please sign in to your Maison Élanor account via the Patron Sanctuary icon in the top navigation. Once authenticated, I will retrieve your real-time tracking timeline instantly.",
+                        List.of(),
+                        List.of("Sign in to Patron Sanctuary", "View complimentary shipping thresholds"),
+                        List.of(new KnowledgeCitationDto("POLICY:shipping-policy", "Maison Élanor Dispatch Policy", "/track", "Complimentary delivery on orders exceeding ₹1,500 via BlueDart Express.")),
+                        false,
+                        "AUTH_REQUIRED"
+                );
+            }
+        }
+
+        // 2. Retrieve Grounded Knowledge Evidence
+        List<RetrievedChunkDto> retrievedEvidence = knowledgeRetrievalService.retrieveRelevant(request.getMessage(), 4, 0.20);
         List<CatalogContextDto> catalogContext = buildCatalogContext();
-        log.info("Processing AI chat inquiry with {} active catalog context items", catalogContext.size());
-        return aiAssistantProvider.generateChatResponse(request, catalogContext);
+
+        log.info("Processing AI chat inquiry with {} retrieved evidence chunks and {} catalog items",
+                retrievedEvidence.size(), catalogContext.size());
+
+        return aiAssistantProvider.generateChatResponse(request, catalogContext, retrievedEvidence);
     }
 
     @Transactional(readOnly = true)

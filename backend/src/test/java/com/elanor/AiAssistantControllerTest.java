@@ -116,4 +116,49 @@ public class AiAssistantControllerTest {
                 .andExpect(jsonPath("$.data.bundledDiscountPercentage").value(15.00))
                 .andExpect(jsonPath("$.data.bundledPrice").exists());
     }
+
+    @Test
+    public void testAiChatInquiry_PolicyGroundedWithCitations() throws Exception {
+        AiChatRequest request = new AiChatRequest();
+        request.setMessage("What is your 7-day return policy and how do refunds work?");
+
+        mockMvc.perform(post("/api/v1/ai/chat")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.reply", containsString("7-Day")))
+                .andExpect(jsonPath("$.data.intent").value("POLICY_FAQ"))
+                .andExpect(jsonPath("$.data.citations", not(empty())));
+    }
+
+    @Test
+    public void testAiChatInquiry_MedicalSafetyAbstention() throws Exception {
+        AiChatRequest request = new AiChatRequest();
+        request.setMessage("Can this product cure my eczema and dermatitis infection?");
+
+        mockMvc.perform(post("/api/v1/ai/chat")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.needsHumanSupport").value(true))
+                .andExpect(jsonPath("$.data.intent").value("SAFETY_ABSTENTION"))
+                .andExpect(jsonPath("$.data.reply", containsString("dermatologist")));
+    }
+
+    @Test
+    public void testAiChatInquiry_GuestOrderTrackingRequiresAuth() throws Exception {
+        AiChatRequest request = new AiChatRequest();
+        request.setMessage("Where is my order ELN-2026-9999?");
+
+        mockMvc.perform(post("/api/v1/ai/chat")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.intent").value("AUTH_REQUIRED"))
+                .andExpect(jsonPath("$.data.reply", containsString("sign in to your Maison Élanor account")));
+    }
 }
+
