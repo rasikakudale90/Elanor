@@ -484,8 +484,19 @@ graph TD
   - Hybrid Card Sorting study results with 5 users across 20 content cards, achieving 88%–100% sorting agreement across 5 categories.
   - 3 Core Task User Flows: (1) AI Skin Diagnostic & Purchase Flow, (2) Product Discovery & Checkout Flow, (3) Sanctuary Profile & Settings Flow.
   - Detailed low-fidelity visual wireframe blueprints and component tables for 7 core screens: Login, Registration, Dashboard, List, Details, Profile, and Settings.
-- [x] **Consolidated Master Coursework Document (`Elanor_UI_UX_Comprehensive_Documentation_Master.docx`)**:
-  - Complete, unified academic submission file merging Assignments 1, 2, and 3 into a single cohesive `.docx` document with academic cover table, executive abstract, full typography scale table, and zero meta-commentary.
-  - Mirrored backup copies saved in root and in `docs/`.
+### ✅ Phase 16 — Evidence-Grounded RAG AI Assistant & Haute Chatbot Drawer
+- [x] **Backend RAG Knowledge Ingestion & Retrieval Pipeline**:
+  - `knowledge_chunks` Flyway migration (`V4__knowledge_base.sql`) with token-based semantic indexing.
+  - Startup catalog and atelier policy ingestion with SHA-256 deduplication (`KnowledgeIngestionService.java`).
+  - Retrieval engine with token hybrid scoring and citation attribution (`KnowledgeRetrievalService.java`).
+  - Google Gemini 1.5 Flash grounded provider (`GeminiAiAssistantProvider.java`) with mock fallback and safety guardrails.
+  - Live JWT-authenticated order tracking tool (`AiAssistantService.java`).
+- [x] **Frontend Luxury Chatbot Component & Resilience**:
+  - Floating Concierge launcher pill and glassmorphic slide-out drawer (`ChatBotDrawer.tsx`).
+  - Fixed user message visibility (resolved CSS contrast issue where dark obsidian text was styled on dark background; restored `#FDFBF8` contrast with gold patron badge).
+  - Session patron name memory and direct name inquiry recognition ("What is my name?" / "My name is Rasika").
+  - 8-second quick race timeout falling back to client-side grounded catalog reasoning when backend container is hibernating.
+  - 1-click cart addition directly from concierge product cards.
+
 
 
