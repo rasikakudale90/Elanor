@@ -10,6 +10,7 @@ import QuickViewModal from '@/components/QuickViewModal';
 import AuthModal from '@/components/AuthModal';
 import MobileBottomNav from '@/components/MobileBottomNav';
 import Footer from '@/components/Footer';
+import ChatBotDrawer from '@/components/ChatBotDrawer';
 
 const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
@@ -62,6 +63,7 @@ export default function RootLayout({
           <SearchModal />
           <QuickViewModal />
           <AuthModal />
+          <ChatBotDrawer />
         </StoreProvider>
       </body>
     </html>

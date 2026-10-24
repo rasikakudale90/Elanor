@@ -148,7 +148,43 @@ export interface AiConsultationResponse {
   }>;
   bundledDiscountPercentage: number;
   totalRitualPrice: number;
-  bundledPrice: number;
+}
+
+export interface KnowledgeCitationDto {
+  sourceId: string;
+  title: string;
+  urlOrReference: string;
+  excerpt: string;
+}
+
+export interface ProductRecommendationDto {
+  productId: string;
+  variantId?: string;
+  name: string;
+  subtitle?: string;
+  price: number;
+  imageUrl?: string;
+  clinicalBenefit?: string;
+}
+
+export interface AiChatMessageDto {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+}
+
+export interface AiChatRequest {
+  message: string;
+  history?: AiChatMessageDto[];
+  focusedProductId?: string;
+}
+
+export interface AiChatResponse {
+  reply: string;
+  suggestedProducts?: ProductRecommendationDto[];
+  followUpQuestions?: string[];
+  citations?: KnowledgeCitationDto[];
+  needsHumanSupport?: boolean;
+  intent?: string;
 }
 
 // Token & Guest ID management
@@ -319,11 +355,13 @@ export const elanorApi = {
   ai: {
     consult: (payload: AiConsultationRequest) =>
       request<AiConsultationResponse>('/ai/consult', { method: 'POST', body: JSON.stringify(payload) }),
-    chat: (message: string, context?: Record<string, unknown>) =>
-      request<{ reply: string; suggestedProducts: ProductDto[] }>('/ai/chat', {
+    chat: (payload: string | AiChatRequest) => {
+      const body = typeof payload === 'string' ? { message: payload } : payload;
+      return request<AiChatResponse>('/ai/chat', {
         method: 'POST',
-        body: JSON.stringify({ message, context }),
-      }),
+        body: JSON.stringify(body),
+      });
+    },
   },
 
   // 6. Tracking
