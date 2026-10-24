@@ -4,10 +4,10 @@
 > **Brand Slogan:** Pure Beauty. Naturally.  
 > **Brand Essence:** Haute Botanique & Clinical Cellular Longevity  
 > **Architecture:** Modular Monolith with Replaceable Provider Ports (Spring Boot 3.3.5 + Java 21 + PostgreSQL) + Next.js 15 App Router Frontend  
-> **Current Status:** 100% Complete & Production-Hardened (60/60 Backend Tests Passing, 14/14 Frontend Static Pages Compiled, 100% Clean Git Tree)  
+> **Current Status:** 100% Complete & Production-Hardened (65/65 Backend Tests Passing, 18/18 Frontend Static Pages Compiled, 100% Clean Git Tree)  
 > **Repository:** [https://github.com/rasikakudale90/Elanor](https://github.com/rasikakudale90/Elanor)  
 > **Authoritative Specification:** [`docs/ELANOR_BACKEND_TECHNICAL_SRS.md`](file:///e:/Elanor/docs/ELANOR_BACKEND_TECHNICAL_SRS.md)  
-> **Last Updated:** October 2, 2026  
+> **Last Updated:** October 24, 2026  
 
 ---
 
@@ -260,10 +260,36 @@ graph TD
 
 ---
 
+### ✅ Phase 16 — RAG AI Assistant Pipeline & Haute Botanical Chatbot UI (`com.elanor.ai`, `components/ChatBotDrawer.tsx`)
+- [x] **Flyway Migration (`V4__knowledge_base.sql`) & Domain Schema**:
+  - Normalized `knowledge_chunks` table indexing catalog formulations, brand philosophy, 7-day return policies, white-glove shipping policies, and dermatological FAQs.
+  - Added indexes on `(source_type, source_id)` and `(content_hash)` for high-speed retrieval.
+- [x] **Automated Ingestion Pipeline (`KnowledgeIngestionService.java`)**:
+  - Auto-synchronizes on application startup and dynamic catalog events.
+  - Ingests active products (`Product`, `ProductVariant`), shipping & return policies, and patch testing protocols with SHA-256 idempotency.
+- [x] **Hybrid Semantic Retrieval Engine (`KnowledgeRetrievalService.java`)**:
+  - Token-level relevance scoring and threshold filtering (k=4).
+  - Stable citation generation (`sourceId`, `title`, `urlOrReference`, `excerpt`).
+- [x] **Gemini 1.5 Provider & Live Tools Engine (`GeminiAiAssistantProvider.java`, `AiAssistantService.java`)**:
+  - Environment-driven provider selection (`AI_PROVIDER_TYPE`, `GEMINI_API_KEY`, `GEMINI_MODEL`) with graceful local grounded fallback.
+  - Live order tracking tool verifying authenticated JWT principal (zero IDOR).
+  - Skincare safety abstention guardrail flagging medical condition inquiries (`needsHumanSupport = true`, `intent = SAFETY_ABSTENTION`).
+- [x] **Luxury Chatbot UI (`components/ChatBotDrawer.tsx`)**:
+  - Built strictly with `Élanor_Design_Tokens_v1.0.md` (`#F8F3EB` linen, `#1B1A17` obsidian, `#C8A46A` gold).
+  - Floating launcher button with subtle gold breathing pulse.
+  - Verified citation pills, interactive suggested formulation cards with 1-click "Add to Bag", quick prompt chips, and conversation restart controls.
+  - Fully responsive and elevated above `MobileBottomNav.tsx` on mobile viewports.
+- [x] **Zero-Error Verification**:
+  - Backend: 65/65 JUnit tests passing (`mvn test` -> `BUILD SUCCESS`).
+  - Frontend: 18/18 static and dynamic routes compiled cleanly (`npm run build` -> Exit code 0).
+
+---
+
 ## 4. Verification Status & Test Suite Summary
 
-- **Backend Unit & Integration Tests (JUnit 5 / Mockito):** 60 passed, 0 failures, 0 errors, 0 skipped across all 15 implementation phases (`mvn test` -> `BUILD SUCCESS`)
+- **Backend Unit & Integration Tests (JUnit 5 / Mockito):** 65 passed, 0 failures, 0 errors, 0 skipped across all 16 implementation phases (`mvn test` -> `BUILD SUCCESS`)
 - **Backend End-to-End Postman / Newman Test Suite:** 41/41 requests executed, 68/68 assertions passed (0 failed, 0 errored) across all 15 phases against live Spring Boot local server
+  - Phase 16: Grounded RAG AI Assistant, Ingestion Pipeline & Citation Verification (KnowledgeBaseRagTest & AiAssistantControllerTest passing)
   - Phase 01: Baseline & OpenAPI Docs (Health check, OpenAPI schema title)
   - Phase 02: Auth & Accounts (Customer registration, Admin login, Profile, Saved addresses)
   - Phase 03: Catalog & Variants (Admin category creation, Product creation, Variant creation, Stock restock, Public catalog)

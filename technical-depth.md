@@ -39,15 +39,16 @@ graph TD
 
 ## 2. Technical Depth & Engineering Architecture
 
-### 2.1 Backend Architecture & Provider Ports (Phases 1 — 15 Complete)
-* **Architecture Pattern:** Modular Monolith in Spring Boot 3.3.5 (Java 21) with 25 normalized tables via Flyway (`V1__init_schema.sql`).
+### 2.1 Backend Architecture & Provider Ports (Phases 1 — 16 Complete)
+* **Architecture Pattern:** Modular Monolith in Spring Boot 3.3.5 (Java 21) with 26 normalized tables via Flyway (`V1__init_schema.sql` through `V4__knowledge_base.sql`).
 * **Provider Port Implementations:**
   - **Payment Processing**: `PaymentProvider` interface with `RazorpayPaymentProvider`, `DemoPaymentProvider`, and `CodPaymentProvider`.
   - **Logistics & Tracking**: `ShippingProvider` interface with `ShiprocketShippingProvider` and `ManualShippingProvider` (BlueDart express).
   - **Communications**: `SmsProvider` interface with `DevLogSmsProvider`.
   - **Social Authentication**: `SocialAuthProvider` with `GoogleAuthProvider`.
-  - **AI Shopping Assistant**: `AiAssistantProvider` with `MockLocalAiAssistantProvider` and Gemini Interactions API integration port.
-* **Test Suite Status:** 60/60 Unit & Integration tests passing (`mvn test` -> `BUILD SUCCESS`) + 41/41 Postman requests (68/68 assertions passed).
+  - **AI Shopping Assistant & RAG Pipeline**: `AiAssistantProvider` with `GeminiAiAssistantProvider` (Google Gemini 1.5 Flash REST integration) and `MockLocalAiAssistantProvider` (local fallback).
+  - **Knowledge & Evidence Engine**: `KnowledgeIngestionService` (auto-indexing active catalog formulations, brand philosophy, 7-day returns, and shipping policies with SHA-256 deduplication) and `KnowledgeRetrievalService` (hybrid semantic relevance ranking with top-k citation mapping).
+* **Test Suite Status:** 65/65 Unit & Integration tests passing (`mvn test` -> `BUILD SUCCESS`) + 41/41 Postman requests (68/68 assertions passed).
 
 ---
 
