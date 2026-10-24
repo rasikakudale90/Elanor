@@ -433,4 +433,33 @@ graph TD
   - Backend: 288 source files compiled with Maven on Java 21 (`mvn test-compile` & `mvn clean package` -> Exit code 0).
   - GitHub synchronization: Clean branch `main` at commit `60b55b9`.
 
+---
+
+### ✅ MCA UI/UX Academic Coursework Suite (Assignments 1, 2, 3 + Master Document)
+- [x] **Assignment 1 — UI/UX Evaluation of an Existing Application (`Assignment_1_UI_UX_Evaluation_Report.docx`)**:
+  - Evaluation of 7 core Élanor screens: Homepage (`/`), Shop (`/shop`), Formulation Detail (`/product/[id]`), AI Skin Concierge (`/ai-skin-concierge`), Cart Drawer (`CartDrawer.tsx`), Customer Sanctuary (`AuthModal.tsx`), and Single-Page Checkout (`/checkout`).
+  - Target user personas: Genevieve Moreau (34, Luxury Connoisseur) & Claire Delacroix (26, Ingredient & Tech Enthusiast).
+  - Aesthetic & interaction strengths: Alabaster linen palette (`#F8F3EB`), Cormorant Garamond serif pairing, 3D mouse parallax with laser scan beam, Lenis smooth scrolling.
+  - Usability & accessibility audit: Fitts's Law mobile thumb-zone reachability, WCAG 2.1 AA contrast deficit on secondary text (2.92:1 failure), button corner consistency, missing ARIA tags.
+  - Locked typography scale: Hero Display XL (88px), Hero (72px), H1 Main (56px), H2 Section (42px), H3 Card (30px), H4 Component (22px), Body Large (18px), Body Standard (16px), Small (14px), Caption (12px).
+  - Five implemented strategic improvements: Persistent Mobile Bottom Navigation (`MobileBottomNav.tsx`), WCAG contrast calibration (`#5E584F` for 5.8:1 ratio), slide-out Cart Drawer with $150 free shipping gauge, 4-stage progressive disclosure AI quiz stepper, and single-page accordion checkout.
+  - 7-slide oral presentation deck outline with executive discussion points.
+- [x] **Assignment 2 — User Research and Competitive Analysis (`Assignment_2_User_Research_and_Competitive_Analysis.docx`)**:
+  - Qualitative user interviews & task-based usability testing with 5 diverse participants (Genevieve, Claire, Ananya, Marcus, Pooja) across mobile and desktop devices.
+  - Competitive analysis matrix benchmarking Élanor against Aesop (minimalist luxury) and Kiehl's (clinical heritage apothecary) across 6 key dimensions; identified Élanor's strategic "White Space".
+  - Detailed Persona Modeling (Genevieve & Claire).
+  - 4-Quadrant Empathy Map structured cleanly into Says, Thinks, Does, Feels.
+  - 5-Stage Customer Journey Map (Discovery → Consultation → Evaluation → Purchase → Tracking) detailing user actions, emotions, pain points, and design opportunities.
+  - Formal user-centered Problem Statement and 5 actionable "How Might We" (HMW) design frameworks.
+  - 5 Agile User Stories with formal testable Acceptance Criteria (AI Concierge, Mobile Bottom Nav, Cart Drawer, Accordion Checkout, High-Contrast Ingredients).
+- [x] **Assignment 3 — Information Architecture and Wireframing (`Assignment_3_Information_Architecture_and_Wireframing.docx`)**:
+  - Hierarchical 3-level Sitemap organizing content from root homepage down to apothecary products, diagnostic tools, and customer accounts.
+  - Dual-Layer Navigation Structure: Desktop fixed header + Mobile Bottom Navigation dock (`MobileBottomNav.tsx`) + Breadcrumb hierarchy + Utility footer.
+  - Hybrid Card Sorting study results with 5 users across 20 content cards, achieving 88%–100% sorting agreement across 5 categories.
+  - 3 Core Task User Flows: (1) AI Skin Diagnostic & Purchase Flow, (2) Product Discovery & Checkout Flow, (3) Sanctuary Profile & Settings Flow.
+  - Detailed low-fidelity visual wireframe blueprints and component tables for 7 core screens: Login, Registration, Dashboard, List, Details, Profile, and Settings.
+- [x] **Consolidated Master Coursework Document (`Elanor_UI_UX_Comprehensive_Documentation_Master.docx`)**:
+  - Complete, unified academic submission file merging Assignments 1, 2, and 3 into a single cohesive `.docx` document with academic cover table, executive abstract, full typography scale table, and zero meta-commentary.
+  - Mirrored backup copies saved in root and in `docs/`.
+
 

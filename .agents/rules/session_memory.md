@@ -27,4 +27,8 @@ At the beginning of every session or upon receiving user instructions:
   - Live on [https://elanor-spendora2.vercel.app/ai-skin-concierge](https://elanor-spendora2.vercel.app/ai-skin-concierge).
   - Exact 3-column composition based on `skin9.png` reference with GSAP mouse parallax, laser scanning beam, 3 dermal bounding boxes, and 1-click ritual cart addition with 15% discount.
 - **Live Deployment:** [https://elanor-spendora2.vercel.app](https://elanor-spendora2.vercel.app) (GitHub `main`).
-
+- **MCA UI/UX Coursework Documentation Suite:**
+  - `Assignment_1_UI_UX_Evaluation_Report.docx`: Heuristic evaluation (Nielsen's 10 Heuristics, WCAG 2.1 AA), typography scale (Hero 88px/72px, H1 56px, H2 42px, H3 30px, H4 22px, Body 16-18px, Caption 12px), 5 strategic improvements, 7 presentation slides deck.
+  - `Assignment_2_User_Research_and_Competitive_Analysis.docx`: 5-user qualitative research, competitor matrix (Aesop vs Kiehl's), personas (Genevieve & Claire), empathy map, customer journey map, problem statement, 5 HMWs, and 5 Agile user stories with acceptance criteria.
+  - `Assignment_3_Information_Architecture_and_Wireframing.docx`: Hierarchical sitemap, dual-layer navigation model, hybrid card sorting matrix, 3 user flows, and low-fidelity wireframes for 7 screens (Login, Registration, Dashboard, List, Details, Profile, Settings).
+  - `Elanor_UI_UX_Comprehensive_Documentation_Master.docx`: Unified master coursework report combining Assignments 1, 2, and 3 into one comprehensive submission file.

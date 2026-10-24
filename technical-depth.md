@@ -93,6 +93,24 @@ graph TD
 
 ---
 
+### 2.5 User Experience (UI/UX) Engineering & Human-Centered Design Architecture
+* **Design System & Typography Scale:**
+  - Locked typographical hierarchy pairing Cormorant Garamond (luxury serif) for headings and Manrope (geometric sans-serif) for body/UI data.
+  - Scale: Hero Display XL (88px, weight 500), Hero (72px, weight 500), H1 Main (56px, weight 500), H2 Section (42px, weight 500), H3 Card (30px, weight 500), H4 Component (22px, weight 500), Body Large (18px, weight 400), Body Standard (16px, weight 400), Small UI (14px, weight 500), Caption (12px, weight 400).
+* **Dual-Layer Navigation Model:**
+  - Desktop: Minimalist fixed header with search modal, bag drawer trigger, and VIP monogram status.
+  - Mobile: Ergonomic glassmorphic bottom navigation dock (`components/MobileBottomNav.tsx`) placing Home, Shop, Concierge, and Sanctuary in the natural thumb zone.
+* **Accessibility & Contrast Engineering (WCAG 2.1 AA):**
+  - Recalibrated secondary text tokens to `#5E584F` over linen background `#F8F3EB`, achieving a 5.8:1 contrast ratio (exceeding WCAG AA 4.5:1 requirement).
+  - Explicit `aria-label` tags across all icon buttons and accessible keyboard `focus-visible` styling.
+* **Academic Coursework Artifacts (MCA UI/UX Suite):**
+  - `Assignment_1_UI_UX_Evaluation_Report.docx`: Heuristic evaluation (Nielsen 10, WCAG 2.1 AA), typography scale, 5 strategic improvements, 7 presentation slides deck.
+  - `Assignment_2_User_Research_and_Competitive_Analysis.docx`: 5-user research, competitor matrix (Aesop vs Kiehl's), personas (Genevieve & Claire), empathy map, journey map, problem statement, 5 HMWs, Agile user stories.
+  - `Assignment_3_Information_Architecture_and_Wireframing.docx`: Sitemap hierarchy, dual-layer navigation, hybrid card sorting matrix, 3 user flows, 7 low-fidelity wireframes (Login, Register, Dashboard, List, Details, Profile, Settings).
+  - `Elanor_UI_UX_Comprehensive_Documentation_Master.docx`: Master document merging Assignments 1, 2, and 3 into a single academic submission document.
+
+---
+
 ## 3. Production Readiness & Quality Assurance Matrix
 
 | Capability | Status | Architecture Layer | Verification Method |
@@ -106,5 +124,7 @@ graph TD
 | **AI Skin Diagnostic Engine** | ✅ Complete | `/ai-skin-concierge` + Spring AI | Heuristic Dermal Scoring + Regimen Builder |
 | **Live Webhook Ingestion** | ✅ Complete | Razorpay & Shiprocket Ports | HMAC-SHA256 Signature Verification |
 | **Vercel Edge Deployment** | ✅ Live | Next.js 15 App Router | [elanor-spendora2.vercel.app](https://elanor-spendora2.vercel.app) |
+| **UI/UX Academic Coursework Suite** | ✅ Complete | Assignments 1, 2, 3 + Master | Full `.docx` Academic Submissions |
+
 
 
