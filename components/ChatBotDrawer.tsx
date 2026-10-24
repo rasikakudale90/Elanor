@@ -41,6 +41,7 @@ export default function ChatBotDrawer() {
   };
 
   const [messages, setMessages] = useState<ChatMessage[]>([initialGreeting]);
+  const [sessionPatronName, setSessionPatronName] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -50,6 +51,24 @@ export default function ChatBotDrawer() {
       inputRef.current?.focus();
     }
   }, [isOpen, messages, isLoading]);
+
+  const renderFormattedText = (rawText: string, isUser: boolean) => {
+    if (!rawText) return null;
+    const parts = rawText.split(/(\*\*[^*]+\*\*)/g);
+    return parts.map((part, index) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return (
+          <strong
+            key={index}
+            className={`font-semibold ${isUser ? 'text-[#C8A46A]' : 'text-[#1B1A17]'}`}
+          >
+            {part.slice(2, -2)}
+          </strong>
+        );
+      }
+      return part;
+    });
+  };
 
   const handleSendMessage = async (userText: string) => {
     const text = userText.trim();
@@ -72,12 +91,16 @@ export default function ChatBotDrawer() {
       lowerText.includes('my name') ||
       lowerText.includes('who am i') ||
       lowerText.includes('do you know me') ||
-      lowerText.startsWith('who i am')
+      lowerText.startsWith('who i am') ||
+      lowerText === 'name' ||
+      lowerText === 'whats my name' ||
+      lowerText === "what's my name"
     ) {
       setTimeout(() => {
-        const reply = customerUser
-          ? `Cher Patron, you are logged in as **${customerUser.name}** (${customerUser.email}), esteemed member of our **${customerUser.tier}** tier. How may I tailor your botanical regimen today?`
-          : `You are currently visiting our atelier as an esteemed guest (**Cher Patron**). To let me personalize your consultations or look up your private orders, please sign in via the Patron Sanctuary icon in the top navigation, or feel free to tell me your name!`;
+        const activeName = customerUser?.name || sessionPatronName;
+        const reply = activeName
+          ? `Cher Patron, you are recognized in our atelier as **${activeName}**${customerUser?.tier ? ` (${customerUser.email}), esteemed member of our **${customerUser.tier}** tier` : ''}. How may I tailor your botanical regimen today?`
+          : `You are currently visiting our atelier as an esteemed guest (**Cher Patron**). To let me personalize your consultations or look up your private orders, please sign in via the Patron Sanctuary icon in the top navigation, or simply introduce yourself by saying *"My name is..."*!`;
 
         setMessages(prev => [
           ...prev,
@@ -85,29 +108,30 @@ export default function ChatBotDrawer() {
             id: 'res-' + Date.now(),
             role: 'assistant',
             content: reply,
-            intent: customerUser ? 'USER_RECOGNIZED' : 'AUTH_REQUIRED',
-            followUpQuestions: customerUser
+            intent: activeName ? 'USER_RECOGNIZED' : 'AUTH_REQUIRED',
+            followUpQuestions: activeName
               ? ['Track my recent sacred order', 'Recommend a ritual for barrier repair']
               : ['Sign in to Patron Sanctuary', 'Recommend a ritual for barrier repair'],
             timestamp: new Date()
           }
         ]);
         setIsLoading(false);
-      }, 500);
+      }, 400);
       return;
     }
 
-    // Name self-introduction: "My name is X" / "I am X"
-    const nameMatch = text.match(/(?:my name is|i am|call me)\s+([a-zA-Z\s]{2,30})/i);
-    if (nameMatch && !lowerText.includes('what is') && !lowerText.includes('tell me')) {
+    // Name self-introduction: "My name is X" / "I am X" / "Call me X" / "I'm X"
+    const nameMatch = text.match(/(?:my name is|my name's|i'm|im|i am|call me|this is)\s+([a-zA-Z\s]{2,30})/i);
+    if (nameMatch && !lowerText.includes('what is') && !lowerText.includes('tell me') && !lowerText.includes('where is')) {
       const capturedName = nameMatch[1].trim();
+      setSessionPatronName(capturedName);
       setTimeout(() => {
         setMessages(prev => [
           ...prev,
           {
             id: 'res-' + Date.now(),
             role: 'assistant',
-            content: `Enchanté, **${capturedName}**! It is a distinct pleasure to guide you through Maison Élanor's cellular longevity botanical universe. How may I assist your dermal ritual today?`,
+            content: `Enchanté, **${capturedName}**! It is a distinct pleasure to welcome you to Maison Élanor. I have committed your name to our atelier records. How may I assist your dermal ritual today?`,
             followUpQuestions: [
               'Recommend a ritual for compromised barrier repair',
               'What is your 7-day return policy?',
@@ -117,7 +141,7 @@ export default function ChatBotDrawer() {
           }
         ]);
         setIsLoading(false);
-      }, 500);
+      }, 400);
       return;
     }
 
@@ -127,10 +151,16 @@ export default function ChatBotDrawer() {
         content: m.content
       }));
 
-      const res = await elanorApi.ai.chat({
+      // Race with 8s timeout to avoid freezing if Render container is cold-starting
+      const chatPromise = elanorApi.ai.chat({
         message: text,
         history: historyPayload
       });
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Backend timeout: using local grounded RAG')), 8000)
+      );
+
+      const res = await Promise.race([chatPromise, timeoutPromise]);
 
       if (res && res.reply) {
         const assistantMessage: ChatMessage = {
@@ -388,19 +418,28 @@ export default function ChatBotDrawer() {
                 <div
                   className={`max-w-[88%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                     msg.role === 'user'
-                      ? 'bg-[#1B1A17] text-[#FDFBF8] rounded-br-xs shadow'
-                      : 'bg-[#FFFDF9] text-[#1B1A17] border border-[#EFE3D3] rounded-bl-xs shadow-sm'
+                      ? 'bg-[#1B1A17] text-[#FDFBF8] border border-[#C8A46A]/30 rounded-br-xs shadow-md'
+                      : 'bg-[#FFFDF9] text-[#1B1A17] border border-[#EFE3D3] rounded-bl-xs shadow-xs'
                   }`}
                 >
-                  {msg.role === 'assistant' && (
-                    <div className="flex items-center gap-1.5 mb-1.5 text-[#C8A46A] text-xs font-serif">
+                  {msg.role === 'assistant' ? (
+                    <div className="flex items-center gap-1.5 mb-1.5 text-[#C8A46A] text-xs font-serif font-medium">
                       <Sparkles className="w-3.5 h-3.5" />
                       <span>Maison Élanor</span>
                     </div>
+                  ) : (
+                    <div className="flex items-center justify-end gap-1.5 mb-1 text-[#C8A46A] text-[10px] font-sans tracking-wider uppercase font-medium">
+                      <span>You</span>
+                      <User className="w-3 h-3 text-[#C8A46A]" />
+                    </div>
                   )}
 
-                  <p className="whitespace-pre-line text-[13.5px] text-[#1B1A17] leading-relaxed">
-                    {msg.content}
+                  <p
+                    className={`whitespace-pre-line text-[13.5px] leading-relaxed ${
+                      msg.role === 'user' ? 'text-[#FDFBF8]' : 'text-[#1B1A17]'
+                    }`}
+                  >
+                    {renderFormattedText(msg.content, msg.role === 'user')}
                   </p>
 
                   {/* Safety Abstention Alert */}
@@ -475,7 +514,7 @@ export default function ChatBotDrawer() {
                             <div className="min-w-0">
                               <p className="text-xs font-medium text-[#1B1A17] truncate">{p.name}</p>
                               <p className="text-[11px] text-[#C8A46A] font-serif font-semibold">
-                                ₹{p.price.toFixed(2)}
+                                ₹{typeof p.price === 'number' ? p.price.toFixed(2) : p.price}
                               </p>
                             </div>
                           </div>
