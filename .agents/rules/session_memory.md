@@ -27,6 +27,22 @@ At the beginning of every session or upon receiving user instructions:
   - Live on [https://elanor-spendora2.vercel.app/ai-skin-concierge](https://elanor-spendora2.vercel.app/ai-skin-concierge).
   - Exact 3-column composition based on `skin9.png` reference with GSAP mouse parallax, laser scanning beam, 3 dermal bounding boxes, and 1-click ritual cart addition with 15% discount.
 - **Live Deployment:** [https://elanor-spendora2.vercel.app](https://elanor-spendora2.vercel.app) (GitHub `main`).
+- **Phase 16: Evidence-Grounded RAG AI Pipeline & Haute Botanical Concierge:**
+  - **Backend RAG Knowledge Ingestion & Retrieval:**
+    - Flyway `V4__knowledge_base.sql` (`knowledge_chunks` table with source_type, source_id, title, content, metadata_json, content_hash).
+    - Auto-indexing startup service (`KnowledgeIngestionService.java`) with SHA-256 deduplication indexing active products, brand philosophy, 7-day returns, and shipping policies.
+    - Token-based hybrid relevance retrieval (`KnowledgeRetrievalService.java`) with top-k bounding and citation DTO generation.
+    - AI Provider port: `GeminiAiAssistantProvider.java` (Google Gemini 1.5 Flash REST API with grounded prompt injection) and `MockLocalAiAssistantProvider.java` fallback.
+    - Live order status tool secured strictly via JWT `UserPrincipal` (zero IDOR) and cosmetic safety abstention for medical queries.
+    - Test Suite: 65/65 unit and integration tests passing (`mvn test` -> `BUILD SUCCESS`).
+  - **Frontend Luxury Chatbot UI (`components/ChatBotDrawer.tsx`):**
+    - Floating concierge launcher pill with gold pulse animation and glassmorphic slide-out window.
+    - Mounted globally in `app/layout.tsx` within `<StoreProvider>`.
+    - High-contrast patron typography: User messages render in `#FDFBF8` ivory linen on `#1B1A17` obsidian bubble with gold "You" patron tag.
+    - Session patron identity memory: Remembers patron name ("My name is Rasika") across the entire conversation.
+    - Resilient offline client-side grounded reasoning fallback with 8-second quick race timeout to provide instant answers even when the Render backend container is hibernating.
+    - 1-click cart addition directly from concierge formulation recommendation cards.
+    - Static Page Generation: 18/18 static routes compiled cleanly (`npm run build` -> Exit code 0).
 - **MCA UI/UX Coursework Documentation Suite:**
   - `Assignment_1_UI_UX_Evaluation_Report.docx`: Heuristic evaluation (Nielsen's 10 Heuristics, WCAG 2.1 AA), typography scale (Hero 88px/72px, H1 56px, H2 42px, H3 30px, H4 22px, Body 16-18px, Caption 12px), 5 strategic improvements, 7 presentation slides deck.
   - `Assignment_2_User_Research_and_Competitive_Analysis.docx`: 5-user qualitative research, competitor matrix (Aesop vs Kiehl's), personas (Genevieve & Claire), empathy map, customer journey map, problem statement, 5 HMWs, and 5 Agile user stories with acceptance criteria.

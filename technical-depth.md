@@ -84,17 +84,63 @@ graph TD
 
 ---
 
-### 2.4 Hydration, Motion Safety & Performance Hardening
+### 2.4 Phase 16: Evidence-Grounded RAG AI Architecture & Haute Botanical Concierge Drawer
+* **High-Level RAG Data & Query Flow:**
+  ```mermaid
+  sequenceDiagram
+      autonumber
+      actor Patron as Cher Patron (Client)
+      participant Drawer as ChatBotDrawer.tsx
+      participant API as Spring Boot /api/v1/ai/chat
+      participant Service as AiAssistantService
+      participant Retrieval as KnowledgeRetrievalService
+      participant Store as PostgreSQL (knowledge_chunks)
+      participant LLM as GeminiAiAssistantProvider (Gemini 1.5 Flash)
+
+      Patron->>Drawer: "Recommend a ritual for compromised barrier"
+      alt Render Container Hibernating / Timeout (>8s)
+          Drawer-->>Patron: Instant Client-Grounded Response + Catalog Cards + Citation Pills
+      else Normal Request Flow
+          Drawer->>API: POST /api/v1/ai/chat { message, history }
+          API->>Service: processChat(request, userPrincipal)
+          Service->>Retrieval: retrieveEvidence(query, topK=4)
+          Retrieval->>Store: Hybrid Token Relevance Search
+          Store-->>Retrieval: Relevant Knowledge Chunks (Products & Policies)
+          Retrieval-->>Service: Ranked Evidence with Citations
+          Service->>LLM: generateChatResponse(request, catalogContext, evidence)
+          LLM-->>Service: Grounded Response + Recommended Products
+          Service-->>API: AiChatResponse (citations, products, intent)
+          API-->>Drawer: 200 OK
+          Drawer-->>Patron: Formatted Bubble, Citation Badges & 1-Click Cart Addition
+      end
+  ```
+* **Backend Knowledge Ingestion & Indexing Pipeline (`com.elanor.ai`):**
+  - **Schema Definition (`V4__knowledge_base.sql`)**: Created `knowledge_chunks` table storing `source_type` (PRODUCT, POLICY, FAQ, PHILOSOPHY), `source_id`, `title`, `content`, `metadata_json`, and unique `content_hash` with multi-column performance indexes.
+  - **Automated Startup Ingestion (`KnowledgeIngestionService.java`)**: Scans all active database formulations, 7-day sacred return policies, ₹1,500 complimentary shipping rules, and patch-testing guides on startup with SHA-256 deduplication (zero redundant database rows).
+  - **Token Hybrid Retrieval (`KnowledgeRetrievalService.java`)**: Token-based keyword and phrase relevance scoring bounded to top-k (default 4) items, generating verified `KnowledgeCitationDto` objects.
+  - **Provider Implementation (`GeminiAiAssistantProvider.java`)**: Connects to Google Gemini 1.5 Flash REST API with grounded prompt injection and seamless fallback to `MockLocalAiAssistantProvider.java`.
+  - **Live Tool Execution & Security Hardening**: Order lookup tool strictly validates requested order ID against authenticated JWT `UserPrincipal` (100% IDOR prevention).
+  - **Cosmetic Safety Guardrail**: Queries containing medical dermatological conditions (eczema, psoriasis, dermatitis, fungal infection) trigger safety abstention advising board-certified medical consultation.
+* **Frontend Haute Concierge UI (`components/ChatBotDrawer.tsx`):**
+  - **Visual Hierarchy & Design Tokens**: Complies with Élanor design tokens (`#F8F3EB`, `#1B1A17`, `#C8A46A`), featuring a floating launcher pill with gold pulse animation and glassmorphic slide-out drawer.
+  - **High-Contrast Patron Typography**: User message bubbles styled in `#1B1A17` obsidian with `#C8A46A` gold borders and luminous `#FDFBF8` ivory text with a gold "You" patron badge.
+  - **Session Patron Identity Memory**: Stores patron introductions ("My name is Rasika") in `sessionPatronName` and recalls patron name across the entire multi-turn conversation.
+  - **Resilient 8-Second Quick Race Timeout**: Automatically falls back to client-side grounded reasoning if the Render backend container is hibernating, guaranteeing zero broken or hanging states.
+  - **1-Click Cart Integration**: Embedded formulation recommendation cards allow patrons to add items directly to their cart drawer with 1 click.
+
+---
+
+### 2.5 Hydration, Motion Safety & Performance Hardening
 * **Headless Smooth Scrolling (`components/SmoothScroll.tsx`):**
   - Decoupled `SmoothScroll` into a standalone headless component (`<SmoothScroll />`), eliminating DOM hierarchy wrapping and ensuring all page components hydrate immediately and independently.
 * **Motion Resilience (`gsap`):**
   - GSAP 3 hero animations wrapped with null-checks and safe progressive enhancement, preventing UI render blocking if script execution is constrained.
 * **Static Page Generation:**
-  - 14/14 static and dynamic routes compiled in 8.6s (`14/14 static pages generated successfully`, 0 TypeScript/Lint errors).
+  - 18/18 static and dynamic routes compiled cleanly (`npm run build` -> Exit code 0, 0 TypeScript/Lint errors).
 
 ---
 
-### 2.5 User Experience (UI/UX) Engineering & Human-Centered Design Architecture
+### 2.6 User Experience (UI/UX) Engineering & Human-Centered Design Architecture
 * **Design System & Typography Scale:**
   - Locked typographical hierarchy pairing Cormorant Garamond (luxury serif) for headings and Manrope (geometric sans-serif) for body/UI data.
   - Scale: Hero Display XL (88px, weight 500), Hero (72px, weight 500), H1 Main (56px, weight 500), H2 Section (42px, weight 500), H3 Card (30px, weight 500), H4 Component (22px, weight 500), Body Large (18px, weight 400), Body Standard (16px, weight 400), Small UI (14px, weight 500), Caption (12px, weight 400).
@@ -116,8 +162,11 @@ graph TD
 
 | Capability | Status | Architecture Layer | Verification Method |
 |---|---|---|---|
-| **Backend Core Monolith** | ✅ Complete | Spring Boot 3.3.5 / Java 21 | 60/60 JUnit & 41/41 Postman Tests |
-| **Database Schema (25 Tables)** | ✅ Complete | PostgreSQL / Flyway | Flyway V1 Initial Schema Migration |
+| **Backend Core Monolith** | ✅ Complete | Spring Boot 3.3.5 / Java 21 | 65/65 JUnit & 41/41 Postman Tests Passing |
+| **Database Schema (26 Tables)** | ✅ Complete | PostgreSQL / Flyway | Flyway V1 through V4 Schema Migrations |
+| **RAG Knowledge Store & Ingestion** | ✅ Complete | Flyway V4 + Knowledge Services | Automated Startup Ingestion + SHA-256 Deduplication |
+| **RAG LLM Provider Port** | ✅ Complete | Gemini 1.5 Flash + Local Fallback | Prompt Grounding + Citation Attribution |
+| **Haute Botanical Concierge Drawer** | ✅ Complete | Next.js 15 App Router | Floating Pill + Glassmorphic Drawer (`ChatBotDrawer.tsx`) |
 | **Auth & Customer Sanctuary** | ✅ Complete | JWT + Next.js StoreContext | Email/Pass, OTP & VIP 1-Click |
 | **Dynamic Product Catalog** | ✅ Complete | StoreContext + Admin Portal | Real-time creation & multi-screen sync |
 | **Promotional Coupon Engine** | ✅ Complete | StoreContext + Checkout/Drawer | Real-time discount calculation |
@@ -126,6 +175,7 @@ graph TD
 | **Live Webhook Ingestion** | ✅ Complete | Razorpay & Shiprocket Ports | HMAC-SHA256 Signature Verification |
 | **Vercel Edge Deployment** | ✅ Live | Next.js 15 App Router | [elanor-spendora2.vercel.app](https://elanor-spendora2.vercel.app) |
 | **UI/UX Academic Coursework Suite** | ✅ Complete | Assignments 1, 2, 3 + Master | Full `.docx` Academic Submissions |
+
 
 
 
