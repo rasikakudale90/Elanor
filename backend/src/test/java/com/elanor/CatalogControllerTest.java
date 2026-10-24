@@ -63,11 +63,14 @@ public class CatalogControllerTest {
         Role adminRole = roleRepository.findByName("ROLE_ADMIN")
                 .orElseGet(() -> roleRepository.save(new Role("ROLE_ADMIN", "Admin")));
 
-        User admin = new User();
-        admin.setEmail("admin@elanor.com");
-        admin.setActive(true);
-        admin.getRoles().add(adminRole);
-        admin = userRepository.save(admin);
+        User admin = userRepository.findByEmail("admin@elanor.com")
+                .orElseGet(() -> {
+                    User u = new User();
+                    u.setEmail("admin@elanor.com");
+                    u.setActive(true);
+                    u.getRoles().add(adminRole);
+                    return userRepository.save(u);
+                });
 
         adminToken = jwtTokenProvider.generateAccessToken(admin.getId(), admin.getEmail(), List.of("ROLE_ADMIN"));
     }
