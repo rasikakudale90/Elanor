@@ -66,21 +66,91 @@ public class MockLocalAiAssistantProvider implements AiAssistantProvider {
             return new AiChatResponse(reply, recommendations, followUps, citations, needsHumanSupport, intent);
         }
 
-        // 2. Returns & Refunds Policy
+        // 2. Synthesize directly from Retrieved RAG Knowledge Evidence Chunks if available
+        if (retrievedEvidence != null && !retrievedEvidence.isEmpty()) {
+            RetrievedChunkDto top = retrievedEvidence.get(0);
+            if (top.getScore() >= 0.20) {
+                if ("POLICY".equalsIgnoreCase(top.getSourceType())) {
+                    reply = top.getContent().trim();
+                    intent = "POLICY_FAQ";
+                    followUps.add("Track my recent order dispatch");
+                    followUps.add("How do I contact the concierge?");
+                    return new AiChatResponse(reply, recommendations, followUps, citations, false, intent);
+                } else if ("FAQ".equalsIgnoreCase(top.getSourceType())) {
+                    reply = top.getContent().trim();
+                    intent = "ROUTINE_ADVICE";
+                    followUps.add("Which formulations are best for compromised barriers?");
+                    followUps.add("Can I take the Haute Skin Diagnostic?");
+                    return new AiChatResponse(reply, recommendations, followUps, citations, false, intent);
+                } else if ("BRAND".equalsIgnoreCase(top.getSourceType())) {
+                    reply = top.getContent().trim() + "\n\nAll creations are housed in biophotonic violet glass to protect active botanical nutrients against light degradation.";
+                    intent = "BRAND_PHILOSOPHY";
+                    if (!catalogContext.isEmpty()) {
+                        CatalogContextDto hero = catalogContext.get(0);
+                        recommendations.add(new ProductRecommendationDto(
+                                hero.getProductId(), hero.getVariantId(), hero.getName(), hero.getSubtitle(),
+                                hero.getPrice(), hero.getImageUrl(), "Featured botanical formulation."
+                        ));
+                    }
+                    followUps.add("Explore The Iconic Formulations");
+                    followUps.add("What is your 7-day return policy?");
+                    return new AiChatResponse(reply, recommendations, followUps, citations, false, intent);
+                } else if ("PRODUCT".equalsIgnoreCase(top.getSourceType())) {
+                    reply = top.getContent().trim();
+                    intent = "PRODUCT_INQUIRY";
+                    CatalogContextDto found = catalogContext.stream()
+                            .filter(c -> c.getProductId() != null && c.getProductId().equals(top.getSourceId()))
+                            .findFirst()
+                            .orElse(null);
+                    if (found != null) {
+                        recommendations.add(new ProductRecommendationDto(
+                                found.getProductId(), found.getVariantId(), found.getName(), found.getSubtitle(),
+                                found.getPrice(), found.getImageUrl(), "Featured clinical formulation."
+                        ));
+                    }
+                    followUps.add("How do I incorporate this into my morning ritual?");
+                    followUps.add("What complimentary samples are included?");
+                    return new AiChatResponse(reply, recommendations, followUps, citations, false, intent);
+                }
+            }
+        }
+
+        // 3. Catalog Overview / Listing Inquiry ("what products", "all items", "catalog", "show products")
+        if (msg.contains("what products") || msg.contains("catalog") || msg.contains("all products") || msg.contains("show formulations") || msg.contains("what do you have") || msg.contains("what do you sell")) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Maison Élanor curates active clinical formulations engineered for cellular longevity and dermal vitality:\n\n");
+            for (CatalogContextDto item : catalogContext) {
+                sb.append(String.format("• **%s** (%s) — ₹%s: %s\n", item.getName(), item.getCategoryName(), item.getPrice(), item.getSubtitle() != null ? item.getSubtitle() : "Atelier botanical care"));
+                if (recommendations.size() < 3) {
+                    recommendations.add(new ProductRecommendationDto(
+                            item.getProductId(), item.getVariantId(), item.getName(), item.getSubtitle(),
+                            item.getPrice(), item.getImageUrl(), item.getSubtitle()
+                    ));
+                }
+            }
+            sb.append("\nWould you like me to tailor a bespoke regimen based on your specific dermal profile?");
+            reply = sb.toString();
+            intent = "CATALOG_OVERVIEW";
+            followUps.add("Take the 4-step Haute Skin Diagnostic consultation");
+            followUps.add("Recommend a ritual for compromised barrier repair");
+            return new AiChatResponse(reply, recommendations, followUps, citations, false, intent);
+        }
+
+        // 4. Returns & Refunds Policy
         if (msg.contains("return") || msg.contains("refund") || msg.contains("exchange") || msg.contains("replace")) {
             reply = "Under Maison Élanor's 7-Day Sacred Return Policy, patrons may request returns or replacements within 7 calendar days of verified delivery. Formulations must remain in pristine original packaging with at least 90% uncompromised volume. Following a 48-hour atelier inspection, approved refunds are credited within 3-5 business days.";
             intent = "POLICY_FAQ";
             followUps.add("How do I initiate a return for my order?");
             followUps.add("Can I cancel my order before it ships?");
         }
-        // 3. Shipping & Logistics Policy
+        // 5. Shipping & Logistics Policy
         else if (msg.contains("shipping") || msg.contains("delivery") || msg.contains("dispatch") || msg.contains("courier") || msg.contains("cost")) {
             reply = "Maison Élanor provides complimentary white-glove express delivery on all orders exceeding ₹1,500 ($150 USD). Standard delivery is ₹150. Dispatches are handled via BlueDart Express and our Shiprocket logistics network, delivering within 3 to 5 business days with live 5-stage milestone tracking.";
             intent = "POLICY_FAQ";
             followUps.add("Track my recent order dispatch");
             followUps.add("What countries do you deliver to?");
         }
-        // 4. Formulation & Product Inquiries (Balm / Barrier / Soothing)
+        // 6. Formulation & Product Inquiries (Balm / Barrier / Soothing)
         else if (msg.contains("balm") || msg.contains("barrier") || msg.contains("dry") || msg.contains("soothing") || msg.contains("baume")) {
             reply = "For barrier reinforcement, our Baume Apaisant Réparateur is infused with blue tansy, centella asiatica, and botanical squalane to immediately calm inflammation and seal in essential hydration.";
             intent = "PRODUCT_INQUIRY";
@@ -99,7 +169,7 @@ public class MockLocalAiAssistantProvider implements AiAssistantProvider {
             followUps.add("Can I layer the Soothing Balm over retinol treatments?");
             followUps.add("What is the difference between the balm and the elixir?");
         }
-        // 5. Sensitive Skin & Patch Testing Protocol
+        // 7. Sensitive Skin & Patch Testing Protocol
         else if (msg.contains("patch test") || msg.contains("allergy") || msg.contains("react") || msg.contains("sensitive")) {
             reply = "For sensitized or reactive skin types, we recommend a 24-hour patch test on the inner forearm or behind the ear prior to full facial ritual application. If any irritation arises, gently cleanse with cool water and discontinue use.";
             intent = "ROUTINE_ADVICE";
@@ -140,21 +210,26 @@ public class MockLocalAiAssistantProvider implements AiAssistantProvider {
             followUps.add("Should I apply the elixir before or after my moisturizer?");
             followUps.add("Is Bakuchiol pregnancy-safe?");
         } else {
-            reply = "Welcome to Élanor Haute Skin Concierge. Our bespoke formulations blend precious botanical extracts with cellular longevity science. How may I assist your dermal ritual today?";
-            if (!catalogContext.isEmpty()) {
-                CatalogContextDto first = catalogContext.get(0);
+            CatalogContextDto matched = catalogContext.stream()
+                    .filter(c -> msg.contains(c.getName().toLowerCase(Locale.ROOT)) ||
+                            (c.getCategoryName() != null && msg.contains(c.getCategoryName().toLowerCase(Locale.ROOT))))
+                    .findFirst()
+                    .orElse(!catalogContext.isEmpty() ? catalogContext.get(0) : null);
+
+            if (matched != null) {
+                reply = String.format("Maison Élanor crafts clinical botanical formulations in Paris and Grasse. Regarding your inquiry, we invite you to explore **%s** (%s) — ₹%s. %s",
+                        matched.getName(), matched.getCategoryName(), matched.getPrice(),
+                        matched.getSubtitle() != null ? matched.getSubtitle() : "Formulated for cellular longevity.");
                 recommendations.add(new ProductRecommendationDto(
-                        first.getProductId(),
-                        first.getVariantId(),
-                        first.getName(),
-                        first.getSubtitle(),
-                        first.getPrice(),
-                        first.getImageUrl(),
-                        "Handcrafted signature botanical formulation."
+                        matched.getProductId(), matched.getVariantId(), matched.getName(), matched.getSubtitle(),
+                        matched.getPrice(), matched.getImageUrl(), "Signature botanical formulation."
                 ));
+            } else {
+                reply = "Welcome to Élanor Haute Skin Concierge. Our bespoke formulations blend precious botanical extracts with cellular longevity science. How may I assist your dermal ritual today?";
             }
             followUps.add("Take the 4-step Haute Skin Diagnostic consultation");
             followUps.add("Which formulation is recommended for dehydration?");
+            followUps.add("What is your 7-day return policy?");
         }
 
         return new AiChatResponse(reply, recommendations, followUps, citations, needsHumanSupport, intent);

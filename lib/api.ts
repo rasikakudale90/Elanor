@@ -262,8 +262,8 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     if (err.name === 'AbortError') {
       throw new Error('Connection timed out while contacting Atelier. Please try once more.');
     }
-    // If relative path failed or network error occurred, fallback once directly to Render
-    if (baseUrl.startsWith('/') && typeof window !== 'undefined') {
+    // If local/relative call fails or network error occurs, fallback once directly to Render (if not already targeting Render)
+    if (!baseUrl.includes('elanor-uzia.onrender.com') && typeof window !== 'undefined') {
       try {
         const directRes = await fetch(`https://elanor-uzia.onrender.com/api/v1${endpoint}`, {
           ...options,

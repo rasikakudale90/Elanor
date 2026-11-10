@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useStore } from '@/context/StoreContext';
 import { elanorApi, AiChatResponse, KnowledgeCitationDto, ProductRecommendationDto } from '@/lib/api';
+import { executeClientRagQuery } from '@/lib/ragEngine';
 import { Sparkles, X, Send, Bot, ShieldCheck, CheckCircle2, RotateCcw, ExternalLink, User, ShoppingBag } from 'lucide-react';
 
 interface ChatMessage {
@@ -151,18 +152,28 @@ export default function ChatBotDrawer() {
         content: m.content
       }));
 
-      // Race with 8s timeout to avoid freezing if Render container is cold-starting
+      // Race with 10s timeout to allow live backend when warm, while gracefully falling back to client-side RAG
       const chatPromise = elanorApi.ai.chat({
         message: text,
         history: historyPayload
       });
       const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('Backend timeout: using local grounded RAG')), 8000)
+        setTimeout(() => reject(new Error('Backend timeout: using local grounded RAG')), 10000)
       );
 
       const res = await Promise.race([chatPromise, timeoutPromise]);
 
       if (res && res.reply) {
+        // Detect if backend returned a generic fallback greeting (e.g. from cold/mock container)
+        const lowerReply = res.reply.toLowerCase();
+        const lowerQuery = text.toLowerCase();
+        const isQueryGreeting = lowerQuery.startsWith('hi') || lowerQuery.startsWith('hello') || lowerQuery.startsWith('bonjour') || lowerQuery.startsWith('hey');
+        const isGenericFallback = lowerReply.startsWith('welcome to') && !isQueryGreeting;
+
+        if (isGenericFallback) {
+          throw new Error('Backend returned generic greeting, activating high-fidelity client RAG');
+        }
+
         const assistantMessage: ChatMessage = {
           id: 'res-' + Date.now(),
           role: 'assistant',
@@ -179,116 +190,23 @@ export default function ChatBotDrawer() {
         throw new Error('Fallback to local grounded engine');
       }
     } catch {
-      // Graceful local grounded reasoning engine (Zero broken states even if Render is cold-starting)
-      const localResponse = generateLocalGroundedResponse(text);
-      setMessages(prev => [...prev, localResponse]);
+      // High-Fidelity Client-Side Grounded RAG Engine (Zero generic replies; fully evidence-backed)
+      const ragResult = executeClientRagQuery(text, products, customerUser, sessionPatronName);
+      const assistantMessage: ChatMessage = {
+        id: 'rag-' + Date.now(),
+        role: 'assistant',
+        content: ragResult.reply,
+        citations: ragResult.citations || [],
+        suggestedProducts: ragResult.suggestedProducts || [],
+        followUpQuestions: ragResult.followUpQuestions || [],
+        intent: ragResult.intent,
+        needsHumanSupport: ragResult.needsHumanSupport,
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, assistantMessage]);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const generateLocalGroundedResponse = (rawQuery: string): ChatMessage => {
-    const q = rawQuery.toLowerCase();
-    const citations: KnowledgeCitationDto[] = [];
-    const suggestedProducts: ProductRecommendationDto[] = [];
-    let reply = '';
-    let intent = 'GENERAL_CHAT';
-    let needsHumanSupport = false;
-
-    // 1. Medical safety guardrail
-    if (q.includes('cure') || q.includes('eczema') || q.includes('psoriasis') || q.includes('dermatitis') || q.includes('infection')) {
-      reply = "While Maison Élanor formulations are crafted with rare, clinical-grade botanicals to support barrier resilience and cellular longevity, our formulations are cosmetic and not formulated to diagnose, cure, or treat dermatological diseases. We respectfully advise consulting a board-certified dermatologist for medical conditions.";
-      needsHumanSupport = true;
-      intent = 'SAFETY_ABSTENTION';
-    }
-    // 2. Returns Policy
-    else if (q.includes('return') || q.includes('refund') || q.includes('exchange')) {
-      reply = "Under Maison Élanor's 7-Day Sacred Return Policy, patrons may request returns or replacements within 7 calendar days of verified delivery. Formulations must remain in pristine original packaging with at least 90% uncompromised volume. Following a 48-hour atelier inspection, approved refunds are credited within 3-5 business days.";
-      intent = 'POLICY_FAQ';
-      citations.push({
-        sourceId: 'POLICY:return-policy',
-        title: 'Maison Élanor 7-Day Return Policy',
-        urlOrReference: '/policies/returns',
-        excerpt: '7 calendar days post-delivery window for pristine returned items'
-      });
-    }
-    // 3. Shipping Policy
-    else if (q.includes('shipping') || q.includes('deliver') || q.includes('dispatch') || q.includes('cost') || q.includes('track')) {
-      reply = "Maison Élanor provides complimentary white-glove express delivery on all orders exceeding ₹1,500 ($150 USD). Standard shipping is ₹150. Dispatches are handled via BlueDart Express and our Shiprocket logistics network, delivering within 3 to 5 business days with live 5-stage milestone tracking.";
-      intent = 'POLICY_FAQ';
-      citations.push({
-        sourceId: 'POLICY:shipping-policy',
-        title: 'Maison Élanor White-Glove Dispatch Policy',
-        urlOrReference: '/track',
-        excerpt: 'Complimentary insured shipping over ₹1,500 via BlueDart Express'
-      });
-    }
-    // 4. Baume Apaisant / Balm / Barrier
-    else if (q.includes('balm') || q.includes('barrier') || q.includes('soothing') || q.includes('baume')) {
-      const balm = products.find(p => p.id === 'elanor-soothing-balm') || products[0];
-      reply = "For barrier reinforcement and calming comfort, our Baume Apaisant Réparateur is infused with blue tansy, colloidal oat lipids, and botanical squalane. It actively replenishes epidermal lipids, pacifies redness, and seals in essential hydration.";
-      intent = 'PRODUCT_INQUIRY';
-      citations.push({
-        sourceId: 'PRODUCT:baume-apaisant',
-        title: 'Baume Apaisant Réparateur Profile',
-        urlOrReference: '/product/' + balm.id,
-        excerpt: 'Infused with blue tansy and alpine arnica to soothe reactive barriers'
-      });
-      suggestedProducts.push({
-        productId: balm.id,
-        name: balm.name,
-        subtitle: balm.frenchSubtitle,
-        price: balm.price,
-        imageUrl: balm.image,
-        clinicalBenefit: 'Clinical lipid barrier replenishment for sensitized, dry skin.'
-      });
-    }
-    // 5. Serum / Aging / Wrinkles
-    else if (q.includes('serum') || q.includes('aging') || q.includes('wrinkle') || q.includes('cellular')) {
-      const serum = products.find(p => p.category === 'Serums') || products[1] || products[0];
-      reply = "Our flagship Cellular Youth Serum pairs high-altitude edelweiss stem cells with multi-molecular hyaluronic acid to visibly re-densify the skin matrix, soften fine lines, and restore luminous cellular vitality.";
-      intent = 'PRODUCT_INQUIRY';
-      citations.push({
-        sourceId: 'PRODUCT:' + serum.id,
-        title: serum.name + ' Formulation Spec',
-        urlOrReference: '/product/' + serum.id,
-        excerpt: 'Alpine edelweiss stem cells for cellular matrix regeneration'
-      });
-      suggestedProducts.push({
-        productId: serum.id,
-        name: serum.name,
-        subtitle: serum.frenchSubtitle,
-        price: serum.price,
-        imageUrl: serum.image,
-        clinicalBenefit: 'Award-winning cellular regeneration with bio-available peptides.'
-      });
-    } else {
-      reply = "Welcome to Maison Élanor. I am your Haute Botanical Concierge. I can assist you with our cellular formulations, bespoke morning/evening ritual sequencing, store policies, or tracking your sacred orders.";
-      intent = 'GENERAL_CHAT';
-      if (products.length > 0) {
-        const feat = products[0];
-        suggestedProducts.push({
-          productId: feat.id,
-          name: feat.name,
-          subtitle: feat.frenchSubtitle,
-          price: feat.price,
-          imageUrl: feat.image,
-          clinicalBenefit: feat.description?.substring(0, 80)
-        });
-      }
-    }
-
-    return {
-      id: 'local-' + Date.now(),
-      role: 'assistant',
-      content: reply,
-      citations,
-      suggestedProducts,
-      followUpQuestions: STARTER_PROMPTS,
-      intent,
-      needsHumanSupport,
-      timestamp: new Date()
-    };
   };
 
   const handleResetConversation = () => {
