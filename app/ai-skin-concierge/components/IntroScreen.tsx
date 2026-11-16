@@ -164,7 +164,7 @@ export default function IntroScreen({ onStart }: IntroScreenProps) {
       ref={containerRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className="min-h-[88vh] flex items-center justify-center relative overflow-hidden bg-[#FAF7F2] py-8 sm:py-12 px-6 sm:px-12 lg:px-16"
+      className="min-h-[88vh] flex items-center justify-center relative overflow-hidden bg-[#FAF7F2] py-8 sm:py-12 px-4 sm:px-12 lg:px-16"
     >
       {/* Background Ambience */}
       <div className="absolute top-1/3 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[650px] bg-[#EFE3D3]/40 rounded-full blur-3xl pointer-events-none" />
@@ -268,9 +268,10 @@ export default function IntroScreen({ onStart }: IntroScreenProps) {
             {/* TARGET BOUNDING BOX 1: Forehead (Hydration Level) */}
             <div
               ref={boxHydrationRef}
+              onClick={() => setHoveredBox(hoveredBox === 'hydration' ? null : 'hydration')}
               onMouseEnter={() => setHoveredBox('hydration')}
               onMouseLeave={() => setHoveredBox(null)}
-              className="absolute top-[18%] left-[53%] w-[78px] h-[78px] border border-white/90 rounded-sm z-30 transition-all duration-300 hover:border-[#9E5D46] hover:bg-white/10 cursor-pointer"
+              className="absolute top-[18%] left-[53%] w-[78px] h-[78px] border border-white/90 rounded-sm z-30 transition-all duration-300 hover:border-[#9E5D46] hover:bg-white/10 cursor-pointer touch-manipulation"
             >
               {/* Top-left solid white marker */}
               <div className="absolute top-1 left-1 w-1.5 h-1.5 bg-white" />
@@ -289,9 +290,10 @@ export default function IntroScreen({ onStart }: IntroScreenProps) {
             {/* TARGET BOUNDING BOX 2: Eye / Periorbital (Fine Lines) */}
             <div
               ref={boxFineLinesRef}
+              onClick={() => setHoveredBox(hoveredBox === 'lines' ? null : 'lines')}
               onMouseEnter={() => setHoveredBox('lines')}
               onMouseLeave={() => setHoveredBox(null)}
-              className="absolute top-[37%] left-[54%] w-[84px] h-[72px] border border-white/90 rounded-sm z-30 transition-all duration-300 hover:border-[#9E5D46] hover:bg-white/10 cursor-pointer"
+              className="absolute top-[37%] left-[54%] w-[84px] h-[72px] border border-white/90 rounded-sm z-30 transition-all duration-300 hover:border-[#9E5D46] hover:bg-white/10 cursor-pointer touch-manipulation"
             >
               {/* Top-left solid white marker */}
               <div className="absolute top-1 left-1 w-1.5 h-1.5 bg-white" />
@@ -310,9 +312,10 @@ export default function IntroScreen({ onStart }: IntroScreenProps) {
             {/* TARGET BOUNDING BOX 3: Cheek (Skin Texture) */}
             <div
               ref={boxTextureRef}
+              onClick={() => setHoveredBox(hoveredBox === 'texture' ? null : 'texture')}
               onMouseEnter={() => setHoveredBox('texture')}
               onMouseLeave={() => setHoveredBox(null)}
-              className="absolute top-[58%] left-[40%] w-[72px] h-[64px] border border-white/90 rounded-sm z-30 transition-all duration-300 hover:border-[#9E5D46] hover:bg-white/10 cursor-pointer"
+              className="absolute top-[58%] left-[40%] w-[72px] h-[64px] border border-white/90 rounded-sm z-30 transition-all duration-300 hover:border-[#9E5D46] hover:bg-white/10 cursor-pointer touch-manipulation"
             >
               {/* Top-left solid white marker */}
               <div className="absolute top-1 left-1 w-1.5 h-1.5 bg-white" />

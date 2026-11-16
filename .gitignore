@@ -37,6 +37,7 @@ backend/target/
 
 # Archives & Temporary files
 *.zip
+*.mp4
 .DS_Store
 Thumbs.db
 *.lnk

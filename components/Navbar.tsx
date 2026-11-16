@@ -191,7 +191,7 @@ export default function Navbar() {
           </div>
 
           {/* Right: Actions */}
-          <div className="flex items-center space-x-5 sm:space-x-6 text-[#1B1A17]">
+          <div className="flex items-center space-x-2 sm:space-x-4 md:space-x-5 text-[#1B1A17]">
             {/* Search Trigger */}
             <button
               onClick={() => setIsSearchOpen(true)}
@@ -202,11 +202,11 @@ export default function Navbar() {
               <span className="hidden xl:inline text-xs text-[#8E857A] tracking-wider">Search</span>
             </button>
 
-            {/* Customer Account / Sign In Trigger */}
+            {/* Customer Account / Sign In Trigger (Hidden on mobile - available in bottom nav & drawer) */}
             <button
               onClick={() => setIsAuthOpen(true)}
               aria-label="Customer Account Sanctuary"
-              className="p-1.5 hover:text-[#C8A46A] transition-colors duration-200 flex items-center space-x-1.5 cursor-pointer group"
+              className="hidden sm:flex p-1.5 hover:text-[#C8A46A] transition-colors duration-200 items-center space-x-1.5 cursor-pointer group"
             >
               {customerUser ? (
                 <div className="flex items-center space-x-1.5 bg-[#F2EBE2] py-1 px-2.5 rounded-full border border-[#C8A46A]/40 group-hover:border-[#C8A46A] transition-all">
@@ -225,21 +225,21 @@ export default function Navbar() {
               )}
             </button>
 
-            {/* Track Order Trigger (For Guests & Patrons) */}
+            {/* Track Order Trigger (Hidden on small mobile - available in drawer and footer) */}
             <Link
               href="/track"
               aria-label="Track Order"
-              className="p-1.5 hover:text-[#C8A46A] transition-colors duration-200 flex items-center space-x-1 text-[#1B1A17]"
+              className="hidden md:flex p-1.5 hover:text-[#C8A46A] transition-colors duration-200 items-center space-x-1 text-[#1B1A17]"
             >
               <Truck className="w-4 h-4 text-[#C8A46A]" strokeWidth={1.75} />
               <span className="hidden xl:inline text-xs text-[#5E584F] hover:text-[#1B1A17] font-medium tracking-wide">Track Order</span>
             </Link>
 
-            {/* Wishlist Link */}
+            {/* Wishlist Link (Hidden on small mobile - available in bottom nav) */}
             <Link
               href="/wishlist"
               aria-label="Wishlist"
-              className="p-1.5 hover:text-[#C8A46A] transition-colors duration-200 relative"
+              className="hidden sm:flex p-1.5 hover:text-[#C8A46A] transition-colors duration-200 relative"
             >
               <Heart
                 className={`w-5 h-5 ${wishlist.length > 0 ? 'fill-[#C8A46A] text-[#C8A46A]' : ''}`}
@@ -256,12 +256,17 @@ export default function Navbar() {
             <button
               onClick={() => setIsCartOpen(true)}
               aria-label="View Shopping Bag"
-              className="p-2 bg-[#1B1A17] text-[#FFFDF9] rounded-full hover:bg-[#322F2A] transition-all duration-200 flex items-center space-x-2 pl-3.5 pr-4 shadow-sm group cursor-pointer"
+              className="relative p-2 sm:py-2 sm:pl-3.5 sm:pr-4 bg-[#1B1A17] text-[#FFFDF9] rounded-full hover:bg-[#322F2A] transition-all duration-200 flex items-center space-x-2 shadow-sm group cursor-pointer"
             >
               <ShoppingBag className="w-4 h-4 group-hover:scale-110 transition-transform" strokeWidth={2} />
-              <span className="text-xs font-medium tracking-wide">
+              <span className="hidden sm:inline text-xs font-medium tracking-wide">
                 {cartCount > 0 ? `${cartCount} items` : 'Bag'}
               </span>
+              {cartCount > 0 && (
+                <span className="sm:hidden absolute -top-1 -right-1 bg-[#C8A46A] text-[#1B1A17] text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold shadow-sm">
+                  {cartCount}
+                </span>
+              )}
             </button>
 
             {/* Mobile Menu Toggle */}

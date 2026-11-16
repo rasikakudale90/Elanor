@@ -263,7 +263,7 @@ export default function CheckoutPage() {
         strategy="lazyOnload"
       />
 
-      <div className="max-w-[1280px] mx-auto px-6 sm:px-10">
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-10">
         {/* Header */}
         <div className="mb-10 text-center space-y-2">
           <Link href="/" className="inline-block font-serif-luxury text-4xl text-[#1B1A17] tracking-wider hover:text-[#C8A46A] transition-colors">
@@ -349,47 +349,50 @@ export default function CheckoutPage() {
             {/* Left 7 Columns: Step Form */}
             <div className="lg:col-span-7 space-y-8">
               {/* Stepper Header */}
-              <div className="flex items-center justify-between p-4 bg-[#FFFDF9] rounded-2xl border border-[#EFE3D3]">
+              <div className="flex items-center justify-between p-3.5 sm:p-4 bg-[#FFFDF9] rounded-2xl border border-[#EFE3D3]">
                 <div
                   onClick={() => setStep(1)}
-                  className={`flex items-center space-x-2 cursor-pointer text-xs font-semibold ${
+                  className={`flex items-center space-x-1.5 sm:space-x-2 cursor-pointer text-xs font-semibold ${
                     step >= 1 ? 'text-[#1B1A17]' : 'text-[#8E857A]'
                   }`}
                 >
-                  <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] ${step >= 1 ? 'bg-[#1B1A17] text-[#FFFDF9]' : 'bg-[#EADFCF]'}`}>
+                  <span className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-[10px] sm:text-[11px] ${step >= 1 ? 'bg-[#1B1A17] text-[#FFFDF9]' : 'bg-[#EADFCF]'}`}>
                     1
                   </span>
-                  <span>Sanctuary Address</span>
+                  <span className="hidden sm:inline">Sanctuary Address</span>
+                  <span className="sm:hidden">Address</span>
                 </div>
-                <div className="h-px w-8 bg-[#EADFCF]" />
+                <div className="h-px w-4 sm:w-8 bg-[#EADFCF]" />
                 <div
                   onClick={() => setStep(2)}
-                  className={`flex items-center space-x-2 cursor-pointer text-xs font-semibold ${
+                  className={`flex items-center space-x-1.5 sm:space-x-2 cursor-pointer text-xs font-semibold ${
                     step >= 2 ? 'text-[#1B1A17]' : 'text-[#8E857A]'
                   }`}
                 >
-                  <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] ${step >= 2 ? 'bg-[#1B1A17] text-[#FFFDF9]' : 'bg-[#EADFCF]'}`}>
+                  <span className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-[10px] sm:text-[11px] ${step >= 2 ? 'bg-[#1B1A17] text-[#FFFDF9]' : 'bg-[#EADFCF]'}`}>
                     2
                   </span>
-                  <span>Packaging Ritual</span>
+                  <span className="hidden sm:inline">Packaging Ritual</span>
+                  <span className="sm:hidden">Packaging</span>
                 </div>
-                <div className="h-px w-8 bg-[#EADFCF]" />
+                <div className="h-px w-4 sm:w-8 bg-[#EADFCF]" />
                 <div
                   onClick={() => setStep(3)}
-                  className={`flex items-center space-x-2 cursor-pointer text-xs font-semibold ${
+                  className={`flex items-center space-x-1.5 sm:space-x-2 cursor-pointer text-xs font-semibold ${
                     step >= 3 ? 'text-[#1B1A17]' : 'text-[#8E857A]'
                   }`}
                 >
-                  <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] ${step >= 3 ? 'bg-[#1B1A17] text-[#FFFDF9]' : 'bg-[#EADFCF]'}`}>
+                  <span className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-[10px] sm:text-[11px] ${step >= 3 ? 'bg-[#1B1A17] text-[#FFFDF9]' : 'bg-[#EADFCF]'}`}>
                     3
                   </span>
-                  <span>Payment Gateway</span>
+                  <span className="hidden sm:inline">Payment Gateway</span>
+                  <span className="sm:hidden">Payment</span>
                 </div>
               </div>
 
               {/* Step 1: Shipping Address */}
               {step === 1 && (
-                <div className="bg-[#FFFDF9] p-8 rounded-3xl border border-[#EFE3D3] shadow-card space-y-6">
+                <div className="bg-[#FFFDF9] p-5 sm:p-8 rounded-2xl sm:rounded-3xl border border-[#EFE3D3] shadow-card space-y-6">
                   <div className="flex items-center space-x-2 text-sm font-serif-luxury font-semibold text-[#1B1A17] pb-3 border-b border-[#EADFCF]">
                     <Truck className="w-4 h-4 text-[#C8A46A]" />
                     <span>Recipient Information & Address</span>
@@ -436,7 +439,7 @@ export default function CheckoutPage() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                     <div>
                       <label className="block text-[11px] font-semibold text-[#5E584F] uppercase tracking-wider mb-1">City</label>
                       <input
@@ -478,7 +481,7 @@ export default function CheckoutPage() {
 
               {/* Step 2: Packaging Selection */}
               {step === 2 && (
-                <div className="bg-[#FFFDF9] p-8 rounded-3xl border border-[#EFE3D3] shadow-card space-y-6">
+                <div className="bg-[#FFFDF9] p-5 sm:p-8 rounded-2xl sm:rounded-3xl border border-[#EFE3D3] shadow-card space-y-6">
                   <div className="flex items-center space-x-2 text-sm font-serif-luxury font-semibold text-[#1B1A17] pb-3 border-b border-[#EADFCF]">
                     <Gift className="w-4 h-4 text-[#C8A46A]" />
                     <span>Choose Your Unboxing Presentation</span>
@@ -543,7 +546,7 @@ export default function CheckoutPage() {
 
               {/* Step 3: Payment Gateway Selector */}
               {step === 3 && (
-                <div className="bg-[#FFFDF9] p-8 rounded-3xl border border-[#EFE3D3] shadow-card space-y-6">
+                <div className="bg-[#FFFDF9] p-5 sm:p-8 rounded-2xl sm:rounded-3xl border border-[#EFE3D3] shadow-card space-y-6">
                   <div className="flex items-center justify-between pb-3 border-b border-[#EADFCF]">
                     <div className="flex items-center space-x-2 text-sm font-serif-luxury font-semibold text-[#1B1A17]">
                       <CreditCard className="w-4 h-4 text-[#C8A46A]" />
@@ -754,7 +757,7 @@ export default function CheckoutPage() {
 
             {/* Right 5 Columns: Sticky Order Review */}
             <div className="lg:col-span-5 space-y-6">
-              <div className="bg-[#FFFDF9] p-8 rounded-3xl border border-[#EFE3D3] shadow-card space-y-6 sticky top-28">
+              <div className="bg-[#FFFDF9] p-5 sm:p-8 rounded-2xl sm:rounded-3xl border border-[#EFE3D3] shadow-card space-y-6 sticky top-28">
                 <h3 className="font-serif-luxury text-2xl text-[#1B1A17] border-b border-[#EADFCF] pb-4">
                   Bag Overview ({cart.length} Items)
                 </h3>

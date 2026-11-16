@@ -56,7 +56,7 @@ export default function ProductDetailPage() {
   const relatedProducts = PRODUCTS.filter((p) => p.id !== product.id).slice(0, 3);
 
   return (
-    <div className="bg-[#F8F3EB] min-h-screen py-8 sm:py-16">
+    <div className="bg-[#F8F3EB] min-h-screen py-8 sm:py-16 pb-32 sm:pb-24 lg:pb-16">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-10 space-y-12 sm:space-y-16">
         {/* Breadcrumb */}
         <nav className="flex items-center space-x-2 text-xs text-[#8E857A] overflow-x-auto whitespace-nowrap">
@@ -375,7 +375,7 @@ export default function ProductDetailPage() {
       </div>
 
       {/* Sticky Mobile Purchase Bar */}
-      <div className="lg:hidden fixed bottom-14 inset-x-0 z-30 bg-[#FFFDF9]/95 backdrop-blur-md border-t border-[#EADFCF] p-3 px-4 shadow-card flex items-center justify-between">
+      <div className="lg:hidden fixed bottom-[57px] inset-x-0 z-30 bg-[#FFFDF9]/95 backdrop-blur-md border-t border-[#EADFCF] p-3 px-4 shadow-card flex items-center justify-between">
         <div>
           <h4 className="font-serif-luxury text-sm font-semibold text-[#1B1A17] line-clamp-1">{product.name}</h4>
           <p className="text-xs font-bold text-[#1B1A17]">${product.price}</p>

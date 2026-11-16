@@ -346,9 +346,9 @@ export default function AuthModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1B1A17]/60 backdrop-blur-md animate-in fade-in duration-300">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#1B1A17]/60 backdrop-blur-md animate-in fade-in duration-300">
       <div
-        className="relative w-full max-w-md bg-[#FFFDF9] rounded-3xl border border-[#EFE3D3] p-8 shadow-floating overflow-hidden animate-in zoom-in-95 duration-300"
+        className="relative w-full max-w-md max-h-[92vh] overflow-y-auto bg-[#FFFDF9] rounded-2xl sm:rounded-3xl border border-[#EFE3D3] p-5 sm:p-8 shadow-floating overflow-x-hidden animate-in zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Subtle Luxury Aura */}

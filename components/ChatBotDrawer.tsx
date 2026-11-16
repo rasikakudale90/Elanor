@@ -261,15 +261,15 @@ export default function ChatBotDrawer() {
         <button
           onClick={() => setIsOpen(true)}
           aria-label="Open Élanor Haute Botanical AI Concierge"
-          className="fixed bottom-20 right-4 lg:bottom-8 lg:right-8 z-40 group flex items-center gap-3 bg-[#1B1A17] hover:bg-[#2C2924] text-[#F8F3EB] border border-[#C8A46A]/40 hover:border-[#C8A46A] shadow-2xl rounded-full px-4 py-3 sm:px-5 sm:py-3.5 transition-all duration-300 hover:scale-105 active:scale-95"
+          className="fixed bottom-20 right-3 sm:bottom-6 sm:right-6 lg:bottom-8 lg:right-8 z-40 group flex items-center gap-2.5 bg-[#1B1A17] hover:bg-[#2C2924] text-[#F8F3EB] border border-[#C8A46A]/50 hover:border-[#C8A46A] shadow-2xl rounded-full p-2.5 sm:px-5 sm:py-3.5 transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
         >
           <div className="relative flex items-center justify-center">
             <span className="absolute -inset-1 rounded-full bg-[#C8A46A]/20 animate-ping opacity-75" />
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#C8A46A] to-[#E4C894] flex items-center justify-center text-[#1B1A17] shadow-inner">
-              <Sparkles className="w-4 h-4" />
+            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#C8A46A] to-[#E4C894] flex items-center justify-center text-[#1B1A17] shadow-inner font-serif font-bold text-sm">
+              É
             </div>
           </div>
-          <div className="flex flex-col text-left">
+          <div className="hidden sm:flex flex-col text-left">
             <span className="font-serif font-medium text-sm tracking-wide text-[#FDFBF8]">
               Botanical Concierge
             </span>
@@ -286,7 +286,7 @@ export default function ChatBotDrawer() {
           role="dialog"
           aria-modal="true"
           aria-labelledby="concierge-dialog-title"
-          className="fixed bottom-20 right-2 sm:bottom-6 sm:right-6 z-50 w-[96vw] sm:w-[440px] h-[640px] max-h-[82vh] bg-[#FFFDF9]/95 backdrop-blur-xl border border-[#C8A46A]/30 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-6 duration-300"
+          className="fixed inset-0 sm:inset-auto sm:bottom-6 sm:right-6 z-50 w-full sm:w-[440px] h-[100dvh] sm:h-[640px] sm:max-h-[82vh] bg-[#FFFDF9]/98 sm:bg-[#FFFDF9]/95 backdrop-blur-xl border-0 sm:border sm:border-[#C8A46A]/30 rounded-none sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300"
         >
           {/* Luxury Header */}
           <div className="bg-[#1B1A17] text-[#F8F3EB] px-5 py-4 flex items-center justify-between border-b border-[#C8A46A]/30">
@@ -496,7 +496,7 @@ export default function ChatBotDrawer() {
           </div>
 
           {/* Input Box */}
-          <div className="p-3 bg-[#FFFDF9] border-t border-[#EFE3D3]">
+          <div className="p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] bg-[#FFFDF9] border-t border-[#EFE3D3]">
             <form
               onSubmit={(e) => {
                 e.preventDefault();

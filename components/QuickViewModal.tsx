@@ -29,21 +29,21 @@ export default function QuickViewModal() {
         className="fixed inset-0 bg-[#1B1A17]/60 backdrop-blur-md transition-opacity"
       />
 
-      <div className="relative min-h-screen px-4 py-12 flex items-center justify-center">
-        <div className="relative w-full max-w-4xl bg-[#FFFDF9] rounded-3xl shadow-floating border border-[#EADFCF] overflow-hidden">
+      <div className="relative min-h-screen px-3 sm:px-4 py-6 sm:py-12 flex items-center justify-center">
+        <div className="relative w-full max-w-4xl bg-[#FFFDF9] rounded-2xl sm:rounded-3xl shadow-floating border border-[#EADFCF] overflow-hidden">
           {/* Close button */}
           <button
             onClick={() => setQuickViewProduct(null)}
-            className="absolute top-5 right-5 z-20 p-2 text-[#5E584F] hover:text-[#1B1A17] bg-[#FFFDF9]/80 rounded-full hover:bg-[#EFE3D3] transition-colors"
+            className="absolute top-4 right-4 sm:top-5 sm:right-5 z-20 p-2 text-[#5E584F] hover:text-[#1B1A17] bg-[#FFFDF9]/80 rounded-full hover:bg-[#EFE3D3] transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
 
           <div className="grid grid-cols-1 md:grid-cols-2">
             {/* Left: Product Imagery with marble pedestal backdrop */}
-            <div className="relative h-[380px] md:h-full bg-[#F2EBE2] p-8 flex items-center justify-center border-b md:border-b-0 md:border-r border-[#EADFCF] overflow-hidden">
+            <div className="relative h-[260px] sm:h-[340px] md:h-full bg-[#F2EBE2] p-4 sm:p-8 flex items-center justify-center border-b md:border-b-0 md:border-r border-[#EADFCF] overflow-hidden">
               <div className="absolute inset-0 bg-glow-radial opacity-60 pointer-events-none" />
-              <div className="relative w-full h-full max-w-[320px] max-h-[400px] rounded-2xl overflow-hidden shadow-card border border-[#E4D7C5]">
+              <div className="relative w-full h-full max-w-[280px] sm:max-w-[320px] max-h-[400px] rounded-2xl overflow-hidden shadow-card border border-[#E4D7C5]">
                 <Image
                   src={product.image}
                   alt={product.name}
@@ -68,7 +68,7 @@ export default function QuickViewModal() {
             </div>
 
             {/* Right: Formulation Details */}
-            <div className="p-8 sm:p-10 flex flex-col justify-between space-y-6">
+            <div className="p-5 sm:p-10 flex flex-col justify-between space-y-5 sm:space-y-6">
               <div>
                 <div className="flex justify-between items-start">
                   <div>

@@ -51,10 +51,10 @@ export default function SearchModal() {
         className="fixed inset-0 bg-[#1B1A17]/60 backdrop-blur-md transition-opacity"
       />
 
-      <div className="relative min-h-screen px-4 pt-16 pb-20 flex justify-center items-start">
-        <div className="relative w-full max-w-3xl bg-[#FFFDF9] rounded-3xl shadow-floating border border-[#EADFCF] overflow-hidden">
+      <div className="relative min-h-screen px-3 sm:px-4 pt-8 sm:pt-16 pb-12 sm:pb-20 flex justify-center items-start">
+        <div className="relative w-full max-w-3xl bg-[#FFFDF9] rounded-2xl sm:rounded-3xl shadow-floating border border-[#EADFCF] overflow-hidden">
           {/* Top Search Input Bar */}
-          <div className="p-6 sm:p-8 border-b border-[#EADFCF] bg-[#F8F3EB]/80 flex items-center space-x-4">
+          <div className="p-4 sm:p-8 border-b border-[#EADFCF] bg-[#F8F3EB]/80 flex items-center space-x-3 sm:space-x-4">
             <Search className="w-6 h-6 text-[#C8A46A]" strokeWidth={1.75} />
             <input
               type="text"

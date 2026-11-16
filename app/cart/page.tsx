@@ -47,14 +47,14 @@ export default function CartPage() {
   };
 
   return (
-    <div className="bg-[#F8F3EB] min-h-screen py-12 sm:py-16">
-      <div className="max-w-[1440px] mx-auto px-6 sm:px-10">
-        <div className="mb-10 flex items-center justify-between border-b border-[#EADFCF] pb-6">
+    <div className="bg-[#F8F3EB] min-h-screen py-8 sm:py-16">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-10">
+        <div className="mb-8 sm:mb-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[#EADFCF] pb-6">
           <div>
             <span className="text-xs uppercase tracking-widest text-[#7D9075] font-semibold">
               Maison Élanor Atelier
             </span>
-            <h1 className="font-serif-luxury text-4xl sm:text-5xl text-[#1B1A17] mt-1">
+            <h1 className="font-serif-luxury text-3xl sm:text-5xl text-[#1B1A17] mt-1">
               Your Sacred Bag
             </h1>
           </div>
@@ -88,7 +88,7 @@ export default function CartPage() {
             {/* Left Column: Cart Items & Sample Selector */}
             <div className="lg:col-span-8 space-y-8">
               {/* Shipping Progress Bar */}
-              <div className="bg-[#FFFDF9] p-6 rounded-3xl border border-[#EFE3D3] shadow-sm space-y-3">
+              <div className="bg-[#FFFDF9] p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-[#EFE3D3] shadow-sm space-y-3">
                 <div className="flex justify-between text-xs font-semibold text-[#1B1A17]">
                   <span>
                     {isFreeShipping
@@ -106,11 +106,11 @@ export default function CartPage() {
               </div>
 
               {/* Items Table */}
-              <div className="bg-[#FFFDF9] rounded-3xl border border-[#EFE3D3] overflow-hidden shadow-sm divide-y divide-[#EAE1D3]">
+              <div className="bg-[#FFFDF9] rounded-2xl sm:rounded-3xl border border-[#EFE3D3] overflow-hidden shadow-sm divide-y divide-[#EAE1D3]">
                 {cart.map((item) => (
-                  <div key={item.product.id} className="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 hover:bg-[#FDFBF8] transition-colors">
-                    <div className="flex items-center space-x-4">
-                      <div className="relative w-24 h-28 rounded-2xl overflow-hidden bg-[#F2EBE2] border border-[#EADFCF] shrink-0">
+                  <div key={item.product.id} className="p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6 hover:bg-[#FDFBF8] transition-colors">
+                    <div className="flex items-center space-x-3.5 sm:space-x-4">
+                      <div className="relative w-20 h-24 sm:w-24 sm:h-28 rounded-2xl overflow-hidden bg-[#F2EBE2] border border-[#EADFCF] shrink-0">
                         <Image
                           src={item.product.image}
                           alt={item.product.name}
@@ -241,7 +241,7 @@ export default function CartPage() {
 
             {/* Right Column: Order Summary & Checkout CTA */}
             <div className="lg:col-span-4 space-y-6">
-              <div className="bg-[#FFFDF9] p-8 rounded-3xl border border-[#EFE3D3] shadow-card space-y-6 sticky top-28">
+              <div className="bg-[#FFFDF9] p-5 sm:p-8 rounded-2xl sm:rounded-3xl border border-[#EFE3D3] shadow-card space-y-6 sticky top-28">
                 <h3 className="font-serif-luxury text-2xl text-[#1B1A17] border-b border-[#EADFCF] pb-4">
                   Order Summary
                 </h3>

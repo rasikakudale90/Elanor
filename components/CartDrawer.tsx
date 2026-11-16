@@ -56,10 +56,10 @@ export default function CartDrawer() {
         className="absolute inset-0 bg-[#1B1A17]/40 backdrop-blur-sm transition-opacity"
       />
 
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
+      <div className="fixed inset-y-0 right-0 max-w-full flex pl-0 sm:pl-10">
         <div className="w-screen max-w-md bg-[#FFFDF9] shadow-2xl flex flex-col justify-between border-l border-[#EADFCF]">
           {/* Header */}
-          <div className="p-6 border-b border-[#EADFCF] bg-[#F8F3EB]/60">
+          <div className="p-4 sm:p-6 border-b border-[#EADFCF] bg-[#F8F3EB]/60">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="font-serif-luxury text-2xl text-[#1B1A17]">Your Shopping Bag</h2>
@@ -296,7 +296,7 @@ export default function CartDrawer() {
 
           {/* Footer / Checkout CTA */}
           {cart.length > 0 && (
-            <div className="p-6 border-t border-[#EADFCF] bg-[#F8F3EB]/80 space-y-4">
+            <div className="p-4 sm:p-6 border-t border-[#EADFCF] bg-[#F8F3EB]/80 space-y-4">
               <div className="space-y-1.5 text-xs text-[#5E584F]">
                 <div className="flex justify-between">
                   <span>Bag Subtotal</span>

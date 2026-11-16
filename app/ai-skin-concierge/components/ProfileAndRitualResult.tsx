@@ -243,7 +243,7 @@ export default function ProfileAndRitualResult({
       </div>
 
       {/* 3. Sticky / Elevated "Add Entire Ritual to Bag" Bar */}
-      <div className="sticky bottom-6 z-30 bg-[#1B1A17] text-[#FFFDF9] rounded-3xl p-6 sm:p-8 border border-[#3E3A33] shadow-floating flex flex-col md:flex-row items-center justify-between gap-6">
+      <div className="sticky bottom-20 lg:bottom-6 z-30 bg-[#1B1A17] text-[#FFFDF9] rounded-2xl sm:rounded-3xl p-4 sm:p-8 border border-[#3E3A33] shadow-floating flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6">
         <div className="space-y-1 text-center md:text-left">
           <div className="flex items-center justify-center md:justify-start space-x-2">
             <span className="font-serif-luxury text-2xl sm:text-3xl text-[#FFFDF9]">
