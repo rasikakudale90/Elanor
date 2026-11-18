@@ -158,6 +158,19 @@ graph TD
 
 ---
 
+### 2.7 Mobile Responsiveness & Touch UX Architecture (Phase 17)
+* **Adaptive Breakpoint Architecture:**
+  - Viewports targeted: Small mobile (320px–390px), standard phone (390px–428px), tablet/phablet (640px–768px), desktop (1024px+).
+  - De-duplicated mobile header navigation (`Navbar.tsx`) by hiding redundant icons (Account, Track, Wishlist) accessible via the glassmorphic thumb-zone dock (`MobileBottomNav.tsx`).
+* **Safe-Area Inset & Virtual Keyboard Management:**
+  - Configured `100dvh` dynamic viewport height and `pb-[max(0.75rem,env(safe-area-inset-bottom))]` across full-screen drawers (`ChatBotDrawer.tsx`) to prevent software keyboards on iOS Safari and Android Chrome from pushing headers off-screen.
+* **Sticky Viewport Layering Hierarchy:**
+  - Standardized sticky action bar heights (`bottom-[57px]` for product purchases, `bottom-20` for routine completion) with `z-30` layering situated directly above the `fixed bottom-0 z-40` mobile bottom dock, backed by responsive page padding (`pb-32 sm:pb-24 lg:pb-16`).
+* **Touch Device Parity:**
+  - Added `touch-manipulation` and dual `onClick` event listeners alongside GSAP mouse parallax to the AI skin model portrait, enabling mobile phone users to tap dermal zones (`Hydration`, `Fine Lines`, `Texture`) to inspect clinical parameters without hover capability.
+
+---
+
 ## 3. Production Readiness & Quality Assurance Matrix
 
 | Capability | Status | Architecture Layer | Verification Method |
@@ -167,6 +180,7 @@ graph TD
 | **RAG Knowledge Store & Ingestion** | ✅ Complete | Flyway V4 + Knowledge Services | Automated Startup Ingestion + SHA-256 Deduplication |
 | **RAG LLM Provider Port** | ✅ Complete | Gemini 1.5 Flash + Local Fallback | Prompt Grounding + Citation Attribution |
 | **Haute Botanical Concierge Drawer** | ✅ Complete | Next.js 15 App Router | Floating Pill + Glassmorphic Drawer (`ChatBotDrawer.tsx`) |
+| **Mobile Responsiveness & Touch UX** | ✅ Complete | Next.js 15 / Tailwind v4 | Full-viewport drawer, safe-area insets, sticky offset |
 | **Auth & Customer Sanctuary** | ✅ Complete | JWT + Next.js StoreContext | Email/Pass, OTP & VIP 1-Click |
 | **Dynamic Product Catalog** | ✅ Complete | StoreContext + Admin Portal | Real-time creation & multi-screen sync |
 | **Promotional Coupon Engine** | ✅ Complete | StoreContext + Checkout/Drawer | Real-time discount calculation |
